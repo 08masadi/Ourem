@@ -480,21 +480,17 @@ html.dark optgroup {
     overflow: visible !important;
   }
 
-  /* When printing from browser, hide all background application content */
-  body > *:not(.print-modal-portal) {
-    display: none !important;
-  }
-
-  /* Hide print controls, headers, buttons, navigation */
+  /* Hide print controls, headers, buttons, navigation, and background UI */
   .no-print,
   .print-control-bar,
   header,
   nav,
+  aside,
   button {
     display: none !important;
   }
 
-  /* Reset modal portal for print */
+  /* Reset modal portal for print so voucher is visible and not hidden */
   .print-modal-portal {
     position: static !important;
     background: transparent !important;
@@ -505,7 +501,7 @@ html.dark optgroup {
     display: block !important;
     width: 100% !important;
     height: auto !important;
-    z-index: 1 !important;
+    z-index: 99999 !important;
   }
 
   .print-modal-container {
@@ -530,6 +526,9 @@ html.dark optgroup {
   }
 
   .printable-sheet {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     box-shadow: none !important;
     margin: 0 auto !important;
     width: 100% !important;

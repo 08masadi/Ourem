@@ -5,7 +5,7 @@ import { jsPDF } from 'jspdf';
 
 /**
  * Print an element directly to A5 Landscape without printing modal UI, scrollbars, or multiple blank pages.
- * Creates an isolated hidden iframe with the exact A5 landscape CSS and only the printable content.
+ * Creates an isolated offscreen iframe with the exact A5 landscape CSS and only the printable content.
  */
 export function printVoucherDocument(element: HTMLElement | null, documentTitle: string) {
   if (!element || typeof window === 'undefined') return;
@@ -18,71 +18,97 @@ export function printVoucherDocument(element: HTMLElement | null, documentTitle:
 
   const iframe = document.createElement('iframe');
   iframe.id = 'ourem-print-frame';
+  // Position offscreen so browser paints it, but user doesn't see it
   iframe.style.position = 'fixed';
-  iframe.style.right = '0';
-  iframe.style.bottom = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
+  iframe.style.left = '-9999px';
+  iframe.style.top = '-9999px';
+  iframe.style.width = '210mm';
+  iframe.style.height = '148mm';
   iframe.style.border = '0';
-  iframe.style.visibility = 'hidden';
-  iframe.setAttribute('aria-hidden', 'true');
+  iframe.style.opacity = '0';
+  iframe.style.pointerEvents = 'none';
   document.body.appendChild(iframe);
 
   const doc = iframe.contentWindow?.document;
   if (!doc) return;
 
-  doc.title = documentTitle;
-
-  // Clone head styles and links
-  const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
-  styles.forEach((style) => {
-    doc.head.appendChild(style.cloneNode(true));
+  // Collect head styles and links from host document
+  let stylesHtml = '';
+  document.querySelectorAll('style, link[rel="stylesheet"]').forEach((style) => {
+    stylesHtml += style.outerHTML;
   });
 
-  // Inject exact A5 Landscape print styles
-  const printStyle = doc.createElement('style');
-  printStyle.textContent = `
-    @page {
-      size: A5 landscape;
-      margin: 4mm;
-    }
-    * {
-      box-sizing: border-box !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-      background: #ffffff !important;
-      color: #000000 !important;
-      width: 100% !important;
-      height: 100% !important;
-      overflow: visible !important;
-    }
-    .printable-sheet {
-      box-shadow: none !important;
-      margin: 0 auto !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      border: 2px solid #1E3A8A !important;
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-      page-break-after: avoid !important;
-      break-after: avoid !important;
-    }
+  const printStyles = `
+    <style>
+      @page {
+        size: A5 landscape;
+        margin: 4mm;
+      }
+      * {
+        box-sizing: border-box !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        width: 100% !important;
+        height: auto !important;
+        display: block !important;
+        visibility: visible !important;
+        overflow: visible !important;
+      }
+      body * {
+        visibility: visible !important;
+      }
+      .printable-sheet {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 520px !important;
+        aspect-ratio: 210 / 148 !important;
+        box-shadow: none !important;
+        margin: 0 auto !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border: 2px solid #1E3A8A !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+      .no-print,
+      .print-control-bar,
+      button {
+        display: none !important;
+      }
+    </style>
   `;
-  doc.head.appendChild(printStyle);
 
-  // Clone printable content
-  const clone = element.cloneNode(true) as HTMLElement;
-  clone.style.boxShadow = 'none';
-  clone.style.margin = '0 auto';
-  clone.style.width = '100%';
-  clone.style.maxWidth = '100%';
-  doc.body.appendChild(clone);
+  doc.open();
+  doc.write(`
+    <!DOCTYPE html>
+    <html lang="id">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>${documentTitle}</title>
+        ${stylesHtml}
+        ${printStyles}
+      </head>
+      <body>
+        ${element.outerHTML}
+      </body>
+    </html>
+  `);
+  doc.close();
 
-  // Ensure all images are loaded before printing
+  // Ensure all images in iframe are loaded before printing
   const images = doc.querySelectorAll('img');
   let loadedCount = 0;
   const totalImages = images.length;
@@ -100,9 +126,9 @@ export function printVoucherDocument(element: HTMLElement | null, documentTitle:
           if (iframe.parentNode) {
             iframe.parentNode.removeChild(iframe);
           }
-        }, 1500);
+        }, 3000);
       }
-    }, 200);
+    }, 300);
   };
 
   if (totalImages === 0) {
@@ -123,14 +149,13 @@ export function printVoucherDocument(element: HTMLElement | null, documentTitle:
         };
       }
     });
-    // Fallback timer if any image stalls
-    setTimeout(performPrint, 1200);
+    // Fallback timer
+    setTimeout(performPrint, 1500);
   }
 }
 
 /**
  * Download element as A5 Landscape PDF using html-to-image and jsPDF.
- * html-to-image is immune to modern Tailwind v4 color issues (color-mix, oklch) unlike html2canvas.
  */
 export async function downloadVoucherPdf(
   element: HTMLElement | null,
@@ -142,7 +167,6 @@ export async function downloadVoucherPdf(
   if (setLoading) setLoading(true);
 
   try {
-    // Generate crisp PNG image using browser's native SVG foreignObject rendering
     const imgData = await toPng(element, {
       quality: 0.98,
       pixelRatio: 2.2,
@@ -151,7 +175,6 @@ export async function downloadVoucherPdf(
       skipFonts: false,
     });
 
-    // Create jsPDF document with A5 Landscape
     const pdf = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
@@ -159,17 +182,14 @@ export async function downloadVoucherPdf(
       compress: true,
     });
 
-    const pdfWidth = pdf.internal.pageSize.getWidth(); // 210
-    const pdfHeight = pdf.internal.pageSize.getHeight(); // 148
+    const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+    const pdfHeight = pdf.internal.pageSize.getHeight(); // 148mm
 
-    // Fit image exactly into A5 Landscape sheet
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
     pdf.save(fileName);
   } catch (error) {
     console.error('Gagal generate PDF dengan toPng:', error);
-
-    // Fallback: If foreignObject rendering encounters CORS security restrictions on external images,
-    // trigger print dialog where user can save as PDF directly.
+    // Fallback: If foreignObject rendering encounters issues, trigger print dialog
     printVoucherDocument(element, fileName.replace('.pdf', ''));
   } finally {
     if (setLoading) setLoading(false);
