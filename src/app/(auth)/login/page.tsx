@@ -16,6 +16,8 @@ import {
   CheckCircle2,
   KeyRound,
   Send,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 function LoginContent() {
@@ -24,6 +26,7 @@ function LoginContent() {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [role, setRole] = useState<UserRole>('employee');
   const [emailInput, setEmailInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [resetEmailSent, setResetEmailSent] = useState<string | null>(null);
@@ -67,6 +70,7 @@ function LoginContent() {
             setResetEmailSent(res.email || emailInput);
           }
         } else if (isRegister) {
+          formData.set('origin', typeof window !== 'undefined' ? window.location.origin : '');
           const res = await signUp(null, formData);
           if (res?.error) {
             setError(res.error);
@@ -356,10 +360,18 @@ function LoginContent() {
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                   <input
                     name="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    className="w-full pl-10 pr-10 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition cursor-pointer"
+                    title={showPassword ? 'Sembunyikan Kata Sandi' : 'Tampilkan Kata Sandi'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 

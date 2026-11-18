@@ -5,8 +5,10 @@ import { UserRole, UserProfile } from '@/types/database';
 import { redirect } from 'next/navigation';
 
 export async function signIn(prevState: any, formData: FormData) {
-  const email = formData.get('email') as string;
+  const rawEmail = formData.get('email') as string;
   const password = formData.get('password') as string;
+
+  const email = (rawEmail || '').trim().toLowerCase();
 
   if (!email || !password) {
     return { error: 'Email dan password wajib diisi.' };
@@ -27,6 +29,17 @@ export async function signIn(prevState: any, formData: FormData) {
   });
 
   if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes('invalid login credentials')) {
+      return {
+        error: 'Email atau kata sandi tidak cocok. Jika Anda baru mendaftar, pastikan email Anda sudah dikonfirmasi (atau dikonfirmasi langsung oleh admin di panel Supabase).',
+      };
+    }
+    if (msg.includes('email not confirmed')) {
+      return {
+        error: 'Email belum dikonfirmasi. Silakan buka tautan konfirmasi di email Anda atau minta Admin untuk mengonfirmasi akun di Supabase.',
+      };
+    }
     return { error: error.message };
   }
 
@@ -48,10 +61,13 @@ export async function signIn(prevState: any, formData: FormData) {
 }
 
 export async function signUp(prevState: any, formData: FormData) {
-  const email = formData.get('email') as string;
+  const rawEmail = formData.get('email') as string;
   const password = formData.get('password') as string;
-  const full_name = formData.get('full_name') as string;
+  const full_name = (formData.get('full_name') as string || '').trim();
   const role = (formData.get('role') as UserRole) || 'employee';
+  const origin = (formData.get('origin') as string) || 'https://ourem.vercel.app';
+
+  const email = (rawEmail || '').trim().toLowerCase();
 
   if (!email || !password || !full_name) {
     return { error: 'Nama lengkap, email, dan password wajib diisi.' };
@@ -70,10 +86,13 @@ export async function signUp(prevState: any, formData: FormData) {
 
   const supabase = await createClient();
 
+  const targetPath = role === 'director' ? '/director' : role === 'finance' ? '/finance' : '/employee';
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: `${origin}/auth/callback?next=${targetPath}`,
       data: {
         full_name,
         role,
@@ -98,12 +117,11 @@ export async function signUp(prevState: any, formData: FormData) {
 
   // If session is already created (email confirmation disabled in Supabase)
   if (data.session) {
-    const targetPath = role === 'director' ? '/director' : role === 'finance' ? '/finance' : '/employee';
     redirect(targetPath);
   }
 
   return {
-    success: 'Pendaftaran berhasil! Silakan periksa email untuk konfirmasi atau coba login.',
+    success: 'Pendaftaran berhasil! Silakan periksa inbox email untuk tautan konfirmasi, atau hubungi Admin untuk konfirmasi akun langsung di Supabase.',
   };
 }
 
