@@ -401,6 +401,8 @@ export async function updateReimbursement(prevState: any, formData: FormData) {
     category = 'Operasional Lainnya';
   }
 
+  const deleteReceipt = formData.get('delete_receipt') === 'true';
+
   const updatePayload: any = {
     title,
     category,
@@ -411,12 +413,10 @@ export async function updateReimbursement(prevState: any, formData: FormData) {
     customer: customer || null,
     account: account || null,
     department: department || 'Staff OPS',
+    receipt_url: deleteReceipt ? null : (receipt_url || null),
     updated_at: new Date().toISOString(),
   };
 
-  if (receipt_url) {
-    updatePayload.receipt_url = receipt_url;
-  }
   if (signature_url) {
     updatePayload.signature_url = signature_url;
   }
@@ -450,6 +450,71 @@ export async function updateReimbursement(prevState: any, formData: FormData) {
   revalidatePath('/director');
   revalidatePath('/finance');
   return { success: true };
+}
+
+export async function deleteReceiptAction(requestId: string, targetReceiptUrl?: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: 'Unauthorized' };
+
+  // Fetch current request
+  const { data: req, error: fetchErr } = await supabase
+    .from('reimbursement_requests')
+    .select('*')
+    .eq('id', requestId)
+    .single();
+
+  if (fetchErr || !req) return { error: 'Pengajuan tidak ditemukan.' };
+
+  let newReceiptUrl: string | null = null;
+  let newDescription = req.description;
+
+  // Update structured blocks inside description if present
+  try {
+    const metaMatch = req.description?.match(/__ITEMS_JSON__:([\s\S]*?)__END_ITEMS_JSON__/);
+    if (metaMatch && metaMatch[1]) {
+      const parsed = JSON.parse(metaMatch[1]);
+      if (parsed && Array.isArray(parsed.blocks)) {
+        parsed.blocks = parsed.blocks.map((b: any) => {
+          if (!targetReceiptUrl || b.receipt_url === targetReceiptUrl) {
+            return { ...b, receipt_url: undefined };
+          }
+          return b;
+        });
+        const remainingWithReceipt = parsed.blocks.find((b: any) => b.receipt_url);
+        newReceiptUrl = remainingWithReceipt?.receipt_url || null;
+        const newJsonHeader = `__ITEMS_JSON__:${JSON.stringify(parsed)}__END_ITEMS_JSON__\n`;
+        const cleanText = req.description.replace(/__ITEMS_JSON__:[\s\S]*?__END_ITEMS_JSON__\n?/, '');
+        newDescription = `${newJsonHeader}${cleanText}`;
+      }
+    }
+  } catch {}
+
+  if (!targetReceiptUrl || req.receipt_url === targetReceiptUrl) {
+    if (!newReceiptUrl) newReceiptUrl = null;
+  } else {
+    newReceiptUrl = req.receipt_url;
+  }
+
+  const { error: updateError } = await supabase
+    .from('reimbursement_requests')
+    .update({
+      receipt_url: newReceiptUrl,
+      description: newDescription,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', requestId);
+
+  if (updateError) return { error: updateError.message };
+
+  revalidatePath('/employee');
+  revalidatePath('/director');
+  revalidatePath('/finance');
+
+  return { success: true, receipt_url: newReceiptUrl, description: newDescription };
 }
 
 export async function updateOvertimeRequest(prevState: any, formData: FormData) {

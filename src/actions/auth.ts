@@ -446,7 +446,7 @@ export async function updateProfileBank(formData: FormData) {
       data: {
         full_name: full_name || undefined,
         department: department || undefined,
-        avatar_url: avatar_url || undefined,
+        avatar_url: avatar_url || null,
         signature_url: signature_url || undefined,
         bank_name: bank_name || '',
         bank_account_number: bank_account_number || '',
@@ -463,13 +463,13 @@ export async function updateProfileBank(formData: FormData) {
     email: user.email,
     full_name: full_name || user.user_metadata?.full_name || 'User',
     department: department || (effectiveRole === 'director' ? 'Director' : effectiveRole === 'finance' ? 'Finance' : 'Staff OPS'),
+    avatar_url: avatar_url || null,
     bank_name: bank_name || null,
     bank_account_number: bank_account_number || null,
     bank_account_holder: bank_account_holder || null,
     updated_at: new Date().toISOString(),
   };
 
-  if (avatar_url) fullPayload.avatar_url = avatar_url;
   if (signature_url) fullPayload.signature_url = signature_url;
 
   let { error } = await supabase

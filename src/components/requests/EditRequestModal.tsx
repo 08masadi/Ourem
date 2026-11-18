@@ -344,11 +344,18 @@ export default function EditRequestModal({
       }
     });
 
+    const anyReceiptFile = blocks.some((b) => b.receiptFile);
     const firstReceiptFile = blocks.find((b) => b.receiptFile)?.receiptFile;
+    const activeReceiptUrl = blocks.find((b) => b.receiptPreview)?.receiptPreview || '';
+
     if (firstReceiptFile) {
       formData.set('receipt_file', firstReceiptFile);
-    } else if (blocks[0]?.receiptPreview) {
-      formData.set('receipt_url', blocks[0].receiptPreview);
+    } else {
+      formData.set('receipt_url', activeReceiptUrl);
+    }
+
+    if (!anyReceiptFile && !activeReceiptUrl) {
+      formData.set('delete_receipt', 'true');
     }
 
     startTransition(async () => {
@@ -357,6 +364,10 @@ export default function EditRequestModal({
         if (res?.error) {
           setError(res.error);
         } else if (res?.success) {
+          const finalReceiptUrl = anyReceiptFile
+            ? (request.receipt_url || null)
+            : (activeReceiptUrl || null);
+
           const updated: ReimbursementRequest = {
             ...request,
             title: autoTitle,
@@ -368,7 +379,7 @@ export default function EditRequestModal({
             request_date: requestDate,
             description: combinedDescription,
             amount: totalAmount,
-            receipt_url: blocks[0]?.receiptPreview || request.receipt_url,
+            receipt_url: finalReceiptUrl,
           };
           onSuccess(updated);
           onClose();

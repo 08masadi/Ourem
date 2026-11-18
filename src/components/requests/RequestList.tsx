@@ -17,6 +17,7 @@ import {
   deleteBatchReimbursementRequests,
   updateBatchDirectorStatus,
   updateBatchFinancePayment,
+  deleteReceiptAction,
   getLatestRequests,
 } from '@/actions/requests';
 import { getGlobalFinanceSignature, getGlobalDirectorSignature } from '@/actions/auth';
@@ -39,6 +40,7 @@ import {
   Square,
   Edit3,
   Trash2,
+  X,
 } from 'lucide-react';
 import ReimbursementVoucherPdf from './ReimbursementVoucherPdf';
 import OvertimeVoucherPdf from './OvertimeVoucherPdf';
@@ -95,6 +97,7 @@ export default function RequestList({
   const [editRequest, setEditRequest] = useState<ReimbursementRequest | null>(null);
 
   const [selectedRequest, setSelectedRequest] = useState<ReimbursementRequest | null>(null);
+  const [viewingReceipt, setViewingReceipt] = useState<string | null>(null);
   const [rejectModalReq, setRejectModalReq] = useState<ReimbursementRequest | null>(null);
   const [rejectReason, setRejectReason] = useState<string>('');
   const [paymentModalReq, setPaymentModalReq] = useState<ReimbursementRequest | null>(null);
@@ -337,6 +340,32 @@ export default function RequestList({
       if (res?.success) {
         setRequests((prev) => prev.filter((r) => r.id !== id));
         setSelectedIds((prev) => prev.filter((itemId) => itemId !== id));
+      } else if (res?.error) {
+        alert(res.error);
+      }
+    });
+  };
+
+  const handleDeleteReceipt = (receiptUrl: string) => {
+    if (!selectedRequest) return;
+    if (!confirm('Apakah Anda yakin ingin menghapus foto bukti nota ini?')) return;
+
+    startTransition(async () => {
+      const res = await deleteReceiptAction(selectedRequest.id, receiptUrl);
+      if (res?.success) {
+        const updated = {
+          ...selectedRequest,
+          receipt_url: res.receipt_url,
+          description: res.description || selectedRequest.description,
+        };
+        setSelectedRequest(updated);
+        setRequests((prev) =>
+          prev.map((r) => (r.id === updated.id ? updated : r))
+        );
+        triggerSuccessNotification(
+          'Foto Berhasil Dihapus',
+          'Foto bukti nota telah berhasil dihapus dari pengajuan ini.'
+        );
       } else if (res?.error) {
         alert(res.error);
       }
@@ -1291,21 +1320,35 @@ export default function RequestList({
           <EditOvertimeModal
             request={editRequest}
             onClose={() => setEditRequest(null)}
-            onSuccess={(updated) =>
+            onSuccess={(updated) => {
               setRequests((prev) =>
                 prev.map((r) => (r.id === updated.id ? updated : r))
-              )
-            }
+              );
+              if (selectedRequest?.id === updated.id) {
+                setSelectedRequest(updated);
+              }
+              triggerSuccessNotification(
+                'Perubahan Berhasil Disimpan',
+                'Data form lembur telah berhasil diperbarui.'
+              );
+            }}
           />
         ) : (
           <EditRequestModal
             request={editRequest}
             onClose={() => setEditRequest(null)}
-            onSuccess={(updated) =>
+            onSuccess={(updated) => {
               setRequests((prev) =>
                 prev.map((r) => (r.id === updated.id ? updated : r))
-              )
-            }
+              );
+              if (selectedRequest?.id === updated.id) {
+                setSelectedRequest(updated);
+              }
+              triggerSuccessNotification(
+                'Perubahan Berhasil Disimpan',
+                'Data pengajuan reimbursement telah berhasil diperbarui.'
+              );
+            }}
           />
         )
       )}
@@ -1446,32 +1489,101 @@ export default function RequestList({
                 </div>
               )}
 
-              {/* Receipt Preview */}
-              <div>
-                <span className="text-slate-400 block mb-1.5">Bukti Nota / Dokumen:</span>
-                {selectedRequest.receipt_url ? (
-                  <div className="space-y-2">
-                    <img
-                      src={selectedRequest.receipt_url}
-                      alt="Bukti Nota"
-                      className="w-full max-h-64 object-contain rounded-xl border border-slate-800 bg-slate-950 p-2"
-                    />
-                    <a
-                      href={selectedRequest.receipt_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-orange-400 hover:text-orange-300 font-semibold"
-                    >
-                      <span>Buka gambar di tab baru</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
+              {/* Receipt Preview (Tampilan Foto Kecil / Compact Thumbnails agar tidak memenuhi layar) */}
+              {(() => {
+                const parsedBlocks = parseAccountBlocksFromDescription(
+                  selectedRequest.description,
+                  selectedRequest.account,
+                  Number(selectedRequest.amount),
+                  selectedRequest.customer,
+                  selectedRequest.receipt_url
+                );
+
+                const blockReceipts = parsedBlocks
+                  .map((b) => b.receipt_url)
+                  .filter(Boolean) as string[];
+
+                const allReceipts = Array.from(
+                  new Set([selectedRequest.receipt_url, ...blockReceipts].filter(Boolean))
+                ) as string[];
+
+                const canDeletePhoto =
+                  selectedRequest.payment_status !== 'Paid' &&
+                  currentRole !== 'director';
+
+                return (
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-slate-400 font-semibold flex items-center gap-1.5">
+                        <span>Bukti Nota / Dokumen</span>
+                        {allReceipts.length > 0 && (
+                          <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded-full font-bold">
+                            {allReceipts.length}
+                          </span>
+                        )}
+                      </span>
+                      {allReceipts.length > 0 && (
+                        <span className="text-[10px] text-slate-500">
+                          Klik foto untuk perbesar
+                        </span>
+                      )}
+                    </div>
+
+                    {allReceipts.length > 0 ? (
+                      <div className="flex flex-wrap gap-2.5 pt-1">
+                        {allReceipts.map((url, idx) => (
+                          <div
+                            key={`receipt-${idx}`}
+                            className="relative group flex flex-col items-center"
+                          >
+                            <div
+                              onClick={() => setViewingReceipt(url)}
+                              className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-slate-800 bg-slate-950 p-1 overflow-hidden cursor-pointer hover:border-orange-500 transition shadow-sm flex items-center justify-center shrink-0"
+                              title="Klik untuk melihat foto ukuran penuh"
+                            >
+                              <img
+                                src={url}
+                                alt={`Nota ${idx + 1}`}
+                                className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition duration-200"
+                              />
+                            </div>
+
+                            {/* Tombol Hapus Cepat Foto Bukti Nota */}
+                            {canDeletePhoto && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteReceipt(url);
+                                }}
+                                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rose-600 hover:bg-rose-500 text-white rounded-full flex items-center justify-center shadow-md cursor-pointer transition z-10"
+                                title="Hapus foto bukti nota ini"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
+
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-[10px] text-orange-400 hover:text-orange-300 font-semibold mt-1 flex items-center gap-0.5"
+                            >
+                              <span>Nota #{idx + 1}</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-slate-500 italic bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[11px]">
+                        Tidak ada lampiran bukti nota.
+                      </p>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-slate-500 italic bg-slate-950 p-3 rounded-xl border border-slate-800">
-                    Tidak ada lampiran bukti nota.
-                  </p>
-                )}
-              </div>
+                );
+              })()}
 
               {/* Action Buttons Section di Bawah Kolom Lampiran Bukti Nota (Ikon saja tanpa teks) */}
               <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-end gap-2">
@@ -1708,6 +1820,48 @@ export default function RequestList({
           data={monthlyRecapData}
           onClose={() => setMonthlyRecapData(null)}
         />
+      )}
+
+      {/* Modal: Fullscreen / Lightbox Bukti Nota */}
+      {viewingReceipt && (
+        <div
+          className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[60] flex flex-col items-center justify-center p-4 cursor-pointer"
+          onClick={() => setViewingReceipt(null)}
+        >
+          <div
+            className="relative max-w-2xl max-h-[85vh] bg-slate-900 border border-slate-800 rounded-3xl p-3 shadow-2xl flex flex-col items-center w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full flex justify-between items-center pb-2 px-2 border-b border-slate-800">
+              <span className="text-xs font-bold text-white">Foto Bukti Nota</span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={viewingReceipt}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1 rounded-lg bg-orange-600/20 text-orange-400 hover:bg-orange-600/30 text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Buka di tab baru</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setViewingReceipt(null)}
+                  className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="p-2 overflow-auto max-h-[75vh] flex items-center justify-center w-full">
+              <img
+                src={viewingReceipt}
+                alt="Bukti Nota Penuh"
+                className="max-w-full max-h-[70vh] object-contain rounded-xl"
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
