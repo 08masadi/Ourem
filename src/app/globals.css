@@ -1,8 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #020617;
+  --foreground: #f8fafc;
+
+  /* Default Dark Mode Slate Palette */
+  --color-slate-950: #020618;
+  --color-slate-900: #0f172b;
+  --color-slate-800: #1d293d;
+  --color-slate-700: #314158;
+  --color-slate-600: #45556c;
+  --color-slate-500: #62748e;
+  --color-slate-400: #90a1b9;
+  --color-slate-300: #cad5e2;
+  --color-slate-200: #e2e8f0;
+  --color-slate-100: #f1f5f9;
+  --color-slate-50: #f8fafc;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -12,15 +26,410 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ========================================================
+   LOGO SWITCHING: Follows device dark / light mode
+   ======================================================== */
+.logo-light {
+  display: none !important;
+}
+.logo-dark {
+  display: block !important;
+}
+
+/* ========================================================
+   LIGHT THEME: Softer, Eye-Friendly, Non-Glare Palette
+   ======================================================== */
+@media (prefers-color-scheme: light) {
+  :root:not(.dark) {
+    --background: #f1f5f9; /* Soothing soft gray-blue canvas */
+    --foreground: #1e293b; /* Deep slate, much softer on eyes than harsh black */
+
+    --color-slate-950: #f1f5f9; /* Soft background, eliminates blinding white glare */
+    --color-slate-900: #ffffff; /* Crisp white for floating cards & modals */
+    --color-slate-850: #f8fafc; /* Gentle inner container */
+    --color-slate-800: #cbd5e1; /* Visible, clean, soft borders */
+    --color-slate-700: #94a3b8; /* Secondary borders */
+    --color-slate-600: #64748b;
+    --color-slate-500: #64748b; /* Muted hints */
+    --color-slate-400: #475569; /* Secondary text, rich & clear */
+    --color-slate-300: #334155; /* Labels */
+    --color-slate-200: #1e293b; /* Subtitles & prominent values */
+    --color-slate-100: #0f172a; /* Headings */
+    --color-slate-50: #020617;
+    color-scheme: light;
+  }
+}
+
+html.light {
+  --background: #f1f5f9;
+  --foreground: #1e293b;
+
+  --color-slate-950: #f1f5f9;
+  --color-slate-900: #ffffff;
+  --color-slate-850: #f8fafc;
+  --color-slate-800: #cbd5e1;
+  --color-slate-700: #94a3b8;
+  --color-slate-600: #64748b;
+  --color-slate-500: #64748b;
+  --color-slate-400: #475569;
+  --color-slate-300: #334155;
+  --color-slate-200: #1e293b;
+  --color-slate-100: #0f172a;
+  --color-slate-50: #020617;
+  color-scheme: light;
+}
+
+/* ========================================================
+   DARK THEME: Explicit Fallback Variables
+   ======================================================== */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: #020617;
+    --foreground: #f8fafc;
+
+    --color-slate-950: #020618;
+    --color-slate-900: #0f172b;
+    --color-slate-800: #1d293d;
+    --color-slate-700: #314158;
+    --color-slate-600: #45556c;
+    --color-slate-500: #62748e;
+    --color-slate-400: #90a1b9;
+    --color-slate-300: #cad5e2;
+    --color-slate-200: #e2e8f0;
+    --color-slate-100: #f1f5f9;
+    --color-slate-50: #f8fafc;
+    color-scheme: dark;
+  }
+}
+
+html.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+
+  --color-slate-950: #020618;
+  --color-slate-900: #0f172b;
+  --color-slate-800: #1d293d;
+  --color-slate-700: #314158;
+  --color-slate-600: #45556c;
+  --color-slate-500: #62748e;
+  --color-slate-400: #90a1b9;
+  --color-slate-300: #cad5e2;
+  --color-slate-200: #e2e8f0;
+  --color-slate-100: #f1f5f9;
+  --color-slate-50: #f8fafc;
+  color-scheme: dark;
+}
+
+/* Logo toggles */
+@media (prefers-color-scheme: light) {
+  :root:not(.dark) .logo-light {
+    display: block !important;
+  }
+  :root:not(.dark) .logo-dark {
+    display: none !important;
+  }
+}
+html.light .logo-light {
+  display: block !important;
+}
+html.light .logo-dark {
+  display: none !important;
+}
+html.dark .logo-light {
+  display: none !important;
+}
+html.dark .logo-dark {
+  display: block !important;
+}
+
+/* ========================================================
+   LIGHT MODE: FLAT, CLEAN, EYE-FRIENDLY COMPONENT STYLES
+   ======================================================== */
+@media (prefers-color-scheme: light) {
+  /* Soft card elevation */
+  :root:not(.dark) .bg-slate-900 {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  /* Desktop Sidebar in Light Mode */
+  :root:not(.dark) aside {
+    background-color: #f8fafc !important;
+    border-right-color: #cbd5e1 !important;
+  }
+
+  /* Desktop Header in Light Mode */
+  :root:not(.dark) header.bg-slate-950\/70 {
+    background-color: rgba(248, 250, 252, 0.95) !important;
+    border-bottom-color: #cbd5e1 !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
+  }
+
+  /* Mobile Header in Light Mode */
+  :root:not(.dark) header.bg-slate-900\/95 {
+    background-color: rgba(255, 255, 255, 0.97) !important;
+    border-bottom-color: #cbd5e1 !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
+  }
+
+  /* Mobile Bottom Nav in Light Mode */
+  :root:not(.dark) nav.bg-slate-900\/95 {
+    background-color: rgba(255, 255, 255, 0.97) !important;
+    border-top-color: #cbd5e1 !important;
+    box-shadow: 0 -1px 3px 0 rgba(0, 0, 0, 0.04) !important;
+  }
+
+  /* Modal Backdrop stays dark translucent */
+  :root:not(.dark) .fixed.inset-0.bg-slate-950\/80,
+  :root:not(.dark) .fixed.inset-0[class*="bg-slate-950"] {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+  }
+
+  /* General text-white turns dark on light cards */
+  :root:not(.dark) .text-white {
+    color: #0f172a;
+  }
+
+  /* High contrast, eye-friendly accent colors in light mode (no washed out neon) */
+  :root:not(.dark) .text-orange-400,
+  :root:not(.dark) .text-orange-500 {
+    color: #c2410c !important; /* Deep warm burnt orange */
+  }
+  :root:not(.dark) .text-amber-400,
+  :root:not(.dark) .text-amber-500 {
+    color: #b45309 !important; /* Rich deep amber / bronze */
+  }
+  :root:not(.dark) .text-emerald-400,
+  :root:not(.dark) .text-emerald-500 {
+    color: #047857 !important; /* Rich deep forest emerald */
+  }
+  :root:not(.dark) .text-teal-400,
+  :root:not(.dark) .text-teal-500 {
+    color: #0f766e !important; /* Deep teal */
+  }
+  :root:not(.dark) .text-rose-400,
+  :root:not(.dark) .text-rose-500 {
+    color: #be123c !important; /* Rich deep rose */
+  }
+
+  /* Keep crisp white text on buttons, badges, banners, avatars */
+  :root:not(.dark) [class*="bg-orange-"] .text-white,
+  :root:not(.dark) [class*="bg-orange-"] .text-white-forced,
+  :root:not(.dark) [class*="from-orange-"] .text-white,
+  :root:not(.dark) [class*="from-orange-"] * .text-white,
+  :root:not(.dark) [class*="bg-emerald-"] .text-white,
+  :root:not(.dark) [class*="from-emerald-"] .text-white,
+  :root:not(.dark) [class*="bg-rose-"] .text-white,
+  :root:not(.dark) [class*="from-rose-"] .text-white,
+  :root:not(.dark) [class*="bg-amber-"] .text-white,
+  :root:not(.dark) [class*="from-amber-"] .text-white,
+  :root:not(.dark) [class*="bg-teal-"] .text-white,
+  :root:not(.dark) [class*="from-teal-"] .text-white,
+  :root:not(.dark) [class*="bg-gradient-"] .text-white,
+  :root:not(.dark) button.bg-orange-600,
+  :root:not(.dark) button.bg-orange-500,
+  :root:not(.dark) button.bg-emerald-600,
+  :root:not(.dark) button.bg-rose-600,
+  :root:not(.dark) button[class*="bg-gradient-"],
+  :root:not(.dark) button[class*="bg-orange-"],
+  :root:not(.dark) button[class*="bg-emerald-"],
+  :root:not(.dark) button[class*="bg-rose-"],
+  :root:not(.dark) .preserve-white {
+    color: #ffffff !important;
+  }
+
+  /* Deeper, warmer, eye-comfortable banners */
+  :root:not(.dark) .from-orange-600.via-orange-500.to-amber-500 {
+    background-image: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #d97706 100%) !important;
+    box-shadow: 0 10px 25px -5px rgba(194, 65, 12, 0.2) !important;
+  }
+  :root:not(.dark) .from-orange-600.to-amber-600 {
+    background-image: linear-gradient(135deg, #c2410c 0%, #d97706 100%) !important;
+    box-shadow: 0 10px 25px -5px rgba(194, 65, 12, 0.2) !important;
+  }
+  :root:not(.dark) .from-emerald-700.to-teal-800 {
+    background-image: linear-gradient(135deg, #065f46 0%, #0d9488 100%) !important;
+    box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.2) !important;
+  }
+
+  /* Inputs, Textareas, and Selects */
+  :root:not(.dark) input:not([type="checkbox"]):not([type="radio"]),
+  :root:not(.dark) textarea,
+  :root:not(.dark) select {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  :root:not(.dark) input::placeholder,
+  :root:not(.dark) textarea::placeholder {
+    color: #94a3b8 !important;
+  }
+
+  :root:not(.dark) select option,
+  :root:not(.dark) optgroup {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Login Page Gradient in Light Mode */
+  :root:not(.dark) .from-slate-950.via-slate-900.to-zinc-900 {
+    background-image: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%) !important;
+  }
+
+  /* Monospace description block */
+  :root:not(.dark) div[class*="font-mono"].bg-slate-950 {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #1e293b !important;
+  }
+}
+
+/* Explicit fallback for html.light */
+html.light .bg-slate-900 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light aside {
+  background-color: #f8fafc !important;
+  border-right-color: #cbd5e1 !important;
+}
+
+html.light header.bg-slate-950\/70 {
+  background-color: rgba(248, 250, 252, 0.95) !important;
+  border-bottom-color: #cbd5e1 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light header.bg-slate-900\/95 {
+  background-color: rgba(255, 255, 255, 0.97) !important;
+  border-bottom-color: #cbd5e1 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light nav.bg-slate-900\/95 {
+  background-color: rgba(255, 255, 255, 0.97) !important;
+  border-top-color: #cbd5e1 !important;
+  box-shadow: 0 -1px 3px 0 rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light .fixed.inset-0.bg-slate-950\/80,
+html.light .fixed.inset-0[class*="bg-slate-950"] {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+}
+
+html.light .text-white {
+  color: #0f172a;
+}
+
+html.light .text-orange-400,
+html.light .text-orange-500 {
+  color: #c2410c !important;
+}
+html.light .text-amber-400,
+html.light .text-amber-500 {
+  color: #b45309 !important;
+}
+html.light .text-emerald-400,
+html.light .text-emerald-500 {
+  color: #047857 !important;
+}
+html.light .text-teal-400,
+html.light .text-teal-500 {
+  color: #0f766e !important;
+}
+html.light .text-rose-400,
+html.light .text-rose-500 {
+  color: #be123c !important;
+}
+
+html.light [class*="bg-orange-"] .text-white,
+html.light [class*="bg-orange-"] .text-white-forced,
+html.light [class*="from-orange-"] .text-white,
+html.light [class*="from-orange-"] * .text-white,
+html.light [class*="bg-emerald-"] .text-white,
+html.light [class*="from-emerald-"] .text-white,
+html.light [class*="bg-rose-"] .text-white,
+html.light [class*="from-rose-"] .text-white,
+html.light [class*="bg-amber-"] .text-white,
+html.light [class*="from-amber-"] .text-white,
+html.light [class*="bg-teal-"] .text-white,
+html.light [class*="from-teal-"] .text-white,
+html.light [class*="bg-gradient-"] .text-white,
+html.light button.bg-orange-600,
+html.light button.bg-orange-500,
+html.light button.bg-emerald-600,
+html.light button.bg-rose-600,
+html.light button[class*="bg-gradient-"],
+html.light button[class*="bg-orange-"],
+html.light button[class*="bg-emerald-"],
+html.light button[class*="bg-rose-"],
+html.light .preserve-white {
+  color: #ffffff !important;
+}
+
+html.light .from-orange-600.via-orange-500.to-amber-500 {
+  background-image: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #d97706 100%) !important;
+  box-shadow: 0 10px 25px -5px rgba(194, 65, 12, 0.2) !important;
+}
+html.light .from-orange-600.to-amber-600 {
+  background-image: linear-gradient(135deg, #c2410c 0%, #d97706 100%) !important;
+  box-shadow: 0 10px 25px -5px rgba(194, 65, 12, 0.2) !important;
+}
+html.light .from-emerald-700.to-teal-800 {
+  background-image: linear-gradient(135deg, #065f46 0%, #0d9488 100%) !important;
+  box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.2) !important;
+}
+
+html.light input:not([type="checkbox"]):not([type="radio"]),
+html.light textarea,
+html.light select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+html.light select option,
+html.light optgroup {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+html.light .from-slate-950.via-slate-900.to-zinc-900 {
+  background-image: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%) !important;
+}
+
+html.light div[class*="font-mono"].bg-slate-950 {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+/* Dark mode select options explicitly dark */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) select option,
+  :root:not(.light) optgroup {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+  }
+}
+html.dark select option,
+html.dark optgroup {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
 }
