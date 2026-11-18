@@ -1,7 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { getUserNotifications, AppNotification } from '@/actions/requests';
+import {
+  getUserNotifications,
+  AppNotification,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotificationAction,
+  clearAllNotificationsAction,
+} from '@/actions/requests';
 import { UserRole } from '@/types/database';
 import {
   Bell,
@@ -10,10 +17,9 @@ import {
   Clock,
   AlertTriangle,
   CreditCard,
-  Info,
   ChevronRight,
   Sparkles,
-  ExternalLink,
+  Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -28,21 +34,30 @@ export default function NotificationBell({ role }: NotificationBellProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Load read notifications from localStorage
+  // Load cached read & deleted notifications from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('ourem_read_notifications');
-      if (stored) {
-        setReadIds(JSON.parse(stored));
+      const storedRead = localStorage.getItem('ourem_read_notifications');
+      if (storedRead) {
+        setReadIds(JSON.parse(storedRead));
       }
     } catch {}
   }, []);
 
-  // Fetch notifications for the user
+  // Fetch notifications for the user from server
   const loadNotifications = async () => {
     try {
       const data = await getUserNotifications(role);
-      if (data) {
+      if (Array.isArray(data)) {
+        // Gabungkan status read dari server (user_metadata)
+        const serverReadIds = data.filter((n) => n.isRead).map((n) => n.id);
+        setReadIds((prev) => {
+          const merged = Array.from(new Set([...prev, ...serverReadIds]));
+          try {
+            localStorage.setItem('ourem_read_notifications', JSON.stringify(merged));
+          } catch {}
+          return merged;
+        });
         setNotifications(data);
       }
     } catch {}
@@ -50,8 +65,13 @@ export default function NotificationBell({ role }: NotificationBellProps) {
 
   useEffect(() => {
     loadNotifications();
-    // Poll every 5 detik untuk sinkronisasi real-time instan antar akun
-    const interval = setInterval(loadNotifications, 5000);
+
+    // Poll setiap 30 detik (hemat baterai & kuota ponsel, tidak membebani server)
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        loadNotifications();
+      }
+    }, 30000);
 
     const handleFocus = () => loadNotifications();
     const handleVisibility = () => {
@@ -85,6 +105,7 @@ export default function NotificationBell({ role }: NotificationBellProps) {
     };
   }, [isOpen]);
 
+  // Tandai 1 notifikasi sebagai sudah dibaca (disimpan di LocalStorage & Server User Metadata)
   const markAsRead = (id: string) => {
     if (!readIds.includes(id)) {
       const updated = [...readIds, id];
@@ -92,9 +113,11 @@ export default function NotificationBell({ role }: NotificationBellProps) {
       try {
         localStorage.setItem('ourem_read_notifications', JSON.stringify(updated));
       } catch {}
+      markNotificationAsRead(id).catch(() => {});
     }
   };
 
+  // Tandai semua notifikasi sebagai sudah dibaca
   const markAllAsRead = () => {
     const allIds = notifications.map((n) => n.id);
     const merged = Array.from(new Set([...readIds, ...allIds]));
@@ -102,12 +125,33 @@ export default function NotificationBell({ role }: NotificationBellProps) {
     try {
       localStorage.setItem('ourem_read_notifications', JSON.stringify(merged));
     } catch {}
+    markAllNotificationsAsRead(allIds).catch(() => {});
+  };
+
+  // Hapus 1 notifikasi (Permanen di akun user)
+  const handleDeleteNotification = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    deleteNotificationAction(id).catch(() => {});
+  };
+
+  // Hapus semua notifikasi (Permanen di akun user)
+  const handleClearAll = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const allIds = notifications.map((n) => n.id);
+    setNotifications([]);
+    clearAllNotificationsAction(allIds).catch(() => {});
   };
 
   const unreadCount = notifications.filter((n) => !readIds.includes(n.id)).length;
-  const displayedNotifications = activeTab === 'unread'
-    ? notifications.filter((n) => !readIds.includes(n.id))
-    : notifications;
+  const displayedNotifications =
+    activeTab === 'unread'
+      ? notifications.filter((n) => !readIds.includes(n.id))
+      : notifications;
 
   const getIcon = (type: AppNotification['type']) => {
     switch (type) {
@@ -159,7 +203,7 @@ export default function NotificationBell({ role }: NotificationBellProps) {
         }`}
       >
         <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-        
+
         {/* Unread Badge Indicator */}
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white shadow-md shadow-rose-950/50">
@@ -191,16 +235,30 @@ export default function NotificationBell({ role }: NotificationBellProps) {
               </div>
             </div>
 
-            {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={markAllAsRead}
-                className="text-[10px] text-orange-400 hover:text-orange-300 font-semibold flex items-center gap-1 hover:underline transition"
-              >
-                <CheckCheck className="w-3.5 h-3.5" />
-                <span>Tandai dibaca</span>
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <button
+                  type="button"
+                  onClick={markAllAsRead}
+                  title="Tandai semua notifikasi sudah dibaca"
+                  className="text-[10px] text-orange-400 hover:text-orange-300 font-semibold flex items-center gap-1 hover:underline transition"
+                >
+                  <CheckCheck className="w-3.5 h-3.5" />
+                  <span>Dibaca</span>
+                </button>
+              )}
+              {notifications.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  title="Hapus semua notifikasi"
+                  className="text-[10px] text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1 hover:underline transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Hapus</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Tab Filter */}
@@ -245,21 +303,9 @@ export default function NotificationBell({ role }: NotificationBellProps) {
               displayedNotifications.map((notif) => {
                 const isRead = readIds.includes(notif.id);
                 return (
-                  <Link
+                  <div
                     key={notif.id}
-                    href={notif.link}
-                    onClick={() => {
-                      markAsRead(notif.id);
-                      setIsOpen(false);
-                      if (notif.requestId) {
-                        window.dispatchEvent(
-                          new CustomEvent('open-request-detail', {
-                            detail: { requestId: notif.requestId },
-                          })
-                        );
-                      }
-                    }}
-                    className={`p-3.5 flex items-start gap-3 transition group block ${
+                    className={`p-3.5 flex items-start gap-3 transition group relative ${
                       isRead
                         ? 'bg-slate-900/40 hover:bg-slate-800/50 opacity-80 hover:opacity-100'
                         : 'bg-orange-950/15 hover:bg-orange-950/25'
@@ -277,33 +323,71 @@ export default function NotificationBell({ role }: NotificationBellProps) {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-0.5">
-                        <span
-                          className={`text-xs font-bold truncate ${
+                        <Link
+                          href={notif.link}
+                          onClick={() => {
+                            markAsRead(notif.id);
+                            setIsOpen(false);
+                            if (notif.requestId) {
+                              window.dispatchEvent(
+                                new CustomEvent('open-request-detail', {
+                                  detail: { requestId: notif.requestId },
+                                })
+                              );
+                            }
+                          }}
+                          className={`text-xs font-bold truncate hover:underline ${
                             isRead ? 'text-slate-300' : 'text-white'
                           }`}
                         >
                           {notif.title}
-                        </span>
-                        {!isRead && (
-                          <span className="w-2 h-2 rounded-full bg-orange-400 shrink-0"></span>
-                        )}
+                        </Link>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {!isRead && (
+                            <span className="w-2 h-2 rounded-full bg-orange-400"></span>
+                          )}
+                          <button
+                            type="button"
+                            title="Hapus notifikasi ini"
+                            onClick={(e) => handleDeleteNotification(notif.id, e)}
+                            className="p-1 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
 
-                      <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                        {notif.message}
-                      </p>
+                      <Link
+                        href={notif.link}
+                        onClick={() => {
+                          markAsRead(notif.id);
+                          setIsOpen(false);
+                          if (notif.requestId) {
+                            window.dispatchEvent(
+                              new CustomEvent('open-request-detail', {
+                                detail: { requestId: notif.requestId },
+                              })
+                            );
+                          }
+                        }}
+                        className="block"
+                      >
+                        <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                          {notif.message}
+                        </p>
 
-                      <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-800/40">
-                        <span className="text-[10px] text-slate-500">
-                          {formatTimeAgo(notif.date || notif.createdAt)}
-                        </span>
-                        <span className="text-[10px] text-orange-400/80 font-medium flex items-center gap-0.5 group-hover:translate-x-0.5 transition">
-                          <span>Buka</span>
-                          <ChevronRight className="w-3 h-3" />
-                        </span>
-                      </div>
+                        <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-800/40">
+                          <span className="text-[10px] text-slate-500">
+                            {formatTimeAgo(notif.date || notif.createdAt)}
+                          </span>
+                          <span className="text-[10px] text-orange-400/80 font-medium flex items-center gap-0.5 group-hover:translate-x-0.5 transition">
+                            <span>Buka</span>
+                            <ChevronRight className="w-3 h-3" />
+                          </span>
+                        </div>
+                      </Link>
                     </div>
-                  </Link>
+                  </div>
                 );
               })
             )}
@@ -312,7 +396,7 @@ export default function NotificationBell({ role }: NotificationBellProps) {
           {/* Footer */}
           <div className="p-2.5 bg-slate-950/80 border-t border-slate-800/80 text-center">
             <span className="text-[10px] text-slate-500">
-              Ourem Notification Center &bull; Notifikasi Otomatis Realtime
+              Ourem Notification Center &bull; Notifikasi Tersimpan Permanen
             </span>
           </div>
         </div>

@@ -127,38 +127,10 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
     .eq('id', user.id)
     .single();
 
-  let signature_url: string | null =
+  const signature_url: string | null =
     (user.user_metadata?.signature_url as string) || null;
-  let avatar_url: string | null =
+  const avatar_url: string | null =
     (user.user_metadata?.avatar_url as string) || null;
-
-  // Auto-discover existing signature from storage bucket receipts/signatures if metadata is empty
-  if (!signature_url) {
-    try {
-      const { data: sigFiles } = await supabase.storage.from('receipts').list('signatures');
-      const userSig = (sigFiles || []).find((f) => f.name.includes(user.id));
-      if (userSig) {
-        const { data: pubData } = supabase.storage
-          .from('receipts')
-          .getPublicUrl(`signatures/${userSig.name}`);
-        signature_url = pubData.publicUrl;
-      }
-    } catch {}
-  }
-
-  // Also check receipts folder in storage bucket
-  if (!signature_url) {
-    try {
-      const { data: rootFiles } = await supabase.storage.from('receipts').list('receipts');
-      const userSig = (rootFiles || []).find((f) => f.name.includes(`sig-${user.id}`));
-      if (userSig) {
-        const { data: pubData } = supabase.storage
-          .from('receipts')
-          .getPublicUrl(`receipts/${userSig.name}`);
-        signature_url = pubData.publicUrl;
-      }
-    } catch {}
-  }
 
   return {
     id: user.id,
@@ -465,41 +437,12 @@ export async function getGlobalDirectorSignature(): Promise<{
 }> {
   const supabase = await createClient();
   try {
-    const { data: rootFiles } = await supabase.storage.from('receipts').list('receipts');
     const { data: dirProfiles } = await supabase
       .from('profiles')
-      .select('id, full_name, role, signature_url')
+      .select('id, full_name, role')
       .eq('role', 'director');
 
     if (dirProfiles && dirProfiles.length > 0) {
-      for (const dirUser of dirProfiles) {
-        if (dirUser.signature_url) {
-          return { signature_url: dirUser.signature_url, full_name: dirUser.full_name || 'DIRECTOR' };
-        }
-        const dirFile = (rootFiles || []).find(
-          (f) => f.name.includes(`sig-${dirUser.id}`) || f.name.includes(dirUser.id)
-        );
-        if (dirFile) {
-          const { data: pubData } = supabase.storage
-            .from('receipts')
-            .getPublicUrl(`receipts/${dirFile.name}`);
-          return {
-            signature_url: pubData.publicUrl,
-            full_name: dirUser.full_name || 'DIRECTOR',
-          };
-        }
-        const { data: sigFiles } = await supabase.storage.from('receipts').list('signatures');
-        const dirSig = (sigFiles || []).find((f) => f.name.includes(dirUser.id));
-        if (dirSig) {
-          const { data: pubData } = supabase.storage
-            .from('receipts')
-            .getPublicUrl(`signatures/${dirSig.name}`);
-          return {
-            signature_url: pubData.publicUrl,
-            full_name: dirUser.full_name || 'DIRECTOR',
-          };
-        }
-      }
       return { signature_url: null, full_name: dirProfiles[0].full_name || 'DIRECTOR' };
     }
   } catch {

@@ -43,6 +43,7 @@ export default function BottomNav({ role }: BottomNavProps) {
             <Link
               key={link.href}
               href={link.href}
+              prefetch={false}
               className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
                 isActive ? 'text-orange-400 font-bold' : 'text-slate-400 hover:text-slate-200'
               }`}

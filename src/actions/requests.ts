@@ -995,6 +995,7 @@ export interface AppNotification {
   date: string;
   link: string;
   createdAt: string;
+  isRead?: boolean;
 }
 
 export async function getUserNotifications(targetRole?: string): Promise<AppNotification[]> {
@@ -1005,10 +1006,8 @@ export async function getUserNotifications(targetRole?: string): Promise<AppNoti
 
   if (!user) return [];
 
-  const userProfile = await getCurrentUserProfile();
   const effectiveRole = (
     targetRole ||
-    userProfile?.role ||
     (user.user_metadata?.role as string) ||
     'employee'
   ).toLowerCase().trim();
@@ -1117,7 +1116,7 @@ export async function getUserNotifications(targetRole?: string): Promise<AppNoti
         }
       }
 
-      if (!userProfile?.signature_url) {
+      if (!user.user_metadata?.signature_url) {
         notifications.push({
           id: 'employee-no-sig',
           title: 'Upload Tanda Tangan Karyawan',
@@ -1135,7 +1134,6 @@ export async function getUserNotifications(targetRole?: string): Promise<AppNoti
       for (const req of allReqs) {
         if (req.title === '[DELETED]') continue;
 
-        // Khusus akun Director, notifikasi yang masuk HANYA pengajuan form lembur saja
         const isOvertime =
           req.reimbursement_type === 'Lembur' ||
           req.account === 'Lembur' ||
@@ -1226,7 +1224,7 @@ export async function getUserNotifications(targetRole?: string): Promise<AppNoti
         }
       }
 
-      if (!userProfile?.signature_url) {
+      if (!user.user_metadata?.signature_url) {
         notifications.push({
           id: 'finance-no-sig',
           title: 'Upload Tanda Tangan Finance',
@@ -1247,19 +1245,100 @@ export async function getUserNotifications(targetRole?: string): Promise<AppNoti
     console.error('Error fetching notifications:', err);
   }
 
-  // Jika belum ada notifikasi sama sekali, berikan status sistem
-  if (notifications.length === 0) {
-    notifications.push({
-      id: 'system-ready',
-      title: 'Tidak Ada Notifikasi Baru',
-      message: 'Semua aktivitas dan pengajuan Anda telah up-to-date.',
-      type: 'info',
-      date: new Date().toISOString(),
-      link: '/profile',
-      createdAt: new Date().toISOString(),
+  // Filter out deleted notifications and mark read status from user_metadata
+  const readList: string[] = Array.isArray(user.user_metadata?.read_notifications)
+    ? (user.user_metadata.read_notifications as string[])
+    : [];
+  const deletedList: string[] = Array.isArray(user.user_metadata?.deleted_notifications)
+    ? (user.user_metadata.deleted_notifications as string[])
+    : [];
+
+  const filtered = notifications
+    .filter((n) => !deletedList.includes(n.id))
+    .map((n) => ({
+      ...n,
+      isRead: readList.includes(n.id),
+    }));
+
+  return filtered.slice(0, 30);
+}
+
+// Server action: Tandai satu notifikasi sebagai sudah dibaca (disimpan permanen di cloud akun user)
+export async function markNotificationAsRead(id: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false };
+
+  const current: string[] = Array.isArray(user.user_metadata?.read_notifications)
+    ? user.user_metadata.read_notifications
+    : [];
+
+  if (!current.includes(id)) {
+    const updated = [...current, id];
+    await supabase.auth.updateUser({
+      data: { read_notifications: updated },
     });
   }
+  return { success: true };
+}
 
-  // Batasi maksimal 25 notifikasi terbaru
-  return notifications.slice(0, 25);
+// Server action: Tandai semua notifikasi sebagai sudah dibaca (disimpan permanen di cloud akun user)
+export async function markAllNotificationsAsRead(ids: string[]) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false };
+
+  const current: string[] = Array.isArray(user.user_metadata?.read_notifications)
+    ? user.user_metadata.read_notifications
+    : [];
+
+  const merged = Array.from(new Set([...current, ...ids]));
+  await supabase.auth.updateUser({
+    data: { read_notifications: merged },
+  });
+  return { success: true };
+}
+
+// Server action: Hapus notifikasi (disimpan permanen di cloud akun user agar tidak muncul lagi)
+export async function deleteNotificationAction(id: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false };
+
+  const current: string[] = Array.isArray(user.user_metadata?.deleted_notifications)
+    ? user.user_metadata.deleted_notifications
+    : [];
+
+  if (!current.includes(id)) {
+    const updated = [...current, id];
+    await supabase.auth.updateUser({
+      data: { deleted_notifications: updated },
+    });
+  }
+  return { success: true };
+}
+
+// Server action: Hapus semua notifikasi sekaligus (disimpan permanen di cloud akun user)
+export async function clearAllNotificationsAction(ids: string[]) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false };
+
+  const current: string[] = Array.isArray(user.user_metadata?.deleted_notifications)
+    ? user.user_metadata.deleted_notifications
+    : [];
+
+  const merged = Array.from(new Set([...current, ...ids]));
+  await supabase.auth.updateUser({
+    data: { deleted_notifications: merged },
+  });
+  return { success: true };
 }
