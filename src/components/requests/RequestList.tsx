@@ -1112,7 +1112,7 @@ export default function RequestList({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
+        <div className="max-h-[60vh] sm:max-h-[66vh] overflow-y-auto space-y-2.5 sm:space-y-3 pr-1 sm:pr-2 custom-scrollbar overscroll-contain">
           {filteredRequests.map((req) => {
             const isPendingApproval = req.status === 'Menunggu Approval';
             const isApproved = req.status === 'Disetujui';

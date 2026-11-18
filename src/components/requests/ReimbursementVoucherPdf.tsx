@@ -499,88 +499,12 @@ export default function ReimbursementVoucherPdf({
                       </tr>
                     </tbody>
                   </table>
-
-                  {/* Stempel Lunas & Tanggal (Tampil di posisi tengah tabel jika sudah dicairkan) */}
-                  {data.isPaid && (
-                    <div
-                      className="absolute pointer-events-none select-none z-30"
-                      style={{
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%) rotate(-13deg)',
-                      }}
-                    >
-                      <div
-                        style={{
-                          border: '4px double #DC2626',
-                          borderRadius: '10px',
-                          padding: '8px 24px',
-                          backgroundColor: 'rgba(254, 242, 242, 0.45)',
-                          color: '#DC2626',
-                          boxShadow: '0 0 0 2px #DC2626 inset, 0 4px 12px rgba(220, 38, 38, 0.15)',
-                          display: 'inline-flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minWidth: '220px',
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontFamily: "'Arial Black', 'Impact', sans-serif",
-                            fontSize: '32pt',
-                            fontWeight: 900,
-                            letterSpacing: '5px',
-                            lineHeight: '1',
-                            textTransform: 'uppercase',
-                            color: '#DC2626',
-                          }}
-                        >
-                          LUNAS
-                        </div>
-                        <div
-                          style={{
-                            width: '100%',
-                            borderTop: '2px solid #DC2626',
-                            margin: '5px 0 3px 0',
-                          }}
-                        />
-                        <div
-                          style={{
-                            fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
-                            fontSize: '11.5pt',
-                            fontWeight: 800,
-                            letterSpacing: '1px',
-                            color: '#B91C1C',
-                            textTransform: 'uppercase',
-                            lineHeight: '1.2',
-                          }}
-                        >
-                          TGL : {data.paidDate || data.date}
-                        </div>
-                        <div
-                          style={{
-                            fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
-                            fontSize: '8pt',
-                            fontWeight: 700,
-                            letterSpacing: '1.5px',
-                            color: '#DC2626',
-                            textTransform: 'uppercase',
-                            marginTop: '2px',
-                            opacity: 0.9,
-                          }}
-                        >
-                          FINANCE DEPT &bull; PAID
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
 
               {/* Signatures Footer */}
               <div
-                className="mt-6 pt-3 flex justify-between items-end"
+                className="mt-6 pt-3 flex justify-between items-end relative"
                 style={{ fontFamily: "'Calibri', sans-serif", fontSize: '11pt' }}
               >
                 {/* Employee Signature */}
@@ -623,6 +547,80 @@ export default function ReimbursementVoucherPdf({
                   </div>
                 </div>
 
+                {/* Stempel Lunas & Tanggal: Di Bawah Tabel & Transparan */}
+                {data.isPaid && (
+                  <div
+                    className="pointer-events-none select-none flex flex-col items-center justify-center my-auto px-4"
+                    style={{
+                      transform: 'rotate(-8deg)',
+                      opacity: 0.72,
+                    }}
+                  >
+                    <div
+                      style={{
+                        border: '3.5px double rgba(220, 38, 38, 0.85)',
+                        borderRadius: '10px',
+                        padding: '6px 22px',
+                        backgroundColor: 'transparent',
+                        color: '#DC2626',
+                        display: 'inline-flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '210px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontFamily: "'Arial Black', 'Impact', sans-serif",
+                          fontSize: '28pt',
+                          fontWeight: 900,
+                          letterSpacing: '5px',
+                          lineHeight: '1',
+                          textTransform: 'uppercase',
+                          color: '#DC2626',
+                        }}
+                      >
+                        LUNAS
+                      </div>
+                      <div
+                        style={{
+                          width: '100%',
+                          borderTop: '2px solid rgba(220, 38, 38, 0.85)',
+                          margin: '4px 0 2px 0',
+                        }}
+                      />
+                      <div
+                        style={{
+                          fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
+                          fontSize: '11pt',
+                          fontWeight: 800,
+                          letterSpacing: '1px',
+                          color: '#B91C1C',
+                          textTransform: 'uppercase',
+                          lineHeight: '1.2',
+                        }}
+                      >
+                        TGL : {data.paidDate || data.date}
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
+                          fontSize: '7.5pt',
+                          fontWeight: 700,
+                          letterSpacing: '1.5px',
+                          color: '#DC2626',
+                          textTransform: 'uppercase',
+                          marginTop: '2px',
+                          opacity: 0.9,
+                        }}
+                      >
+                        FINANCE DEPT &bull; PAID
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Finance Signature */}
                 <div className="w-56 text-center">
                   <div className="h-16 flex items-end justify-center mb-1">
@@ -643,14 +641,7 @@ export default function ReimbursementVoucherPdf({
                           crossOrigin="anonymous"
                           className="max-h-14 max-w-full object-contain"
                         />
-                      ) : (
-                        <div
-                          className="italic text-slate-400"
-                          style={{ fontSize: '10pt', fontFamily: "'Calibri', sans-serif" }}
-                        >
-                          ( Menunggu Pencairan )
-                        </div>
-                      );
+                      ) : null;
                     })()}
                   </div>
                   <div
