@@ -454,3 +454,92 @@ html.dark optgroup {
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.35) rgba(15, 23, 42, 0.4);
 }
+
+/* ========================================================
+   PRINT STYLES: A5 LANDSCAPE & ISOLATED VOUCHER
+   ======================================================== */
+@media print {
+  @page {
+    size: A5 landscape;
+    margin: 4mm;
+  }
+
+  * {
+    box-sizing: border-box !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: visible !important;
+  }
+
+  /* When printing from browser, hide all background application content */
+  body > *:not(.print-modal-portal) {
+    display: none !important;
+  }
+
+  /* Hide print controls, headers, buttons, navigation */
+  .no-print,
+  .print-control-bar,
+  header,
+  nav,
+  button {
+    display: none !important;
+  }
+
+  /* Reset modal portal for print */
+  .print-modal-portal {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    z-index: 1 !important;
+  }
+
+  .print-modal-container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-height: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+  }
+
+  .print-sheet-wrapper {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  .printable-sheet {
+    box-shadow: none !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+}
+

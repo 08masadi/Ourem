@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { ReimbursementType, ReimbursementVoucherPrintData } from '@/types/database';
+import { ReimbursementVoucherPrintData } from '@/types/database';
 import { Download, Printer, X, Loader2 } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { normalizeAccount } from '@/lib/formatters';
+import { printVoucherDocument, downloadVoucherPdf } from '@/lib/printUtils';
 
 interface ReimbursementVoucherPdfProps {
   data: ReimbursementVoucherPrintData;
@@ -38,9 +37,8 @@ export default function ReimbursementVoucherPdf({
   };
 
   const isPettyCash = data.type === 'Petty Cash';
-  const titleText = isPettyCash ? 'PETTY CASH REIMBURSEMENT' : 'VOUCHER REIMBURSEMENT';
 
-  // Group items by distinct block so identical accounts in different columns/cards remain separate
+  // Group items by distinct block so identical accounts in different cards remain separate
   const accountGroups: AccountGroup[] = [];
   data.items.forEach((item, idx) => {
     const acc = normalizeAccount(item.account, data.type);
@@ -62,59 +60,37 @@ export default function ReimbursementVoucherPdf({
     });
   });
 
-  // Calculate table empty filler rows count (row height is 15pt)
+  // In A5 Landscape, 8 rows fit the page height
   const totalItemRows = data.items.length;
-  const minRows = 10;
+  const minRows = 8;
   const emptyRowsCount = Math.max(0, minRows - totalItemRows);
   const emptyRows = Array.from({ length: emptyRowsCount });
 
-  const handleDownloadPdf = async () => {
-    if (!printRef.current) return;
-    setIsExporting(true);
-
-    try {
-      const element = printRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      const safeDate = data.date.replace(/\//g, '-');
-      const fileName = `${data.type.replace(/\s+/g, '-')}-${data.requestedBy}-${safeDate}.pdf`;
-      pdf.save(fileName);
-    } catch (err) {
-      console.error('Gagal export PDF:', err);
-    } finally {
-      setIsExporting(false);
-    }
-  };
+  const safeDate = data.date.replace(/\//g, '-');
+  const safeName = (data.requestedBy || 'Karyawan').replace(/\s+/g, '-');
+  const docFileName = `${data.type.replace(/\s+/g, '-')}-${safeName}-${safeDate}.pdf`;
+  const docTitle = `${data.type} - ${data.requestedBy} (${data.date})`;
 
   const handlePrint = () => {
-    window.print();
+    printVoucherDocument(printRef.current, docTitle);
+  };
+
+  const handleDownloadPdf = async () => {
+    await downloadVoucherPdf(printRef.current, docFileName, setIsExporting);
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl my-4 flex flex-col max-h-[95vh]">
-        {/* Top Control Bar */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-3 shrink-0">
+    <div className="print-modal-portal fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="print-modal-container relative w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl my-4 flex flex-col max-h-[95vh]">
+        {/* Top Control Bar (Hidden on print) */}
+        <div className="print-control-bar no-print flex items-center justify-between pb-3 border-b border-slate-800 mb-3 shrink-0">
           <div>
             <h2 className="text-base sm:text-lg font-bold text-white">
-              Preview Cetak Voucher Reimbursement
+              Preview Cetak Voucher Reimbursement (A5 Landscape)
             </h2>
+            <p className="text-xs text-slate-400">
+              Format resmi PT. Citra Sari Kencana & Ouffice.co.id &bull; Ukuran A5 Landscape
+            </p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -158,108 +134,127 @@ export default function ReimbursementVoucherPdf({
         </div>
 
         {/* Scrollable Document Container */}
-        <div className="overflow-auto flex-1 flex justify-center p-2 bg-slate-950/70 rounded-2xl border border-slate-800">
-          {/* Printable Sheet formatted with Calibri 11pt */}
+        <div className="print-sheet-wrapper overflow-auto flex-1 flex justify-center p-2 sm:p-4 bg-slate-950/70 rounded-2xl border border-slate-800">
+          {/* Printable Sheet formatted specifically for A5 Landscape (210mm x 148mm ratio) */}
           <div
             ref={printRef}
-            className="w-[1000px] min-h-[580px] bg-white text-slate-900 p-8 shadow-2xl relative flex flex-col justify-between print:shadow-none print:w-full print:m-0 print:p-4"
+            className="printable-sheet bg-white text-black p-5 sm:p-6 shadow-2xl relative flex flex-col justify-between"
             style={{
+              width: '100%',
+              maxWidth: '820px',
+              minHeight: '520px',
+              aspectRatio: '210 / 148',
               border: '2px solid #1E3A8A',
               fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
-              fontSize: '11pt',
+              backgroundColor: '#ffffff',
+              color: '#000000',
             }}
           >
-            {/* Document Body */}
-            <div
-              className="relative z-10 flex flex-col justify-between h-full"
-              style={{ fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif", fontSize: '11pt' }}
-            >
-              {/* Header: 3-Column Layout: Left (Ouffice), Center (Title), Right (CSK Logo) */}
+            {/* Inner Content */}
+            <div className="relative z-10 flex flex-col justify-between h-full">
+              {/* Header: Left (Ouffice), Center (Title), Right (CSK Logo) */}
               <div>
-                <div className="grid grid-cols-12 items-center pb-3 border-b-2 border-[#EA580C]/40 gap-2">
+                <div className="grid grid-cols-12 items-center pb-2.5 border-b-2 border-[#EA580C] gap-2">
                   {/* Left: Brand Logo - Official Ouffice.co.id */}
                   <div className="col-span-3 flex items-center justify-start">
                     <img
                       src="/ouffice-logo.png"
                       alt="Ouffice.co.id"
-                      className="h-16 sm:h-20 w-auto object-contain"
-                      crossOrigin="anonymous"
+                      className="h-12 sm:h-14 w-auto object-contain"
                     />
                   </div>
 
-                  {/* Center: Title (Petty Cash Reimbursement) - Enlarged & Bold */}
+                  {/* Center: Title (Petty Cash Reimbursement / Voucher Reimbursement) */}
                   <div className="col-span-6 text-center">
                     <h1
-                      className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-wide uppercase"
-                      style={{ color: '#EA580C', fontFamily: "'Calibri', sans-serif", fontWeight: 900 }}
+                      className="text-xl sm:text-2xl font-black tracking-wider uppercase leading-tight"
+                      style={{
+                        color: '#EA580C',
+                        fontFamily: "'Calibri', sans-serif",
+                        fontWeight: 900,
+                      }}
                     >
-                      {titleText}
+                      {isPettyCash ? (
+                        <>
+                          PETTY CASH
+                          <br />
+                          REIMBURSEMENT
+                        </>
+                      ) : (
+                        <>
+                          VOUCHER
+                          <br />
+                          REIMBURSEMENT
+                        </>
+                      )}
                     </h1>
                   </div>
 
-                  {/* Right: Brand Logo - Citra Sari Kencana (Sized to match Ouffice) */}
+                  {/* Right: Brand Logo - Citra Sari Kencana */}
                   <div className="col-span-3 flex items-center justify-end">
                     <img
                       src="/csk-logo.png"
                       alt="Citra Sari Kencana"
-                      className="h-16 sm:h-20 w-auto object-contain"
-                      crossOrigin="anonymous"
+                      className="h-12 sm:h-14 w-auto object-contain"
                     />
                   </div>
                 </div>
 
-                {/* Info Boxes - Shorter width, enlarged padding & font like before */}
-                <div
-                  className="flex justify-between items-center mt-3 font-bold"
-                  style={{ fontFamily: "'Calibri', sans-serif", fontSize: '11pt' }}
-                >
-                  {/* Left Side: REQUESTED BY & DEPARTMENT */}
-                  <div className="flex items-center gap-3">
-                    {/* REQUESTED BY */}
-                    <div className="w-56 border border-[#EA580C] px-3 py-2 rounded-sm">
-                      <div
-                        className="text-[#EA580C] font-bold tracking-wider mb-0.5"
-                        style={{ fontSize: '9pt', fontFamily: "'Calibri', sans-serif" }}
-                      >
-                        REQUESTED BY :
-                      </div>
-                      <div
-                        className="font-extrabold text-slate-900 uppercase"
-                        style={{ fontSize: '12pt', fontFamily: "'Calibri', sans-serif" }}
-                      >
-                        {data.requestedBy || 'MISKADI'}
-                      </div>
+                {/* Info Boxes: REQUESTED BY, DEPARTMENT, DATE */}
+                <div className="grid grid-cols-12 gap-2 mt-2.5 font-bold">
+                  {/* REQUESTED BY */}
+                  <div className="col-span-4 border border-[#EA580C] px-3 py-1.5 rounded-sm bg-white">
+                    <div
+                      className="text-[#EA580C] font-bold tracking-wider mb-0.5"
+                      style={{ fontSize: '8pt', fontFamily: "'Calibri', sans-serif" }}
+                    >
+                      REQUESTED BY :
                     </div>
-
-                    {/* DEPARTMENT */}
-                    <div className="w-56 border border-[#EA580C] px-3 py-2 rounded-sm">
-                      <div
-                        className="text-[#EA580C] font-bold tracking-wider mb-0.5"
-                        style={{ fontSize: '9pt', fontFamily: "'Calibri', sans-serif" }}
-                      >
-                        DEPARTMENT :
-                      </div>
-                      <div
-                        className="font-extrabold text-slate-900 uppercase"
-                        style={{ fontSize: '12pt', fontFamily: "'Calibri', sans-serif" }}
-                      >
-                        {data.department || 'STAFF OPS'}
-                      </div>
+                    <div
+                      className="font-extrabold uppercase truncate"
+                      style={{
+                        fontSize: '11pt',
+                        color: '#000000',
+                        fontFamily: "'Calibri', sans-serif",
+                      }}
+                    >
+                      {data.requestedBy || 'MISKADI'}
                     </div>
                   </div>
 
-                  {/* Right Side: DATE */}
-                  <div className="w-48 border border-[#EA580C] px-3 py-2 rounded-sm">
+                  {/* DEPARTMENT */}
+                  <div className="col-span-4 border border-[#EA580C] px-3 py-1.5 rounded-sm bg-white">
                     <div
                       className="text-[#EA580C] font-bold tracking-wider mb-0.5"
-                      style={{ fontSize: '9pt', fontFamily: "'Calibri', sans-serif" }}
+                      style={{ fontSize: '8pt', fontFamily: "'Calibri', sans-serif" }}
+                    >
+                      DEPARTMENT :
+                    </div>
+                    <div
+                      className="font-extrabold uppercase truncate"
+                      style={{
+                        fontSize: '11pt',
+                        color: '#000000',
+                        fontFamily: "'Calibri', sans-serif",
+                      }}
+                    >
+                      {data.department || 'STAFF OPS'}
+                    </div>
+                  </div>
+
+                  {/* DATE */}
+                  <div className="col-span-4 border border-[#EA580C] px-3 py-1.5 rounded-sm bg-white">
+                    <div
+                      className="text-[#EA580C] font-bold tracking-wider mb-0.5 text-center"
+                      style={{ fontSize: '8pt', fontFamily: "'Calibri', sans-serif" }}
                     >
                       DATE :
                     </div>
                     <div
-                      className="font-extrabold text-center text-slate-900"
+                      className="font-extrabold text-center truncate"
                       style={{
-                        fontSize: '12pt',
+                        fontSize: '11pt',
+                        color: '#000000',
                         fontFamily: "'Calibri', sans-serif",
                       }}
                     >
@@ -268,34 +263,32 @@ export default function ReimbursementVoucherPdf({
                   </div>
                 </div>
 
-                {/* Main Table with Calibri 11pt & Row Height 15pt and Orange Column Borders */}
-                <div className="mt-4 border-2 border-[#EA580C] relative">
+                {/* Main Table: Account, Customer, Description, Amount */}
+                <div className="mt-3 border-2 border-[#EA580C] bg-white">
                   <table
                     className="w-full border-collapse"
                     style={{
                       fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
-                      fontSize: '11pt',
+                      fontSize: '10pt',
                     }}
                   >
                     <thead>
                       <tr
                         style={{
                           backgroundColor: '#EA580C',
-                          height: '15pt',
-                          lineHeight: '15pt',
+                          height: '18pt',
+                          lineHeight: '18pt',
                           fontFamily: "'Calibri', sans-serif",
-                          fontSize: '11pt',
+                          fontSize: '10pt',
                         }}
                         className="text-white text-center font-extrabold"
                       >
                         <th
                           style={{
-                            height: '15pt',
-                            lineHeight: '15pt',
+                            height: '18pt',
                             padding: '0 6px',
                             verticalAlign: 'middle',
-                            fontFamily: "'Calibri', sans-serif",
-                            fontSize: '11pt',
+                            color: '#ffffff',
                           }}
                           className="border border-[#EA580C] w-[18%]"
                         >
@@ -303,12 +296,10 @@ export default function ReimbursementVoucherPdf({
                         </th>
                         <th
                           style={{
-                            height: '15pt',
-                            lineHeight: '15pt',
+                            height: '18pt',
                             padding: '0 6px',
                             verticalAlign: 'middle',
-                            fontFamily: "'Calibri', sans-serif",
-                            fontSize: '11pt',
+                            color: '#ffffff',
                           }}
                           className="border border-[#EA580C] w-[22%]"
                         >
@@ -316,108 +307,103 @@ export default function ReimbursementVoucherPdf({
                         </th>
                         <th
                           style={{
-                            height: '15pt',
-                            lineHeight: '15pt',
+                            height: '18pt',
                             padding: '0 6px',
                             verticalAlign: 'middle',
-                            fontFamily: "'Calibri', sans-serif",
-                            fontSize: '11pt',
+                            color: '#ffffff',
                           }}
-                          className="border border-[#EA580C] w-[40%]"
+                          className="border border-[#EA580C] w-[42%]"
                         >
                           Description
                         </th>
                         <th
                           style={{
-                            height: '15pt',
-                            lineHeight: '15pt',
+                            height: '18pt',
                             padding: '0 6px',
                             verticalAlign: 'middle',
-                            fontFamily: "'Calibri', sans-serif",
-                            fontSize: '11pt',
+                            color: '#ffffff',
                           }}
-                          className="border border-[#EA580C] w-[20%] text-center font-extrabold"
+                          className="border border-[#EA580C] w-[18%] text-center font-extrabold"
                         >
                           Amount
                         </th>
                       </tr>
                     </thead>
                     <tbody
-                      className="font-medium text-slate-900"
-                      style={{ fontFamily: "'Calibri', sans-serif", fontSize: '11pt' }}
+                      style={{
+                        fontFamily: "'Calibri', sans-serif",
+                        fontSize: '10pt',
+                        color: '#000000',
+                      }}
                     >
-                      {/* Render grouped accounts with rowSpan merger and exact 15pt row height */}
+                      {/* Render grouped accounts with solid black font */}
                       {accountGroups.map((group, groupIdx) =>
                         group.items.map((item, itemIdx) => (
                           <tr
                             key={`grp-${groupIdx}-item-${itemIdx}`}
-                            className="border-b border-[#EA580C]/40 hover:bg-orange-50/20"
+                            className="border-b border-[#EA580C]"
                             style={{
-                              height: '15pt',
-                              minHeight: '15pt',
-                              lineHeight: '15pt',
-                              fontFamily: "'Calibri', sans-serif",
-                              fontSize: '11pt',
+                              height: '16pt',
+                              minHeight: '16pt',
+                              lineHeight: '16pt',
                             }}
                           >
                             {/* Merge Account cell on first row of this account group */}
                             {itemIdx === 0 && (
                               <td
                                 rowSpan={group.items.length}
-                                className="border-r border-[#EA580C] text-center font-bold bg-slate-50/40 text-slate-900"
+                                className="border-r border-[#EA580C] text-center font-bold"
                                 style={{
-                                  height: `${group.items.length * 15}pt`,
+                                  height: `${group.items.length * 16}pt`,
                                   verticalAlign: 'middle',
                                   padding: '0 6px',
-                                  fontFamily: "'Calibri', sans-serif",
-                                  fontSize: '11pt',
+                                  color: '#000000',
+                                  backgroundColor: '#ffffff',
                                 }}
                               >
                                 {group.account}
                               </td>
                             )}
 
-                            {/* Customer Column with orange border */}
+                            {/* Customer Column */}
                             <td
-                              className="border-r border-[#EA580C] text-center font-semibold text-slate-900"
+                              className="border-r border-[#EA580C] text-center font-bold"
                               style={{
-                                height: '15pt',
-                                lineHeight: '15pt',
+                                height: '16pt',
+                                lineHeight: '16pt',
                                 verticalAlign: 'middle',
                                 padding: '0 6px',
-                                fontFamily: "'Calibri', sans-serif",
-                                fontSize: '11pt',
+                                color: '#000000',
                               }}
                             >
                               {item.customer || '-'}
                             </td>
 
-                            {/* Description Column with orange border (Tanpa Bullet) */}
+                            {/* Description Column */}
                             <td
-                              className="border-r border-[#EA580C] text-left text-slate-900 whitespace-pre-line"
+                              className="border-r border-[#EA580C] text-left whitespace-pre-line"
                               style={{
-                                minHeight: '15pt',
+                                minHeight: '16pt',
                                 verticalAlign: 'middle',
                                 padding: '1px 8px',
                                 lineHeight: '1.25',
-                                fontFamily: "'Calibri', sans-serif",
-                                fontSize: '11pt',
+                                color: '#000000',
+                                fontWeight: 500,
                               }}
                             >
                               {item.description}
                             </td>
 
-                            {/* Amount Column - Merger vertically with rowSpan matching Account, Align Right */}
+                            {/* Amount Column */}
                             {itemIdx === 0 && (
                               <td
                                 rowSpan={group.items.length}
-                                className="text-right font-bold text-slate-900"
+                                className="text-right font-bold"
                                 style={{
-                                  height: `${group.items.length * 15}pt`,
+                                  height: `${group.items.length * 16}pt`,
                                   verticalAlign: 'middle',
-                                  padding: '0 12px 0 6px',
-                                  fontFamily: "'Calibri', sans-serif",
-                                  fontSize: '11pt',
+                                  padding: '0 10px 0 6px',
+                                  color: '#000000',
                                 }}
                               >
                                 {group.totalAmount > 0 ? formatNumber(group.totalAmount) : '-'}
@@ -427,45 +413,42 @@ export default function ReimbursementVoucherPdf({
                         ))
                       )}
 
-                      {/* Empty filler rows with exact 15pt height and orange borders */}
+                      {/* Empty filler rows with exact height and orange borders */}
                       {emptyRows.map((_, idx) => (
                         <tr
                           key={`empty-${idx}`}
-                          className="border-b border-[#EA580C]/40"
+                          className="border-b border-[#EA580C]"
                           style={{
-                            height: '15pt',
-                            lineHeight: '15pt',
-                            fontFamily: "'Calibri', sans-serif",
-                            fontSize: '11pt',
+                            height: '16pt',
+                            lineHeight: '16pt',
                           }}
                         >
                           <td
                             className="border-r border-[#EA580C]"
-                            style={{ height: '15pt', padding: '0 6px' }}
+                            style={{ height: '16pt', padding: '0 6px' }}
                           ></td>
                           <td
                             className="border-r border-[#EA580C]"
-                            style={{ height: '15pt', padding: '0 6px' }}
+                            style={{ height: '16pt', padding: '0 6px' }}
                           ></td>
                           <td
                             className="border-r border-[#EA580C]"
-                            style={{ height: '15pt', padding: '0 6px' }}
+                            style={{ height: '16pt', padding: '0 6px' }}
                           ></td>
                           <td
                             className="text-right"
-                            style={{ height: '15pt', padding: '0 12px' }}
+                            style={{ height: '16pt', padding: '0 10px' }}
                           ></td>
                         </tr>
                       ))}
 
                       {/* Total Amount Row */}
                       <tr
-                        className="border-t-2 border-[#EA580C] font-black"
+                        className="border-t-2 border-[#EA580C]"
                         style={{
                           height: '18pt',
                           lineHeight: '18pt',
-                          fontFamily: "'Calibri', sans-serif",
-                          fontSize: '11pt',
+                          fontWeight: 900,
                         }}
                       >
                         <td
@@ -473,11 +456,9 @@ export default function ReimbursementVoucherPdf({
                           className="text-center font-bold tracking-wide border-r border-[#EA580C]"
                           style={{
                             height: '18pt',
-                            lineHeight: '18pt',
                             verticalAlign: 'middle',
                             padding: '0 8px',
-                            fontFamily: "'Calibri', sans-serif",
-                            fontSize: '11pt',
+                            color: '#000000',
                           }}
                         >
                           Total Amount
@@ -487,11 +468,9 @@ export default function ReimbursementVoucherPdf({
                           style={{
                             backgroundColor: '#FED7AA',
                             height: '18pt',
-                            lineHeight: '18pt',
                             verticalAlign: 'middle',
-                            padding: '0 12px 0 8px',
-                            fontFamily: "'Calibri', sans-serif",
-                            fontSize: '11pt',
+                            padding: '0 10px 0 8px',
+                            color: '#000000',
                           }}
                         >
                           {data.totalAmount > 0 ? formatNumber(data.totalAmount) : '-'}
@@ -502,14 +481,14 @@ export default function ReimbursementVoucherPdf({
                 </div>
               </div>
 
-              {/* Signatures Footer */}
+              {/* Signatures & Stempel Footer */}
               <div
-                className="mt-6 pt-3 flex justify-between items-end relative"
-                style={{ fontFamily: "'Calibri', sans-serif", fontSize: '11pt' }}
+                className="mt-4 pt-2 flex justify-between items-end relative"
+                style={{ fontFamily: "'Calibri', sans-serif" }}
               >
                 {/* Employee Signature */}
-                <div className="w-56 text-center">
-                  <div className="h-16 flex items-end justify-center mb-1">
+                <div className="w-52 text-center">
+                  <div className="h-14 flex items-end justify-center mb-1">
                     {(() => {
                       const sigUrl =
                         data.employeeSignature ||
@@ -520,13 +499,12 @@ export default function ReimbursementVoucherPdf({
                         <img
                           src={sigUrl}
                           alt="Signature"
-                          crossOrigin="anonymous"
-                          className="max-h-14 max-w-full object-contain"
+                          className="max-h-12 max-w-full object-contain"
                         />
                       ) : (
                         <div
                           className="italic text-slate-400"
-                          style={{ fontSize: '10pt', fontFamily: "'Calibri', sans-serif" }}
+                          style={{ fontSize: '9pt', fontFamily: "'Calibri', sans-serif" }}
                         >
                           ( Ditandatangani digital )
                         </div>
@@ -534,20 +512,20 @@ export default function ReimbursementVoucherPdf({
                     })()}
                   </div>
                   <div
-                    className="font-extrabold text-slate-900 border-t border-slate-700 pt-1"
-                    style={{ fontSize: '11pt', fontFamily: "'Calibri', sans-serif" }}
+                    className="font-extrabold border-t border-slate-700 pt-1"
+                    style={{ fontSize: '10.5pt', color: '#000000', fontFamily: "'Calibri', sans-serif" }}
                   >
                     {data.requestedBy || 'Miskadi'}
                   </div>
                   <div
-                    className="text-slate-500 font-semibold tracking-wider mt-0.5"
-                    style={{ fontSize: '9pt', fontFamily: "'Calibri', sans-serif" }}
+                    className="font-semibold tracking-wider mt-0.5"
+                    style={{ fontSize: '8.5pt', color: '#475569', fontFamily: "'Calibri', sans-serif" }}
                   >
                     Employee Signature
                   </div>
                 </div>
 
-                {/* Stempel Lunas & Tanggal: Di Bawah Tabel & Transparan */}
+                {/* Stempel Lunas: Di Bawah Tabel & Transparan */}
                 {data.isPaid && (
                   <div
                     className="pointer-events-none select-none flex flex-col items-center justify-center my-auto px-4"
@@ -558,24 +536,24 @@ export default function ReimbursementVoucherPdf({
                   >
                     <div
                       style={{
-                        border: '3.5px double rgba(220, 38, 38, 0.85)',
-                        borderRadius: '10px',
-                        padding: '6px 22px',
+                        border: '3px double rgba(220, 38, 38, 0.85)',
+                        borderRadius: '8px',
+                        padding: '4px 18px',
                         backgroundColor: 'transparent',
                         color: '#DC2626',
                         display: 'inline-flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        minWidth: '210px',
+                        minWidth: '180px',
                       }}
                     >
                       <div
                         style={{
                           fontFamily: "'Arial Black', 'Impact', sans-serif",
-                          fontSize: '28pt',
+                          fontSize: '24pt',
                           fontWeight: 900,
-                          letterSpacing: '5px',
+                          letterSpacing: '4px',
                           lineHeight: '1',
                           textTransform: 'uppercase',
                           color: '#DC2626',
@@ -586,14 +564,14 @@ export default function ReimbursementVoucherPdf({
                       <div
                         style={{
                           width: '100%',
-                          borderTop: '2px solid rgba(220, 38, 38, 0.85)',
-                          margin: '4px 0 2px 0',
+                          borderTop: '1.5px solid rgba(220, 38, 38, 0.85)',
+                          margin: '3px 0 2px 0',
                         }}
                       />
                       <div
                         style={{
                           fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
-                          fontSize: '11pt',
+                          fontSize: '10pt',
                           fontWeight: 800,
                           letterSpacing: '1px',
                           color: '#B91C1C',
@@ -606,12 +584,12 @@ export default function ReimbursementVoucherPdf({
                       <div
                         style={{
                           fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
-                          fontSize: '7.5pt',
+                          fontSize: '7pt',
                           fontWeight: 700,
-                          letterSpacing: '1.5px',
+                          letterSpacing: '1.2px',
                           color: '#DC2626',
                           textTransform: 'uppercase',
-                          marginTop: '2px',
+                          marginTop: '1px',
                           opacity: 0.9,
                         }}
                       >
@@ -622,8 +600,8 @@ export default function ReimbursementVoucherPdf({
                 )}
 
                 {/* Finance Signature */}
-                <div className="w-56 text-center">
-                  <div className="h-16 flex items-end justify-center mb-1">
+                <div className="w-52 text-center">
+                  <div className="h-14 flex items-end justify-center mb-1">
                     {(() => {
                       // Tanda tangan finance HANYA muncul setelah dicairkan (PAID) oleh Finance
                       const finSigUrl = data.isPaid
@@ -638,15 +616,14 @@ export default function ReimbursementVoucherPdf({
                         <img
                           src={finSigUrl}
                           alt="Finance Signature"
-                          crossOrigin="anonymous"
-                          className="max-h-14 max-w-full object-contain"
+                          className="max-h-12 max-w-full object-contain"
                         />
                       ) : null;
                     })()}
                   </div>
                   <div
-                    className="font-extrabold text-slate-900 border-t border-slate-700 pt-1 uppercase"
-                    style={{ fontSize: '11pt', fontFamily: "'Calibri', sans-serif" }}
+                    className="font-extrabold border-t border-slate-700 pt-1 uppercase"
+                    style={{ fontSize: '10.5pt', color: '#000000', fontFamily: "'Calibri', sans-serif" }}
                   >
                     {data.isPaid
                       ? data.financeOfficer ||
@@ -657,8 +634,8 @@ export default function ReimbursementVoucherPdf({
                       : 'FINANCE DEPT'}
                   </div>
                   <div
-                    className="text-slate-500 font-semibold tracking-wider mt-0.5"
-                    style={{ fontSize: '9pt', fontFamily: "'Calibri', sans-serif" }}
+                    className="font-semibold tracking-wider mt-0.5"
+                    style={{ fontSize: '8.5pt', color: '#475569', fontFamily: "'Calibri', sans-serif" }}
                   >
                     Finance Signature
                   </div>

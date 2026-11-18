@@ -3,8 +3,7 @@
 import React, { useRef, useState } from 'react';
 import { MonthlyRecapReportData } from '@/types/database';
 import { Download, Printer, X, Loader2 } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { printVoucherDocument, downloadVoucherPdf } from '@/lib/printUtils';
 
 interface MonthlyRecapReportPdfProps {
   data: MonthlyRecapReportData;
@@ -25,43 +24,17 @@ export default function MonthlyRecapReportPdf({
     }).format(num);
   };
 
-  const handleDownloadPdf = async () => {
-    if (!printRef.current) return;
-    setIsExporting(true);
-
-    try {
-      const element = printRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      const safePeriod = data.periodLabel.replace(/\s+/g, '-');
-      const safeType = data.type.replace(/\s+/g, '-');
-      const fileName = `Laporan-Rekap-${safeType}-${safePeriod}.pdf`;
-      pdf.save(fileName);
-    } catch (err) {
-      console.error('Gagal export PDF Rekap:', err);
-    } finally {
-      setIsExporting(false);
-    }
-  };
+  const safePeriod = data.periodLabel.replace(/\s+/g, '-');
+  const safeType = data.type.replace(/\s+/g, '-');
+  const docFileName = `Laporan-Rekap-${safeType}-${safePeriod}.pdf`;
+  const docTitle = `Laporan Rekapitulasi ${data.type} - ${data.periodLabel}`;
 
   const handlePrint = () => {
-    window.print();
+    printVoucherDocument(printRef.current, docTitle);
+  };
+
+  const handleDownloadPdf = async () => {
+    await downloadVoucherPdf(printRef.current, docFileName, setIsExporting);
   };
 
   // Subtitle nama pembayaran
@@ -73,21 +46,21 @@ export default function MonthlyRecapReportPdf({
       : 'PEMBAYARAN PETTY CASH';
 
   // Filler rows to maintain elegant standard height if items are few
-  const minRows = 8;
+  const minRows = 7;
   const emptyRowsCount = Math.max(0, minRows - data.items.length);
   const emptyRows = Array.from({ length: emptyRowsCount });
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl my-4 flex flex-col max-h-[95vh]">
-        {/* Top Control Bar */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-3 shrink-0">
+    <div className="print-modal-portal fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="print-modal-container relative w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl my-4 flex flex-col max-h-[95vh]">
+        {/* Top Control Bar (Hidden on print) */}
+        <div className="print-control-bar no-print flex items-center justify-between pb-3 border-b border-slate-800 mb-3 shrink-0">
           <div>
             <h2 className="text-base sm:text-lg font-bold text-white">
-              Preview Laporan Rekapitulasi {paymentSubTitle}
+              Preview Laporan Rekapitulasi {paymentSubTitle} (A5 Landscape)
             </h2>
             <p className="text-xs text-slate-400">
-              Periode {data.periodLabel}
+              Periode {data.periodLabel} &bull; Ukuran A5 Landscape
             </p>
           </div>
 
@@ -132,151 +105,154 @@ export default function MonthlyRecapReportPdf({
         </div>
 
         {/* Scrollable Document Container */}
-        <div className="overflow-auto flex-1 flex justify-center p-2 bg-slate-950/70 rounded-2xl border border-slate-800">
-          {/* Printable Sheet formatted with Calibri 11pt */}
+        <div className="print-sheet-wrapper overflow-auto flex-1 flex justify-center p-2 sm:p-4 bg-slate-950/70 rounded-2xl border border-slate-800">
+          {/* Printable Sheet formatted specifically for A5 Landscape (210mm x 148mm ratio) */}
           <div
             ref={printRef}
-            className="w-[1000px] min-h-[580px] bg-white text-slate-900 p-8 shadow-2xl relative flex flex-col justify-between print:shadow-none print:w-full print:m-0 print:p-4"
+            className="printable-sheet bg-white text-black p-5 sm:p-6 shadow-2xl relative flex flex-col justify-between"
             style={{
+              width: '100%',
+              maxWidth: '820px',
+              minHeight: '520px',
+              aspectRatio: '210 / 148',
               border: '2px solid #1E3A8A',
               fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
-              fontSize: '11pt',
+              backgroundColor: '#ffffff',
+              color: '#000000',
             }}
           >
             {/* Document Body */}
             <div
               className="relative z-10 flex flex-col justify-between h-full"
-              style={{ fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif", fontSize: '11pt' }}
+              style={{ fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif" }}
             >
               <div>
-                {/* Header: Kop Surat dengan Logo Diperkecil, Judul di Tengah, dan Periode di Atas Garis Posisi Kanan */}
+                {/* Header: Kop Surat dengan Logo, Judul di Tengah, dan Periode di Kanan */}
                 <div className="pb-2 border-b-2 border-[#EA580C]">
                   <div className="grid grid-cols-12 items-center gap-2">
-                    {/* Left: Logo Ouffice Diperkecil */}
+                    {/* Left: Logo Ouffice */}
                     <div className="col-span-3 flex items-center justify-start">
                       <img
                         src="/ouffice-logo.png"
                         alt="Ouffice.co.id"
                         className="h-10 sm:h-12 w-auto object-contain"
-                        crossOrigin="anonymous"
                       />
                     </div>
 
-                    {/* Center: Laporan Rekapitulasi di bawahnya Pembayaran Petty Cash / Voucher / Lembur */}
+                    {/* Center: Judul */}
                     <div className="col-span-6 text-center leading-tight">
                       <div
-                        className="text-xl sm:text-2xl font-black tracking-wide uppercase"
+                        className="text-lg sm:text-xl font-black tracking-wide uppercase"
                         style={{ color: '#EA580C', fontFamily: "'Calibri', sans-serif", fontWeight: 900 }}
                       >
                         LAPORAN REKAPITULASI
                       </div>
                       <div
-                        className="text-lg sm:text-xl font-black tracking-wide uppercase mt-1"
+                        className="text-base sm:text-lg font-black tracking-wide uppercase mt-0.5"
                         style={{ color: '#EA580C', fontFamily: "'Calibri', sans-serif", fontWeight: 900 }}
                       >
                         {paymentSubTitle}
                       </div>
                     </div>
 
-                    {/* Right: Logo Citra Sari Kencana Diperkecil */}
+                    {/* Right: Logo Citra Sari Kencana */}
                     <div className="col-span-3 flex items-center justify-end">
                       <img
                         src="/csk-logo.png"
                         alt="Citra Sari Kencana"
                         className="h-10 sm:h-12 w-auto object-contain"
-                        crossOrigin="anonymous"
                       />
                     </div>
                   </div>
 
-                  {/* Periode Pindah ke Atas Garis Pemisah Kop Surat di Posisi Kanan */}
-                  <div className="flex justify-end mt-2 px-1">
+                  {/* Periode Posisi Kanan */}
+                  <div className="flex justify-end mt-1.5 px-1">
                     <div
-                      className="font-extrabold uppercase tracking-wide text-[11pt]"
+                      className="font-extrabold uppercase tracking-wide text-[10pt]"
                       style={{ fontFamily: "'Calibri', sans-serif" }}
                     >
                       <span className="text-[#EA580C] font-black mr-1.5">PERIODE :</span>
-                      <span className="font-black text-slate-900">{data.periodLabel}</span>
+                      <span className="font-black" style={{ color: '#000000' }}>{data.periodLabel}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Table Pengeluaran Bulanan (Tanpa Kolom Keterangan / Rincian) */}
-                <div className="mt-4 border-2 border-[#EA580C]">
+                {/* Table Pengeluaran Bulanan */}
+                <div className="mt-3 border-2 border-[#EA580C] bg-white">
                   <table
                     className="w-full border-collapse"
                     style={{
                       fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
-                      fontSize: '11pt',
+                      fontSize: '10pt',
                     }}
                   >
                     <thead>
                       <tr
                         style={{
                           backgroundColor: '#EA580C',
-                          height: '20pt',
-                          lineHeight: '20pt',
+                          height: '18pt',
+                          lineHeight: '18pt',
                           fontFamily: "'Calibri', sans-serif",
-                          fontSize: '11pt',
+                          fontSize: '10pt',
                         }}
                         className="text-white text-center font-extrabold"
                       >
-                        <th className="border border-[#EA580C] w-[7%] py-1">NO</th>
-                        <th className="border border-[#EA580C] w-[35%] py-1">NAMA KARYAWAN</th>
-                        <th className="border border-[#EA580C] w-[20%] py-1">DEPARTMENT</th>
-                        <th className="border border-[#EA580C] w-[18%] py-1">TANGGAL</th>
-                        <th className="border border-[#EA580C] w-[20%] py-1">AMOUNT (RP)</th>
+                        <th className="border border-[#EA580C] w-[7%] py-0.5">NO</th>
+                        <th className="border border-[#EA580C] w-[35%] py-0.5">NAMA KARYAWAN</th>
+                        <th className="border border-[#EA580C] w-[20%] py-0.5">DEPARTMENT</th>
+                        <th className="border border-[#EA580C] w-[18%] py-0.5">TANGGAL</th>
+                        <th className="border border-[#EA580C] w-[20%] py-0.5">AMOUNT (RP)</th>
                       </tr>
                     </thead>
                     <tbody>
                       {data.items.map((item, idx) => (
                         <tr
                           key={item.id || idx}
-                          className="border-b border-[#EA580C]/40 text-slate-900"
+                          className="border-b border-[#EA580C]"
                           style={{
-                            height: '20pt',
+                            height: '17pt',
                             lineHeight: '1.25',
                             fontFamily: "'Calibri', sans-serif",
-                            fontSize: '11pt',
+                            fontSize: '9.5pt',
                             backgroundColor: idx % 2 === 1 ? '#FFF7ED' : '#FFFFFF',
                           }}
                         >
                           {/* No */}
                           <td
-                            className="text-center font-bold border-r border-[#EA580C] px-2 py-1.5"
-                            style={{ verticalAlign: 'middle' }}
+                            className="text-center font-bold border-r border-[#EA580C] px-2 py-1"
+                            style={{ verticalAlign: 'middle', color: '#000000' }}
                           >
                             {item.no}
                           </td>
 
                           {/* Nama Karyawan */}
                           <td
-                            className="font-extrabold border-r border-[#EA580C] px-4 py-1.5 uppercase"
-                            style={{ verticalAlign: 'middle' }}
+                            className="font-extrabold border-r border-[#EA580C] px-3 py-1 uppercase"
+                            style={{ verticalAlign: 'middle', color: '#000000' }}
                           >
                             {item.employeeName}
                           </td>
 
                           {/* Department */}
                           <td
-                            className="text-center font-semibold border-r border-[#EA580C] px-2 py-1.5 uppercase text-slate-700"
-                            style={{ verticalAlign: 'middle' }}
+                            className="text-center font-bold border-r border-[#EA580C] px-2 py-1 uppercase"
+                            style={{ verticalAlign: 'middle', color: '#000000' }}
                           >
                             {item.department || 'STAFF OPS'}
                           </td>
 
                           {/* Tanggal */}
                           <td
-                            className="text-center font-bold border-r border-[#EA580C] px-2 py-1.5"
-                            style={{ verticalAlign: 'middle' }}
+                            className="text-center font-bold border-r border-[#EA580C] px-2 py-1"
+                            style={{ verticalAlign: 'middle', color: '#000000' }}
                           >
                             {item.date}
                           </td>
 
                           {/* Amount */}
                           <td
-                            className="text-right font-black border-r border-[#EA580C] px-4 py-1.5 text-slate-900"
-                            style={{ verticalAlign: 'middle' }}
+                            className="text-right font-black border-r border-[#EA580C] px-3 py-1"
+                            style={{ verticalAlign: 'middle', color: '#000000' }}
                           >
                             {formatNumber(item.amount)}
                           </td>
@@ -287,19 +263,19 @@ export default function MonthlyRecapReportPdf({
                       {emptyRows.map((_, idx) => (
                         <tr
                           key={`empty-${idx}`}
-                          className="border-b border-[#EA580C]/40"
+                          className="border-b border-[#EA580C]"
                           style={{
-                            height: '20pt',
-                            lineHeight: '20pt',
+                            height: '17pt',
+                            lineHeight: '17pt',
                             fontFamily: "'Calibri', sans-serif",
-                            fontSize: '11pt',
+                            fontSize: '9.5pt',
                           }}
                         >
-                          <td className="border-r border-[#EA580C] px-2 py-1"></td>
-                          <td className="border-r border-[#EA580C] px-4 py-1"></td>
-                          <td className="border-r border-[#EA580C] px-2 py-1"></td>
-                          <td className="border-r border-[#EA580C] px-2 py-1"></td>
-                          <td className="text-right border-r border-[#EA580C] px-4 py-1"></td>
+                          <td className="border-r border-[#EA580C] px-2 py-0.5"></td>
+                          <td className="border-r border-[#EA580C] px-3 py-0.5"></td>
+                          <td className="border-r border-[#EA580C] px-2 py-0.5"></td>
+                          <td className="border-r border-[#EA580C] px-2 py-0.5"></td>
+                          <td className="text-right border-r border-[#EA580C] px-3 py-0.5"></td>
                         </tr>
                       ))}
 
@@ -307,35 +283,37 @@ export default function MonthlyRecapReportPdf({
                       <tr
                         className="border-t-2 border-[#EA580C] font-black"
                         style={{
-                          height: '24pt',
-                          lineHeight: '24pt',
+                          height: '20pt',
+                          lineHeight: '20pt',
                           fontFamily: "'Calibri', sans-serif",
-                          fontSize: '11pt',
+                          fontSize: '10pt',
                         }}
                       >
                         <td
                           colSpan={4}
                           className="text-center font-black tracking-wider border-r border-[#EA580C] uppercase"
                           style={{
-                            height: '24pt',
+                            height: '20pt',
                             verticalAlign: 'middle',
                             padding: '0 8px',
                             fontFamily: "'Calibri', sans-serif",
-                            fontSize: '11pt',
+                            fontSize: '10pt',
                             backgroundColor: '#FFEDD5',
+                            color: '#000000',
                           }}
                         >
                           TOTAL PENGELUARAN BULAN {data.periodLabel.toUpperCase()}
                         </td>
                         <td
-                          className="text-right font-black text-slate-900"
+                          className="text-right font-black"
                           style={{
                             backgroundColor: '#FED7AA',
-                            height: '24pt',
+                            height: '20pt',
                             verticalAlign: 'middle',
-                            padding: '0 16px 0 8px',
+                            padding: '0 12px 0 8px',
                             fontFamily: "'Calibri', sans-serif",
-                            fontSize: '12pt',
+                            fontSize: '10.5pt',
+                            color: '#000000',
                           }}
                         >
                           Rp {formatNumber(data.totalAmount)}
@@ -346,78 +324,76 @@ export default function MonthlyRecapReportPdf({
                 </div>
               </div>
 
-              {/* Signatures Footer: Dibuat Oleh (Finance) & Mengetahui / Disetujui (Director) */}
+              {/* Signatures Footer */}
               <div
-                className="mt-8 pt-2 flex justify-between items-end px-8"
-                style={{ fontFamily: "'Calibri', sans-serif", fontSize: '11pt' }}
+                className="mt-4 pt-2 flex justify-between items-end px-6"
+                style={{ fontFamily: "'Calibri', sans-serif" }}
               >
                 {/* Finance Signature */}
-                <div className="w-60 text-center">
-                  <div className="text-slate-600 font-bold mb-1" style={{ fontSize: '10pt' }}>
+                <div className="w-52 text-center">
+                  <div className="font-bold mb-1" style={{ fontSize: '9pt', color: '#000000' }}>
                     Dibuat Oleh :
                   </div>
-                  <div className="h-16 flex items-end justify-center mb-1">
+                  <div className="h-14 flex items-end justify-center mb-1">
                     {data.financeSignature ? (
                       <img
                         src={data.financeSignature}
                         alt="Finance Signature"
-                        crossOrigin="anonymous"
-                        className="max-h-14 max-w-full object-contain"
+                        className="max-h-12 max-w-full object-contain"
                       />
                     ) : (
                       <div
                         className="italic text-slate-400"
-                        style={{ fontSize: '10pt', fontFamily: "'Calibri', sans-serif" }}
+                        style={{ fontSize: '9pt', fontFamily: "'Calibri', sans-serif" }}
                       >
                         ( Ditandatangani digital )
                       </div>
                     )}
                   </div>
                   <div
-                    className="font-extrabold text-slate-900 border-t border-slate-700 pt-1 uppercase"
-                    style={{ fontSize: '11pt', fontFamily: "'Calibri', sans-serif" }}
+                    className="font-extrabold border-t border-slate-700 pt-1 uppercase"
+                    style={{ fontSize: '10.5pt', color: '#000000', fontFamily: "'Calibri', sans-serif" }}
                   >
                     {data.financeName || 'FINANCE DEPT'}
                   </div>
                   <div
-                    className="text-slate-500 font-semibold tracking-wider mt-0.5"
-                    style={{ fontSize: '9pt', fontFamily: "'Calibri', sans-serif" }}
+                    className="font-semibold tracking-wider mt-0.5"
+                    style={{ fontSize: '8.5pt', color: '#475569', fontFamily: "'Calibri', sans-serif" }}
                   >
                     Finance Department
                   </div>
                 </div>
 
                 {/* Director Signature */}
-                <div className="w-60 text-center">
-                  <div className="text-slate-600 font-bold mb-1" style={{ fontSize: '10pt' }}>
+                <div className="w-52 text-center">
+                  <div className="font-bold mb-1" style={{ fontSize: '9pt', color: '#000000' }}>
                     Mengetahui &amp; Menyetujui :
                   </div>
-                  <div className="h-16 flex items-end justify-center mb-1">
+                  <div className="h-14 flex items-end justify-center mb-1">
                     {data.directorSignature ? (
                       <img
                         src={data.directorSignature}
                         alt="Director Signature"
-                        crossOrigin="anonymous"
-                        className="max-h-14 max-w-full object-contain"
+                        className="max-h-12 max-w-full object-contain"
                       />
                     ) : (
                       <div
                         className="italic text-slate-400"
-                        style={{ fontSize: '10pt', fontFamily: "'Calibri', sans-serif" }}
+                        style={{ fontSize: '9pt', fontFamily: "'Calibri', sans-serif" }}
                       >
                         ( Ditandatangani digital )
                       </div>
                     )}
                   </div>
                   <div
-                    className="font-extrabold text-slate-900 border-t border-slate-700 pt-1 uppercase"
-                    style={{ fontSize: '11pt', fontFamily: "'Calibri', sans-serif" }}
+                    className="font-extrabold border-t border-slate-700 pt-1 uppercase"
+                    style={{ fontSize: '10.5pt', color: '#000000', fontFamily: "'Calibri', sans-serif" }}
                   >
                     {data.directorName || 'DIREKTUR UTAMA'}
                   </div>
                   <div
-                    className="text-slate-500 font-semibold tracking-wider mt-0.5"
-                    style={{ fontSize: '9pt', fontFamily: "'Calibri', sans-serif" }}
+                    className="font-semibold tracking-wider mt-0.5"
+                    style={{ fontSize: '8.5pt', color: '#475569', fontFamily: "'Calibri', sans-serif" }}
                   >
                     Director
                   </div>
