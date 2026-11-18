@@ -45,16 +45,16 @@ export default function Sidebar({ role }: SidebarProps) {
   return (
     <aside className="hidden md:flex flex-col w-64 bg-slate-900 border-r border-slate-800 text-white h-screen sticky top-0 p-4 shrink-0 overflow-y-auto z-40">
       <div>
-        {/* Brand Logo - Official Ourem Transparent */}
+        {/* Brand Logo - Official Ouffice.co.id Transparent (2x Size) */}
         <div className="px-1 py-4 mb-6 border-b border-slate-800 flex items-center justify-center">
           <img
             src="/ouffice-logo-white.png"
-            alt="Ourem"
+            alt="Ouffice.co.id"
             className="logo-dark h-16 md:h-20 w-auto max-w-full object-contain transition-transform hover:scale-105"
           />
           <img
             src="/ouffice-logo.png"
-            alt="Ourem"
+            alt="Ouffice.co.id"
             className="logo-light h-16 md:h-20 w-auto max-w-full object-contain transition-transform hover:scale-105"
           />
         </div>

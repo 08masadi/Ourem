@@ -97,13 +97,13 @@ function LoginContent() {
           <div className="flex items-center justify-center mb-4">
             <img
               src="/ouffice-logo-white.png"
-              alt="Ourem"
-              className="logo-dark h-16 sm:h-20 w-auto object-contain"
+              alt="Ouffice.co.id"
+              className="logo-dark h-14 sm:h-16 w-auto object-contain"
             />
             <img
               src="/ouffice-logo.png"
-              alt="Ourem"
-              className="logo-light h-16 sm:h-20 w-auto object-contain"
+              alt="Ouffice.co.id"
+              className="logo-light h-14 sm:h-16 w-auto object-contain"
             />
           </div>
           <h1 className="text-2xl font-black text-white tracking-tight">
