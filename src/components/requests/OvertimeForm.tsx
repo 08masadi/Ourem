@@ -104,28 +104,17 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Top Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 p-6 sm:p-8 text-white shadow-2xl">
-        <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-[11px] font-bold text-amber-200 border border-white/20 mb-2">
-              <Clock className="w-3.5 h-3.5" />
-              <span>Formulir Resmi Kerja Lembur</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Pengajuan Form Lembur
-            </h1>
-            <p className="text-xs sm:text-sm text-orange-100 mt-1 max-w-xl">
-              Isi formulir lembur di bawah ini. Dokumen resmi PT. Citra Sari Kencana akan dibuat secara otomatis dan dapat langsung diekspor ke PDF.
-            </p>
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-[11px] font-bold text-amber-200 border border-white/20 mb-2">
+            <Clock className="w-3.5 h-3.5" />
+            <span>Formulir Resmi Kerja Lembur</span>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setShowPreviewPdf(true)}
-            className="px-4 py-2.5 rounded-2xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs backdrop-blur-md border border-white/30 transition flex items-center gap-2 shadow-lg cursor-pointer"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Preview Format PDF</span>
-          </button>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            Pengajuan Form Lembur
+          </h1>
+          <p className="text-xs sm:text-sm text-orange-100 mt-1 max-w-xl">
+            Isi formulir lembur di bawah ini. Dokumen resmi PT. Citra Sari Kencana akan dibuat secara otomatis dan dapat langsung diekspor ke PDF.
+          </p>
         </div>
       </div>
 
