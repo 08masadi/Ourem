@@ -44,12 +44,22 @@ export default function BottomNav({ role }: BottomNavProps) {
               key={link.href}
               href={link.href}
               prefetch={false}
-              className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+              className={`relative flex flex-col items-center justify-center gap-1 py-1.5 px-3.5 rounded-2xl select-none transition-all duration-150 ease-out active:scale-75 active:opacity-70 active:bg-orange-500/10 cursor-pointer ${
                 isActive ? 'text-orange-400 font-bold' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? 'scale-110' : ''}`} />
-              <span className="text-[10px]">{link.label}</span>
+              {isActive && (
+                <span className="absolute inset-0 bg-orange-500/15 rounded-2xl border border-orange-500/25 animate-in fade-in zoom-in-95 duration-150 pointer-events-none"></span>
+              )}
+              <Icon
+                className={`w-5 h-5 relative z-10 transition-transform duration-150 ${
+                  isActive ? 'scale-110 drop-shadow-[0_0_8px_rgba(249,115,22,0.4)]' : ''
+                }`}
+              />
+              <span className="text-[10px] relative z-10">{link.label}</span>
+              {isActive && (
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-0.5 animate-pulse"></span>
+              )}
             </Link>
           );
         })}

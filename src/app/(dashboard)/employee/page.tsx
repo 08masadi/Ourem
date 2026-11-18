@@ -1,13 +1,18 @@
 import { getEmployeeRequests } from '@/actions/requests';
+import { getCurrentUserProfile } from '@/actions/auth';
 import RequestList from '@/components/requests/RequestList';
 import { extractOvertimeFromDescription } from '@/lib/formatters';
 import { Clock, CheckCircle2, Wallet, Layers } from 'lucide-react';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function EmployeeDashboardPage() {
-  const requests = await getEmployeeRequests();
+  const [requests, profile] = await Promise.all([
+    getEmployeeRequests(),
+    getCurrentUserProfile(),
+  ]);
 
   // Helper untuk mengenali kategori pengajuan
   const isOvertimeReq = (r: any) =>
@@ -77,33 +82,52 @@ export default async function EmployeeDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner with Total Unpaid Claim Balance */}
-      <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 rounded-3xl p-6 text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <div className="text-xs font-bold text-orange-200 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-            <Layers className="w-4 h-4" />
-            <span>Dashboard Karyawan • Ourem Gen 2</span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-black">
-            Klaim Operasional & Form Lembur
-          </h1>
-          <p className="text-xs text-orange-100 mt-1 max-w-md">
-            Ajukan klaim kas kecil (petty cash), voucher operasional, atau form lembur resmi, serta cetak / export PDF resmi.
-          </p>
-        </div>
-
-        {/* Total Saldo Belum Dicairkan (Transparan tanpa kolom kotak, angka besar) */}
-        <div className="text-left sm:text-right shrink-0">
-          <div className="text-xs font-bold text-orange-200 uppercase tracking-wider mb-1">
+      {/* Top Banner with Total Unpaid Claim Balance & Profile Photo on Right */}
+      <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 rounded-3xl p-5 sm:p-6 text-white shadow-xl flex flex-row justify-between items-center gap-4">
+        {/* Left: Saldo Belum Dicairkan */}
+        <div className="space-y-1">
+          <div className="text-xs sm:text-sm font-bold text-orange-100 uppercase tracking-wider">
             Total Saldo Belum Dicairkan
           </div>
-          <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-white font-mono tracking-tight drop-shadow-sm">
+          <div className="text-2xl sm:text-4xl lg:text-5xl font-black text-white font-mono tracking-tight drop-shadow-sm">
             {formatRupiah(totalUnpaidNominal)}
           </div>
-          <div className="text-xs text-orange-100 font-medium mt-1">
+          <div className="text-xs text-orange-100/90 font-medium">
             {unpaidRequests.length} pengajuan belum dicairkan
           </div>
         </div>
+
+        {/* Right: Foto Profil Akun */}
+        <Link
+          href="/profile"
+          title="Buka Profil Akun"
+          className="shrink-0 flex items-center gap-3 bg-black/15 hover:bg-black/25 backdrop-blur-sm p-1.5 sm:px-3.5 sm:py-2.5 rounded-2xl border border-white/20 transition-all hover:scale-105 active:scale-95 group cursor-pointer"
+        >
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white shadow-lg overflow-hidden bg-white/20 flex items-center justify-center shrink-0">
+            {profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.full_name || 'Profil'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-white text-lg sm:text-xl font-black">
+                {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U'}
+              </div>
+            )}
+          </div>
+          <div className="text-left hidden sm:block pr-1">
+            <div className="text-[10px] text-orange-200 font-semibold uppercase tracking-wider">
+              Akun Saya
+            </div>
+            <div className="text-xs sm:text-sm font-bold text-white group-hover:text-orange-100 truncate max-w-[130px]">
+              {profile?.full_name || 'Karyawan'}
+            </div>
+            <div className="text-[10px] text-orange-200">
+              {profile?.department || 'Staff OPS'}
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Metrics Cards: Category breakdown (Petty Cash, Voucher, Lembur) & Telah Disetujui */}
