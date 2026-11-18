@@ -44,3 +44,8 @@ next-env.d.ts
 *recovery-codes*
 *authenticati*
 *.local.txt
+
+# android build and apks
+/android-app/
+*.apk
+*.jpg

@@ -80,12 +80,12 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-2.5">
             <img
               src="/ouffice-logo-white.png"
-              alt="Ouffice.co.id"
+              alt="Ourem"
               className="logo-dark h-8 sm:h-9 w-auto object-contain"
             />
             <img
               src="/ouffice-logo.png"
-              alt="Ouffice.co.id"
+              alt="Ourem"
               className="logo-light h-8 sm:h-9 w-auto object-contain"
             />
             <span className="text-[11px] font-bold text-slate-400 border-l border-slate-700 pl-2.5">

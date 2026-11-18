@@ -14,7 +14,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Ourem Gen 2 - Operasional & Reimbursement",
-  description: "Sistem Manajemen Reimbursement & Operasional Ouffice",
+  description: "Sistem Manajemen Reimbursement & Operasional Ourem",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
 };
 
 export default function RootLayout({
