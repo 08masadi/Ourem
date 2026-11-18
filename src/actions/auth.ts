@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { UserRole, UserProfile } from '@/types/database';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 
 export async function signIn(prevState: any, formData: FormData) {
   const rawEmail = formData.get('email') as string;
@@ -141,14 +142,14 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, email, full_name, role, department, bank_name, bank_account_number, bank_account_holder')
+    .select('id, email, full_name, role, department, bank_name, bank_account_number, bank_account_holder, avatar_url, signature_url')
     .eq('id', user.id)
     .single();
 
   const signature_url: string | null =
-    (user.user_metadata?.signature_url as string) || null;
+    profile?.signature_url || (user.user_metadata?.signature_url as string) || null;
   const avatar_url: string | null =
-    (user.user_metadata?.avatar_url as string) || null;
+    profile?.avatar_url || (user.user_metadata?.avatar_url as string) || null;
 
   return {
     id: user.id,
@@ -162,6 +163,94 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
     avatar_url,
     signature_url,
   };
+}
+
+export async function uploadAvatarAction(formData: FormData): Promise<{ error?: string; success?: string; avatar_url?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: 'Unauthorized' };
+
+  const avatarData = (formData.get('avatar_data') as string) || '';
+  const avatarFile = formData.get('avatar_file') as File | null;
+
+  let avatar_url = '';
+
+  // 1. Simpan ke Supabase Storage (receipts/avatars/...)
+  if (avatarFile && avatarFile.size > 0 && avatarFile.name) {
+    try {
+      const fileName = `avatars/avatar-${user.id}-${Date.now()}.jpg`;
+      const { data: uploadData, error: uploadErr } = await supabase.storage
+        .from('receipts')
+        .upload(fileName, avatarFile, {
+          contentType: avatarFile.type || 'image/jpeg',
+          upsert: true,
+          cacheControl: '3600',
+        });
+
+      if (!uploadErr && uploadData) {
+        const { data: pubData } = supabase.storage
+          .from('receipts')
+          .getPublicUrl(fileName);
+        avatar_url = pubData.publicUrl;
+      }
+    } catch {}
+  } else if (avatarData && avatarData.startsWith('data:image/')) {
+    try {
+      const base64Data = avatarData.split(',')[1];
+      const buffer = Buffer.from(base64Data, 'base64');
+      const fileName = `avatars/avatar-${user.id}-${Date.now()}.jpg`;
+
+      const { data: uploadData, error: uploadErr } = await supabase.storage
+        .from('receipts')
+        .upload(fileName, buffer, {
+          contentType: 'image/jpeg',
+          upsert: true,
+          cacheControl: '3600',
+        });
+
+      if (!uploadErr && uploadData) {
+        const { data: pubData } = supabase.storage
+          .from('receipts')
+          .getPublicUrl(fileName);
+        avatar_url = pubData.publicUrl;
+      } else {
+        avatar_url = avatarData;
+      }
+    } catch {
+      avatar_url = avatarData;
+    }
+  }
+
+  if (!avatar_url) {
+    return { error: 'Gagal memproses file foto profil.' };
+  }
+
+  // 2. Update auth user_metadata
+  try {
+    await supabase.auth.updateUser({
+      data: { avatar_url },
+    });
+  } catch {}
+
+  // 3. Update profiles table
+  try {
+    await supabase
+      .from('profiles')
+      .update({ avatar_url, updated_at: new Date().toISOString() })
+      .eq('id', user.id);
+  } catch {}
+
+  // 4. Revalidate all pages so avatar appears everywhere immediately
+  revalidatePath('/profile');
+  revalidatePath('/employee');
+  revalidatePath('/director');
+  revalidatePath('/finance');
+  revalidatePath('/', 'layout');
+
+  return { success: 'Foto profil berhasil diperbarui!', avatar_url };
 }
 
 export async function updateProfileBank(formData: FormData) {
@@ -372,6 +461,12 @@ export async function updateProfileBank(formData: FormData) {
   if (error) {
     return { error: error.message };
   }
+
+  revalidatePath('/profile');
+  revalidatePath('/employee');
+  revalidatePath('/director');
+  revalidatePath('/finance');
+  revalidatePath('/', 'layout');
 
   return {
     success: 'Data profil, rekening, dan tanda tangan berhasil diperbarui!',

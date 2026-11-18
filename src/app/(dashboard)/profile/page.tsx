@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useTransition, useEffect, useRef } from 'react';
-import { getCurrentUserProfile, updateProfileBank, signOutAction } from '@/actions/auth';
+import { getCurrentUserProfile, updateProfileBank, uploadAvatarAction, signOutAction } from '@/actions/auth';
 import { UserProfile } from '@/types/database';
+import AvatarCropperModal from '@/components/profile/AvatarCropperModal';
 import {
   User,
   Mail,
@@ -34,6 +35,8 @@ export default function ProfilePage() {
   // Avatar upload states
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
+  const [cropperRawSrc, setCropperRawSrc] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Signature upload states
@@ -58,11 +61,10 @@ export default function ProfilePage() {
           }
         } catch {}
       } else {
+        // Jangan gunakan signature akun lain yang tersimpan di localStorage!
+        setPreviewSignature(null);
         try {
-          const cachedSig = localStorage.getItem('ourem_user_signature');
-          if (cachedSig) {
-            setPreviewSignature(cachedSig);
-          }
+          localStorage.removeItem('ourem_user_signature');
         } catch {}
       }
       setLoading(false);
@@ -77,21 +79,48 @@ export default function ProfilePage() {
         setError('File foto profil harus berupa gambar (JPG, PNG, WebP).');
         return;
       }
-      if (file.size > 3 * 1024 * 1024) {
-        setError('Ukuran foto profil maksimal 3MB.');
+      if (file.size > 10 * 1024 * 1024) {
+        setError('Ukuran foto profil maksimal 10MB.');
         return;
       }
 
       setError(null);
       setAvatarFile(file);
 
+      // Buka modal cropper dengan fitur geser & zoom
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          setPreviewAvatar(event.target.result as string);
+          setCropperRawSrc(event.target.result as string);
         }
       };
       reader.readAsDataURL(file);
+
+      // Reset value agar bisa memilih file yang sama jika diinginkan
+      e.target.value = '';
+    }
+  };
+
+  const handleCropComplete = async (croppedDataUrl: string) => {
+    setIsUploadingAvatar(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.set('avatar_data', croppedDataUrl);
+
+      const res = await uploadAvatarAction(formData);
+      if (res.error) {
+        setError(res.error);
+      } else if (res.avatar_url) {
+        setPreviewAvatar(res.avatar_url);
+        setProfile((prev) => (prev ? { ...prev, avatar_url: res.avatar_url || null } : prev));
+        setSuccess('Foto profil berhasil diatur dan disimpan!');
+        setCropperRawSrc(null);
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Gagal menyimpan foto profil.');
+    } finally {
+      setIsUploadingAvatar(false);
     }
   };
 
@@ -506,7 +535,18 @@ export default function ProfilePage() {
 
         {/* Logout Button */}
         <div className="pt-6 border-t border-slate-800">
-          <form action={signOutAction}>
+          <form
+            action={signOutAction}
+            onSubmit={() => {
+              try {
+                localStorage.removeItem('ourem_user_signature');
+                localStorage.removeItem('ourem_finance_signature');
+                localStorage.removeItem('ourem_director_signature');
+                localStorage.removeItem('ourem_finance_name');
+                localStorage.removeItem('ourem_director_name');
+              } catch {}
+            }}
+          >
             <button
               type="submit"
               className="w-full py-2.5 px-4 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
@@ -517,6 +557,16 @@ export default function ProfilePage() {
           </form>
         </div>
       </div>
+
+      {/* Modal Cropper Foto Profil (Geser & Zoom) */}
+      {cropperRawSrc && (
+        <AvatarCropperModal
+          imageSrc={cropperRawSrc}
+          isUploading={isUploadingAvatar}
+          onClose={() => setCropperRawSrc(null)}
+          onCropComplete={handleCropComplete}
+        />
+      )}
 
       {/* Modal Tampilan Foto Profil Besar */}
       {showLargeAvatar && (

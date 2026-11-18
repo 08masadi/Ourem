@@ -134,19 +134,11 @@ export default function RequestForm() {
   useEffect(() => {
     async function loadProfile() {
       const p = await getCurrentUserProfile();
-      let sig = p?.signature_url;
-      if (!sig && typeof window !== 'undefined') {
-        try {
-          sig = localStorage.getItem('ourem_user_signature');
-        } catch {}
-      }
       if (p) {
-        setUserProfile({ ...p, signature_url: sig || p.signature_url });
+        setUserProfile(p);
         if (p.department) {
           setDepartment(p.department);
         }
-      } else if (sig) {
-        setUserProfile({ signature_url: sig } as any);
       }
     }
     loadProfile();

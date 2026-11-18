@@ -1,5 +1,7 @@
 import { getAllRequests } from '@/actions/requests';
+import { getCurrentUserProfile } from '@/actions/auth';
 import RequestList from '@/components/requests/RequestList';
+import BannerAvatar from '@/components/layout/BannerAvatar';
 import { extractOvertimeFromDescription } from '@/lib/formatters';
 import { CheckSquare, Clock, CheckCircle2, XCircle } from 'lucide-react';
 
@@ -7,7 +9,10 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function DirectorDashboardPage() {
-  const allRequests = await getAllRequests();
+  const [allRequests, profile] = await Promise.all([
+    getAllRequests(),
+    getCurrentUserProfile(),
+  ]);
 
   const getRequestNominal = (curr: any) => {
     const isOvertime =
@@ -42,15 +47,24 @@ export default async function DirectorDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 rounded-2xl p-4 sm:p-5 text-white shadow-lg">
-        <div className="text-[11px] sm:text-xs font-bold text-amber-200 uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
-          <CheckSquare className="w-3.5 h-3.5" />
-          <span>Persetujuan Direksi (Approval)</span>
+      {/* Top Banner with BannerAvatar on Right */}
+      <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 rounded-2xl p-4 sm:p-5 text-white shadow-lg flex flex-row justify-between items-center gap-4">
+        <div>
+          <div className="text-[11px] sm:text-xs font-bold text-amber-200 uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
+            <CheckSquare className="w-3.5 h-3.5" />
+            <span>Persetujuan Direksi (Approval)</span>
+          </div>
+          <h1 className="text-lg sm:text-xl font-black">
+            Persetujuan Lembur
+          </h1>
         </div>
-        <h1 className="text-lg sm:text-xl font-black">
-          Persetujuan Lembur
-        </h1>
+
+        <BannerAvatar
+          avatarUrl={profile?.avatar_url}
+          fullName={profile?.full_name}
+          email={profile?.email}
+          role={profile?.role}
+        />
       </div>
 
       {/* Metrics Cards */}

@@ -4,6 +4,7 @@ import RequestList from '@/components/requests/RequestList';
 import { extractOvertimeFromDescription } from '@/lib/formatters';
 import { Clock, CheckCircle2, Wallet, Layers } from 'lucide-react';
 import Link from 'next/link';
+import BannerAvatar from '@/components/layout/BannerAvatar';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -97,37 +98,13 @@ export default async function EmployeeDashboardPage() {
           </div>
         </div>
 
-        {/* Right: Foto Profil Akun */}
-        <Link
-          href="/profile"
-          title="Buka Profil Akun"
-          className="shrink-0 flex items-center gap-3 bg-black/15 hover:bg-black/25 backdrop-blur-sm p-1.5 sm:px-3.5 sm:py-2.5 rounded-2xl border border-white/20 transition-all hover:scale-105 active:scale-95 group cursor-pointer"
-        >
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white shadow-lg overflow-hidden bg-white/20 flex items-center justify-center shrink-0">
-            {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={profile.full_name || 'Profil'}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-white text-lg sm:text-xl font-black">
-                {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U'}
-              </div>
-            )}
-          </div>
-          <div className="text-left hidden sm:block pr-1">
-            <div className="text-[10px] text-orange-200 font-semibold uppercase tracking-wider">
-              Akun Saya
-            </div>
-            <div className="text-xs sm:text-sm font-bold text-white group-hover:text-orange-100 truncate max-w-[130px]">
-              {profile?.full_name || 'Karyawan'}
-            </div>
-            <div className="text-[10px] text-orange-200">
-              {profile?.department || 'Staff OPS'}
-            </div>
-          </div>
-        </Link>
+        {/* Right: Foto Profil Akun (Tanpa kotak & teks, klik untuk melihat ukuran besar) */}
+        <BannerAvatar
+          avatarUrl={profile?.avatar_url}
+          fullName={profile?.full_name}
+          email={profile?.email}
+          role={profile?.role}
+        />
       </div>
 
       {/* Metrics Cards: Category breakdown (Petty Cash, Voucher, Lembur) & Telah Disetujui */}

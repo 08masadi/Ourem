@@ -288,10 +288,6 @@ export default function RequestList({
     for (const r of targetReqs) {
       if ((r.profiles as any)?.signature_url) return (r.profiles as any).signature_url;
     }
-    if (typeof window !== 'undefined') {
-      const cached = localStorage.getItem('ourem_user_signature');
-      if (cached) return cached;
-    }
     return null;
   };
 
