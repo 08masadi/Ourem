@@ -39,11 +39,11 @@ CREATE TABLE IF NOT EXISTS public.reimbursement_requests (
     receipt_url TEXT,
     status TEXT NOT NULL CHECK (status IN ('Menunggu Approval', 'Disetujui', 'Ditolak')) DEFAULT 'Menunggu Approval',
     rejection_reason TEXT,
-    director_id UUID REFERENCES public.profiles(id),
+    director_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     director_action_at TIMESTAMPTZ,
     payment_status TEXT NOT NULL CHECK (payment_status IN ('Unpaid', 'Paid')) DEFAULT 'Unpaid',
     payment_note TEXT,
-    finance_id UUID REFERENCES public.profiles(id),
+    finance_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     payment_action_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -64,6 +64,23 @@ ALTER TABLE public.reimbursement_requests DROP CONSTRAINT IF EXISTS reimbursemen
 
 -- Lepas batasan check constraint lama pada category agar fleksibel menerima sub-account baru
 ALTER TABLE public.reimbursement_requests DROP CONSTRAINT IF EXISTS reimbursement_requests_category_check;
+
+-- Pastikan Foreign Key memiliki ON DELETE CASCADE / SET NULL agar penghapusan user di Supabase Auth berjalan lancar tanpa error:
+ALTER TABLE public.profiles 
+  DROP CONSTRAINT IF EXISTS profiles_id_fkey,
+  ADD CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+ALTER TABLE public.reimbursement_requests 
+  DROP CONSTRAINT IF EXISTS reimbursement_requests_user_id_fkey,
+  ADD CONSTRAINT reimbursement_requests_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
+
+ALTER TABLE public.reimbursement_requests 
+  DROP CONSTRAINT IF EXISTS reimbursement_requests_director_id_fkey,
+  ADD CONSTRAINT reimbursement_requests_director_id_fkey FOREIGN KEY (director_id) REFERENCES public.profiles(id) ON DELETE SET NULL;
+
+ALTER TABLE public.reimbursement_requests 
+  DROP CONSTRAINT IF EXISTS reimbursement_requests_finance_id_fkey,
+  ADD CONSTRAINT reimbursement_requests_finance_id_fkey FOREIGN KEY (finance_id) REFERENCES public.profiles(id) ON DELETE SET NULL;
 
 -- Index performa query
 CREATE INDEX IF NOT EXISTS idx_requests_user_id ON public.reimbursement_requests(user_id);
