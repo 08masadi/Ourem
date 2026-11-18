@@ -151,15 +151,22 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
   const avatar_url: string | null =
     profile?.avatar_url || (user.user_metadata?.avatar_url as string) || null;
 
+  const bank_name: string | null =
+    profile?.bank_name || (user.user_metadata?.bank_name as string) || null;
+  const bank_account_number: string | null =
+    profile?.bank_account_number || (user.user_metadata?.bank_account_number as string) || null;
+  const bank_account_holder: string | null =
+    profile?.bank_account_holder || (user.user_metadata?.bank_account_holder as string) || null;
+
   return {
     id: user.id,
     email: user.email || '',
     full_name: profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
     role: (profile?.role as UserRole) || (user.user_metadata?.role as UserRole) || 'employee',
     department: profile?.department || user.user_metadata?.department || 'Staff OPS',
-    bank_name: profile?.bank_name || null,
-    bank_account_number: profile?.bank_account_number || null,
-    bank_account_holder: profile?.bank_account_holder || null,
+    bank_name,
+    bank_account_number,
+    bank_account_holder,
     avatar_url,
     signature_url,
   };
@@ -380,6 +387,9 @@ export async function updateProfileBank(formData: FormData) {
     const isFinance =
       profileCheck?.role === 'finance' ||
       user.user_metadata?.role === 'finance';
+    const isDirector =
+      profileCheck?.role === 'director' ||
+      user.user_metadata?.role === 'director';
 
     if (isFinance && signature_url) {
       if (signature_file && signature_file.size > 0) {
@@ -403,11 +413,34 @@ export async function updateProfileBank(formData: FormData) {
         }
       }
     }
+
+    if (isDirector && signature_url) {
+      if (signature_file && signature_file.size > 0) {
+        await supabase.storage
+          .from('receipts')
+          .upload('receipts/director-signature.png', signature_file, {
+            upsert: true,
+            cacheControl: '0',
+          });
+      } else if (signature_url.startsWith('data:image/')) {
+        const base64Data = signature_url.split(',')[1];
+        if (base64Data) {
+          const buffer = Buffer.from(base64Data, 'base64');
+          await supabase.storage
+            .from('receipts')
+            .upload('receipts/director-signature.png', buffer, {
+              contentType: 'image/png',
+              upsert: true,
+              cacheControl: '0',
+            });
+        }
+      }
+    }
   } catch {
     // ignore
   }
 
-  // Update user_metadata in auth so avatar and signature are always retained
+  // Update user_metadata in auth so avatar, signature, and bank info are always permanently retained
   try {
     await supabase.auth.updateUser({
       data: {
@@ -415,15 +448,20 @@ export async function updateProfileBank(formData: FormData) {
         department: department || undefined,
         avatar_url: avatar_url || undefined,
         signature_url: signature_url || undefined,
+        bank_name: bank_name || '',
+        bank_account_number: bank_account_number || '',
+        bank_account_holder: bank_account_holder || '',
       },
     });
   } catch {
     // Ignore auth metadata error
   }
 
-  // Update profiles table with fallback if avatar_url/signature_url columns are not yet migrated
+  // Update profiles table with upsert to ensure row is always persisted
   const fullPayload: Record<string, any> = {
-    full_name: full_name || undefined,
+    id: user.id,
+    email: user.email,
+    full_name: full_name || user.user_metadata?.full_name || 'User',
     department: department || (effectiveRole === 'director' ? 'Director' : effectiveRole === 'finance' ? 'Finance' : 'Staff OPS'),
     bank_name: bank_name || null,
     bank_account_number: bank_account_number || null,
@@ -436,16 +474,14 @@ export async function updateProfileBank(formData: FormData) {
 
   let { error } = await supabase
     .from('profiles')
-    .update(fullPayload)
-    .eq('id', user.id);
+    .upsert(fullPayload, { onConflict: 'id' });
 
   if (error && (error.message.includes('signature_url') || error.message.includes('avatar_url'))) {
     delete fullPayload.signature_url;
     delete fullPayload.avatar_url;
     const retryRes = await supabase
       .from('profiles')
-      .update(fullPayload)
-      .eq('id', user.id);
+      .upsert(fullPayload, { onConflict: 'id' });
     error = retryRes.error;
   }
 
@@ -453,8 +489,7 @@ export async function updateProfileBank(formData: FormData) {
     delete fullPayload.department;
     const retryRes = await supabase
       .from('profiles')
-      .update(fullPayload)
-      .eq('id', user.id);
+      .upsert(fullPayload, { onConflict: 'id' });
     error = retryRes.error;
   }
 
@@ -472,6 +507,9 @@ export async function updateProfileBank(formData: FormData) {
     success: 'Data profil, rekening, dan tanda tangan berhasil diperbarui!',
     avatar_url: avatar_url || null,
     signature_url: signature_url || null,
+    bank_name: bank_name || null,
+    bank_account_number: bank_account_number || null,
+    bank_account_holder: bank_account_holder || null,
   };
 }
 
@@ -481,7 +519,23 @@ export async function getGlobalFinanceSignature(): Promise<{
 }> {
   const supabase = await createClient();
   try {
-    // 1. Direct check: receipts/finance-signature.png
+    // 1. Direct check in profiles table
+    const { data: finProfiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, role, signature_url')
+      .eq('role', 'finance');
+
+    if (finProfiles && finProfiles.length > 0) {
+      const finWithSig = finProfiles.find((f) => f.signature_url);
+      if (finWithSig?.signature_url) {
+        return {
+          signature_url: finWithSig.signature_url,
+          full_name: finWithSig.full_name || 'FINANCE DEPT',
+        };
+      }
+    }
+
+    // 2. Direct check: receipts/finance-signature.png
     const { data: rootFiles } = await supabase.storage.from('receipts').list('receipts');
     const hasFinSig = (rootFiles || []).some((f) => f.name.includes('finance-signature'));
     if (hasFinSig) {
@@ -489,23 +543,13 @@ export async function getGlobalFinanceSignature(): Promise<{
         .from('receipts')
         .getPublicUrl('receipts/finance-signature.png');
 
-      const { data: finProfiles } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('role', 'finance');
-
       return {
         signature_url: pubData.publicUrl,
         full_name: finProfiles?.[0]?.full_name || 'FINANCE DEPT',
       };
     }
 
-    // 2. Query profiles table for role === 'finance'
-    const { data: finProfiles } = await supabase
-      .from('profiles')
-      .select('id, full_name, role')
-      .eq('role', 'finance');
-
+    // 3. Search storage files for finance user
     if (finProfiles && finProfiles.length > 0) {
       for (const finUser of finProfiles) {
         // Search inside 'receipts' folder for sig-finUser.id
@@ -541,7 +585,7 @@ export async function getGlobalFinanceSignature(): Promise<{
     // ignore
   }
 
-  return { signature_url: null, full_name: null };
+  return { signature_url: null, full_name: 'FINANCE DEPT' };
 }
 
 export async function getGlobalDirectorSignature(): Promise<{
@@ -550,19 +594,71 @@ export async function getGlobalDirectorSignature(): Promise<{
 }> {
   const supabase = await createClient();
   try {
+    // 1. Direct check in profiles table
     const { data: dirProfiles } = await supabase
       .from('profiles')
-      .select('id, full_name, role')
+      .select('id, full_name, role, signature_url')
       .eq('role', 'director');
 
     if (dirProfiles && dirProfiles.length > 0) {
-      return { signature_url: null, full_name: dirProfiles[0].full_name || 'DIRECTOR' };
+      const dirWithSig = dirProfiles.find((d) => d.signature_url);
+      if (dirWithSig?.signature_url) {
+        return {
+          signature_url: dirWithSig.signature_url,
+          full_name: dirWithSig.full_name || 'DIREKTUR UTAMA',
+        };
+      }
+    }
+
+    // 2. Direct check in storage: receipts/director-signature.png
+    const { data: rootFiles } = await supabase.storage.from('receipts').list('receipts');
+    const hasDirSig = (rootFiles || []).some((f) => f.name.includes('director-signature'));
+    if (hasDirSig) {
+      const { data: pubData } = supabase.storage
+        .from('receipts')
+        .getPublicUrl('receipts/director-signature.png');
+
+      return {
+        signature_url: pubData.publicUrl,
+        full_name: dirProfiles?.[0]?.full_name || 'DIREKTUR UTAMA',
+      };
+    }
+
+    // 3. Search storage for director user id
+    if (dirProfiles && dirProfiles.length > 0) {
+      for (const dirUser of dirProfiles) {
+        const dirFile = (rootFiles || []).find(
+          (f) => f.name.includes(`sig-${dirUser.id}`) || f.name.includes(dirUser.id)
+        );
+        if (dirFile) {
+          const { data: pubData } = supabase.storage
+            .from('receipts')
+            .getPublicUrl(`receipts/${dirFile.name}`);
+          return {
+            signature_url: pubData.publicUrl,
+            full_name: dirUser.full_name || 'DIREKTUR UTAMA',
+          };
+        }
+
+        const { data: sigFiles } = await supabase.storage.from('receipts').list('signatures');
+        const dirSigFile = (sigFiles || []).find((f) => f.name.includes(dirUser.id));
+        if (dirSigFile) {
+          const { data: pubData } = supabase.storage
+            .from('receipts')
+            .getPublicUrl(`signatures/${dirSigFile.name}`);
+          return {
+            signature_url: pubData.publicUrl,
+            full_name: dirUser.full_name || 'DIREKTUR UTAMA',
+          };
+        }
+      }
+      return { signature_url: null, full_name: dirProfiles[0].full_name || 'DIREKTUR UTAMA' };
     }
   } catch {
     // ignore
   }
 
-  return { signature_url: null, full_name: 'DIRECTOR' };
+  return { signature_url: null, full_name: 'DIREKTUR UTAMA' };
 }
 
 export async function requestPasswordReset(prevState: any, formData: FormData) {

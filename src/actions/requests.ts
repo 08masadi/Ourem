@@ -172,7 +172,7 @@ export async function createReimbursement(prevState: any, formData: FormData) {
   revalidatePath('/employee');
   revalidatePath('/director');
   revalidatePath('/finance');
-  redirect('/employee');
+  redirect('/employee?success=created_reimbursement');
 }
 
 export async function createOvertimeRequest(prevState: any, formData: FormData) {
@@ -289,7 +289,7 @@ export async function createOvertimeRequest(prevState: any, formData: FormData) 
   revalidatePath('/employee');
   revalidatePath('/director');
   revalidatePath('/finance');
-  redirect('/employee');
+  redirect('/employee?success=created_overtime');
 }
 
 export async function updateReimbursement(prevState: any, formData: FormData) {
@@ -591,7 +591,8 @@ export async function getEmployeeRequests(): Promise<ReimbursementRequest[]> {
           department,
           bank_name,
           bank_account_number,
-          bank_account_holder
+          bank_account_holder,
+          signature_url
         )
       `)
       .eq('user_id', user.id)
@@ -678,7 +679,8 @@ export async function getAllRequests(): Promise<ReimbursementRequest[]> {
           department,
           bank_name,
           bank_account_number,
-          bank_account_holder
+          bank_account_holder,
+          signature_url
         )
       `)
       .order('created_at', { ascending: false });

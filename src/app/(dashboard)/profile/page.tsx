@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect, useRef } from 'react';
 import { getCurrentUserProfile, updateProfileBank, uploadAvatarAction, signOutAction } from '@/actions/auth';
 import { UserProfile } from '@/types/database';
 import AvatarCropperModal from '@/components/profile/AvatarCropperModal';
+import { triggerSuccessNotification } from '@/components/ui/DynamicIslandSuccess';
 import {
   User,
   Mail,
@@ -32,6 +33,13 @@ export default function ProfilePage() {
   const [showLargeAvatar, setShowLargeAvatar] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  // Controlled form states
+  const [fullName, setFullName] = useState('');
+  const [department, setDepartment] = useState('Staff OPS');
+  const [bankName, setBankName] = useState('');
+  const [bankAccountNumber, setBankAccountNumber] = useState('');
+  const [bankAccountHolder, setBankAccountHolder] = useState('');
+
   // Avatar upload states
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
@@ -48,6 +56,13 @@ export default function ProfilePage() {
     async function load() {
       const data = await getCurrentUserProfile();
       setProfile(data);
+      if (data) {
+        setFullName(data.full_name || '');
+        setDepartment(data.department || 'Staff OPS');
+        setBankName(data.bank_name || '');
+        setBankAccountNumber(data.bank_account_number || '');
+        setBankAccountHolder(data.bank_account_holder || '');
+      }
       if (data?.avatar_url) {
         setPreviewAvatar(data.avatar_url);
       }
@@ -58,6 +73,10 @@ export default function ProfilePage() {
           if (data.role === 'finance') {
             localStorage.setItem('ourem_finance_signature', data.signature_url);
             localStorage.setItem('ourem_finance_name', data.full_name || 'Finance Dept');
+          }
+          if (data.role === 'director') {
+            localStorage.setItem('ourem_director_signature', data.signature_url);
+            localStorage.setItem('ourem_director_name', data.full_name || 'DIREKTUR UTAMA');
           }
         } catch {}
       } else {
@@ -205,6 +224,10 @@ export default function ProfilePage() {
         setError(res.error);
       } else if (res?.success) {
         setSuccess(res.success);
+        triggerSuccessNotification(
+          'Perubahan Berhasil Disimpan',
+          'Data profil dan informasi rekening bank pembayaran Anda telah disimpan.'
+        );
         if (res.avatar_url) {
           setPreviewAvatar(res.avatar_url);
         }
@@ -214,10 +237,28 @@ export default function ProfilePage() {
             localStorage.setItem('ourem_user_signature', res.signature_url);
             if (profile?.role === 'finance') {
               localStorage.setItem('ourem_finance_signature', res.signature_url);
-              localStorage.setItem('ourem_finance_name', profile.full_name || 'Finance Dept');
+              localStorage.setItem('ourem_finance_name', fullName || profile.full_name || 'Finance Dept');
+            }
+            if (profile?.role === 'director') {
+              localStorage.setItem('ourem_director_signature', res.signature_url);
+              localStorage.setItem('ourem_director_name', fullName || profile.full_name || 'DIREKTUR UTAMA');
             }
           } catch {}
         }
+        setProfile((prev) =>
+          prev
+            ? {
+                ...prev,
+                full_name: fullName,
+                department: department,
+                bank_name: bankName,
+                bank_account_number: bankAccountNumber,
+                bank_account_holder: bankAccountHolder,
+                avatar_url: res.avatar_url || prev.avatar_url,
+                signature_url: res.signature_url || prev.signature_url,
+              }
+            : null
+        );
       }
     });
   };
@@ -373,7 +414,8 @@ export default function ProfilePage() {
               <input
                 name="full_name"
                 type="text"
-                defaultValue={profile?.full_name || ''}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 required
                 className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
@@ -387,7 +429,8 @@ export default function ProfilePage() {
                 </label>
                 <select
                   name="department"
-                  defaultValue={profile?.department || 'Staff OPS'}
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
                   className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
                 >
                   <option value="Staff OPS">Staff OPS</option>
@@ -424,7 +467,9 @@ export default function ProfilePage() {
                 <input
                   name="bank_name"
                   type="text"
-                  defaultValue={profile?.bank_name || ''}
+                  placeholder="Contoh: BCA / Mandiri / BRI / BNI"
+                  value={bankName}
+                  onChange={(e) => setBankName(e.target.value)}
                   className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
@@ -436,7 +481,9 @@ export default function ProfilePage() {
                 <input
                   name="bank_account_number"
                   type="text"
-                  defaultValue={profile?.bank_account_number || ''}
+                  placeholder="Contoh: 1234567890"
+                  value={bankAccountNumber}
+                  onChange={(e) => setBankAccountNumber(e.target.value)}
                   className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
@@ -448,7 +495,9 @@ export default function ProfilePage() {
                 <input
                   name="bank_account_holder"
                   type="text"
-                  defaultValue={profile?.bank_account_holder || ''}
+                  placeholder="Nama lengkap pemilik rekening"
+                  value={bankAccountHolder}
+                  onChange={(e) => setBankAccountHolder(e.target.value)}
                   className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>

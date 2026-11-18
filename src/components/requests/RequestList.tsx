@@ -45,6 +45,7 @@ import OvertimeVoucherPdf from './OvertimeVoucherPdf';
 import MonthlyRecapReportPdf from './MonthlyRecapReportPdf';
 import EditRequestModal from './EditRequestModal';
 import EditOvertimeModal from './EditOvertimeModal';
+import { triggerSuccessNotification } from '@/components/ui/DynamicIslandSuccess';
 import {
   parseCustomerEntries,
   getCleanDescription,
@@ -413,6 +414,10 @@ export default function RequestList({
           )
         );
         setSelectedIds((prev) => prev.filter((id) => !targetIds.includes(id)));
+        triggerSuccessNotification(
+          'Persetujuan Berhasil Disimpan',
+          `${targetIds.length} pengajuan telah berhasil disetujui secara resmi.`
+        );
       } else if (res?.error) {
         alert(res.error);
       }
@@ -444,6 +449,10 @@ export default function RequestList({
           )
         );
         setSelectedIds((prev) => prev.filter((id) => !idsToDisburse.includes(id)));
+        triggerSuccessNotification(
+          'Pencairan Berhasil Disimpan',
+          `${idsToDisburse.length} pengajuan telah berhasil dicairkan (PAID).`
+        );
       } else if (res?.error) {
         alert(res.error);
       }
@@ -515,8 +524,8 @@ export default function RequestList({
       items: formatPrintItems(dateRequests, determinedType),
       totalAmount,
       employeeSignature: getBestSignature(dateRequests),
-      financeSignature: finSig.signature,
-      financeOfficer: finSig.name,
+      financeSignature: isPaid ? finSig.signature : null,
+      financeOfficer: isPaid ? (finSig.name || 'FINANCE DEPT') : 'FINANCE DEPT',
       isPaid,
       paidDate: isPaid ? paidDate : null,
     };
@@ -532,6 +541,8 @@ export default function RequestList({
     if (isOvertime) {
       const ov = extractOvertimeFromDescription(req.description);
       const finSig = await getBestFinanceSignature();
+      const dirSig = await getBestDirectorSignature();
+      const isApproved = req.status === 'Disetujui';
       const isPaid = req.payment_status === 'Paid';
       const paidDate = req.payment_action_at
         ? formatDateIndo(req.payment_action_at.split('T')[0])
@@ -552,10 +563,10 @@ export default function RequestList({
         uraianPekerjaan: ov?.uraian_pekerjaan || getCleanDescription(req.description),
         nominal: ov?.nominal !== undefined ? ov.nominal : (Number(req.amount) <= 1 ? 0 : Number(req.amount)),
         employeeSignature: req.signature_url || req.profiles?.signature_url || null,
-        directorSignature: req.status === 'Disetujui' ? (req.director_id ? req.profiles?.signature_url || null : null) : null,
-        directorName: req.director_id ? 'Director / Approver' : null,
-        financeSignature: req.payment_status === 'Paid' ? finSig.signature : null,
-        financeName: req.payment_status === 'Paid' ? finSig.name : null,
+        directorSignature: isApproved ? dirSig.signature : null,
+        directorName: isApproved ? (dirSig.name || 'DIREKTUR UTAMA') : null,
+        financeSignature: isPaid ? finSig.signature : null,
+        financeName: isPaid ? (finSig.name || 'FINANCE DEPT') : null,
         isPaid,
         paidDate: isPaid ? paidDate : null,
       };
@@ -595,8 +606,8 @@ export default function RequestList({
       items: formatPrintItems(targetRequests, determinedType),
       totalAmount,
       employeeSignature: getBestSignature(targetRequests),
-      financeSignature: finSig.signature,
-      financeOfficer: finSig.name,
+      financeSignature: isPaid ? finSig.signature : null,
+      financeOfficer: isPaid ? (finSig.name || 'FINANCE DEPT') : 'FINANCE DEPT',
       isPaid,
       paidDate: isPaid ? paidDate : null,
     };
@@ -636,8 +647,8 @@ export default function RequestList({
       items: formatPrintItems(selectedItems, determinedType),
       totalAmount,
       employeeSignature: getBestSignature(selectedItems),
-      financeSignature: finSig.signature,
-      financeOfficer: finSig.name,
+      financeSignature: isPaid ? finSig.signature : null,
+      financeOfficer: isPaid ? (finSig.name || 'FINANCE DEPT') : 'FINANCE DEPT',
       isPaid,
       paidDate: isPaid ? paidDate : null,
     };
@@ -763,6 +774,10 @@ export default function RequestList({
             prev ? { ...prev, status: 'Disetujui', rejection_reason: null } : null
           );
         }
+        triggerSuccessNotification(
+          'Persetujuan Berhasil Disimpan',
+          'Form lembur telah resmi disetujui oleh Direktur.'
+        );
       }
     });
   };
@@ -803,6 +818,10 @@ export default function RequestList({
         );
         setPaymentModalReq(null);
         setPaymentNote('');
+        triggerSuccessNotification(
+          'Pencairan Berhasil Disimpan',
+          'Klaim telah berhasil ditandai sebagai dicairkan (PAID).'
+        );
       }
     });
   };

@@ -627,12 +627,14 @@ export default function ReimbursementVoucherPdf({
                 <div className="w-56 text-center">
                   <div className="h-16 flex items-end justify-center mb-1">
                     {(() => {
-                      const finSigUrl =
-                        data.financeSignature ||
-                        (typeof window !== 'undefined'
-                          ? localStorage.getItem('ourem_finance_signature')
-                          : null) ||
-                        null;
+                      // Tanda tangan finance HANYA muncul setelah dicairkan (PAID) oleh Finance
+                      const finSigUrl = data.isPaid
+                        ? data.financeSignature ||
+                          (typeof window !== 'undefined'
+                            ? localStorage.getItem('ourem_finance_signature')
+                            : null) ||
+                          null
+                        : null;
 
                       return finSigUrl ? (
                         <img
@@ -646,7 +648,7 @@ export default function ReimbursementVoucherPdf({
                           className="italic text-slate-400"
                           style={{ fontSize: '10pt', fontFamily: "'Calibri', sans-serif" }}
                         >
-                          ( Belum Ditandatangani )
+                          ( Menunggu Pencairan )
                         </div>
                       );
                     })()}
@@ -655,11 +657,13 @@ export default function ReimbursementVoucherPdf({
                     className="font-extrabold text-slate-900 border-t border-slate-700 pt-1 uppercase"
                     style={{ fontSize: '11pt', fontFamily: "'Calibri', sans-serif" }}
                   >
-                    {data.financeOfficer ||
-                      (typeof window !== 'undefined'
-                        ? localStorage.getItem('ourem_finance_name')
-                        : null) ||
-                      'FINANCE DEPT'}
+                    {data.isPaid
+                      ? data.financeOfficer ||
+                        (typeof window !== 'undefined'
+                          ? localStorage.getItem('ourem_finance_name')
+                          : null) ||
+                        'FINANCE DEPT'
+                      : 'FINANCE DEPT'}
                   </div>
                   <div
                     className="text-slate-500 font-semibold tracking-wider mt-0.5"
