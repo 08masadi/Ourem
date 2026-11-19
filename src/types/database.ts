@@ -35,6 +35,8 @@ export interface UserProfile {
   full_name: string;
   role: UserRole;
   department?: string | null;
+  phone?: string | null;
+  employee_id?: string | null;
   bank_name?: string | null;
   bank_account_number?: string | null;
   bank_account_holder?: string | null;

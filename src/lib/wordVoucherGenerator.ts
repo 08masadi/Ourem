@@ -30,7 +30,7 @@ export interface GenerateDocxOptions {
   directorApprover?: DocxApprover;
 }
 
-interface LoadedImageData {
+export interface LoadedImageData {
   data: Uint8Array;
   type: 'png' | 'jpg' | 'gif';
   width: number;
@@ -39,13 +39,22 @@ interface LoadedImageData {
 
 // Border definitions
 const thinGrayBorder = {
-  top: { style: BorderStyle.SINGLE, size: 6, color: 'BFBFBF' },
-  bottom: { style: BorderStyle.SINGLE, size: 6, color: 'BFBFBF' },
-  left: { style: BorderStyle.SINGLE, size: 6, color: 'BFBFBF' },
-  right: { style: BorderStyle.SINGLE, size: 6, color: 'BFBFBF' },
+  top: { style: BorderStyle.SINGLE, size: 4, color: 'B0B0B0' },
+  bottom: { style: BorderStyle.SINGLE, size: 4, color: 'B0B0B0' },
+  left: { style: BorderStyle.SINGLE, size: 4, color: 'B0B0B0' },
+  right: { style: BorderStyle.SINGLE, size: 4, color: 'B0B0B0' },
 };
 
-const noBorder = {
+const tableNoBorder = {
+  top: { style: BorderStyle.NONE },
+  bottom: { style: BorderStyle.NONE },
+  left: { style: BorderStyle.NONE },
+  right: { style: BorderStyle.NONE },
+  insideHorizontal: { style: BorderStyle.NONE },
+  insideVertical: { style: BorderStyle.NONE },
+};
+
+const cellNoBorder = {
   top: { style: BorderStyle.NONE },
   bottom: { style: BorderStyle.NONE },
   left: { style: BorderStyle.NONE },
@@ -62,7 +71,7 @@ const orangeFrameBorder = {
 /**
  * Format currency number to Indonesian standard "1.105.000,00"
  */
-function formatNumber(num: number): string {
+export function formatCurrencyNumber(num: number): string {
   return new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -72,7 +81,7 @@ function formatNumber(num: number): string {
 /**
  * Format YYYY-MM-DD to DD/MM/YYYY
  */
-function formatDateSlash(dateStr?: string | null): string {
+export function formatDateSlash(dateStr?: string | null): string {
   if (!dateStr) {
     const today = new Date();
     const d = String(today.getDate()).padStart(2, '0');
@@ -91,7 +100,7 @@ function formatDateSlash(dateStr?: string | null): string {
 /**
  * Format RF Number (e.g. RF-06112026/085)
  */
-function formatRfNumber(dateStr?: string | null, id?: string): string {
+export function formatRfNumber(dateStr?: string | null, id?: string): string {
   const slashDate = formatDateSlash(dateStr);
   const cleanDate = slashDate.replace(/\//g, '');
   const seq = id ? id.slice(-3).toUpperCase() : '085';
@@ -101,7 +110,7 @@ function formatRfNumber(dateStr?: string | null, id?: string): string {
 /**
  * Fetch image and determine dimensions and format
  */
-async function fetchImageBuffer(url: string): Promise<LoadedImageData | null> {
+export async function fetchImageBuffer(url: string): Promise<LoadedImageData | null> {
   if (!url || typeof window === 'undefined') return null;
 
   try {
@@ -166,7 +175,7 @@ async function fetchImageBuffer(url: string): Promise<LoadedImageData | null> {
 /**
  * Fit image inside bounding box while preserving aspect ratio
  */
-function fitImageDimensions(
+export function fitImageDimensions(
   origW: number,
   origH: number,
   maxW: number = 195,
@@ -286,9 +295,13 @@ export async function generateReimbursementDocx(
 
   // Requester details
   const requesterName = request.profiles?.full_name || 'Staff';
-  const requesterPhone = (request.profiles as any)?.phone || '0882 3991 9129';
+  const requesterPhone =
+    request.profiles?.phone || (request.profiles as any)?.phone || '0882 3991 9129';
   const requesterEmail = request.profiles?.email || 'karyawan@ouffice.co.id';
-  const requesterId = `CSK-${(request.user_id || '003').slice(-3).toUpperCase()}`;
+  const requesterId =
+    request.profiles?.employee_id ||
+    (request.profiles as any)?.employee_id ||
+    `CSK-${(request.user_id || '003').slice(-3).toUpperCase()}`;
   const requesterJabatan =
     request.department || request.profiles?.department || 'Sales Executive';
   const bankName = request.profiles?.bank_name || 'BCA';
@@ -309,7 +322,7 @@ export async function generateReimbursementDocx(
     ? formatDateSlash(request.payment_action_at)
     : isPaid
     ? requestDateFormatted
-    : '-';
+    : '';
 
   // -------------------------------------------------------------
   // BUILD PAGE 1: REIMBURSEMENT FORM
@@ -319,7 +332,7 @@ export async function generateReimbursementDocx(
   // Top Title
   page1Children.push(
     new Paragraph({
-      spacing: { after: 40 },
+      spacing: { after: 30 },
       children: [
         new TextRun({
           text: 'Reimbursement Form',
@@ -347,29 +360,29 @@ export async function generateReimbursementDocx(
     })
   );
 
-  // Top Section: Left (Requester Info Table) + Right (Request Date & RF Number Table)
+  // Top Section: Left (Requester Info) + Right (Request Date & RF Number)
   const topLayoutTable = new Table({
     width: { size: 10000, type: WidthType.DXA },
-    borders: noBorder,
+    borders: tableNoBorder,
     rows: [
       new TableRow({
         children: [
           // Left: Requester Info
           new TableCell({
             width: { size: 6200, type: WidthType.DXA },
-            borders: noBorder,
+            borders: cellNoBorder,
             children: [
               new Table({
                 width: { size: 6000, type: WidthType.DXA },
-                borders: noBorder,
+                borders: tableNoBorder,
                 rows: [
                   new TableRow({
                     height: { value: 340, rule: HeightRule.ATLEAST },
                     children: [
                       new TableCell({
-                        width: { size: 2100, type: WidthType.DXA },
-                        borders: noBorder,
-                        margins: { top: 40, bottom: 40, left: 0, right: 60 },
+                        width: { size: 1900, type: WidthType.DXA },
+                        borders: cellNoBorder,
+                        margins: { top: 30, bottom: 30, left: 0, right: 40 },
                         children: [
                           new Paragraph({
                             children: [
@@ -383,9 +396,9 @@ export async function generateReimbursementDocx(
                         ],
                       }),
                       new TableCell({
-                        width: { size: 3900, type: WidthType.DXA },
+                        width: { size: 4100, type: WidthType.DXA },
                         borders: thinGrayBorder,
-                        margins: { top: 40, bottom: 40, left: 100, right: 100 },
+                        margins: { top: 30, bottom: 30, left: 100, right: 100 },
                         children: [
                           new Paragraph({
                             children: [
@@ -405,9 +418,9 @@ export async function generateReimbursementDocx(
                     height: { value: 340, rule: HeightRule.ATLEAST },
                     children: [
                       new TableCell({
-                        width: { size: 2100, type: WidthType.DXA },
-                        borders: noBorder,
-                        margins: { top: 40, bottom: 40, left: 0, right: 60 },
+                        width: { size: 1900, type: WidthType.DXA },
+                        borders: cellNoBorder,
+                        margins: { top: 30, bottom: 30, left: 0, right: 40 },
                         children: [
                           new Paragraph({
                             children: [
@@ -417,9 +430,9 @@ export async function generateReimbursementDocx(
                         ],
                       }),
                       new TableCell({
-                        width: { size: 3900, type: WidthType.DXA },
+                        width: { size: 4100, type: WidthType.DXA },
                         borders: thinGrayBorder,
-                        margins: { top: 40, bottom: 40, left: 100, right: 100 },
+                        margins: { top: 30, bottom: 30, left: 100, right: 100 },
                         children: [
                           new Paragraph({
                             children: [
@@ -438,9 +451,9 @@ export async function generateReimbursementDocx(
                     height: { value: 340, rule: HeightRule.ATLEAST },
                     children: [
                       new TableCell({
-                        width: { size: 2100, type: WidthType.DXA },
-                        borders: noBorder,
-                        margins: { top: 40, bottom: 40, left: 0, right: 60 },
+                        width: { size: 1900, type: WidthType.DXA },
+                        borders: cellNoBorder,
+                        margins: { top: 30, bottom: 30, left: 0, right: 40 },
                         children: [
                           new Paragraph({
                             children: [
@@ -450,9 +463,9 @@ export async function generateReimbursementDocx(
                         ],
                       }),
                       new TableCell({
-                        width: { size: 3900, type: WidthType.DXA },
+                        width: { size: 4100, type: WidthType.DXA },
                         borders: thinGrayBorder,
-                        margins: { top: 40, bottom: 40, left: 100, right: 100 },
+                        margins: { top: 30, bottom: 30, left: 100, right: 100 },
                         children: [
                           new Paragraph({
                             children: [
@@ -477,12 +490,12 @@ export async function generateReimbursementDocx(
           // Right: Request Date & RF Number mini table
           new TableCell({
             width: { size: 3800, type: WidthType.DXA },
-            borders: noBorder,
+            borders: cellNoBorder,
             children: [
               new Table({
                 width: { size: 3600, type: WidthType.DXA },
                 alignment: AlignmentType.RIGHT,
-                borders: noBorder,
+                borders: tableNoBorder,
                 rows: [
                   new TableRow({
                     height: { value: 280, rule: HeightRule.ATLEAST },
@@ -491,7 +504,7 @@ export async function generateReimbursementDocx(
                         width: { size: 3600, type: WidthType.DXA },
                         shading: { fill: 'B95318' },
                         borders: thinGrayBorder,
-                        margins: { top: 40, bottom: 40, left: 60, right: 60 },
+                        margins: { top: 30, bottom: 30, left: 60, right: 60 },
                         children: [
                           new Paragraph({
                             alignment: AlignmentType.CENTER,
@@ -515,7 +528,7 @@ export async function generateReimbursementDocx(
                       new TableCell({
                         width: { size: 3600, type: WidthType.DXA },
                         borders: thinGrayBorder,
-                        margins: { top: 40, bottom: 40, left: 60, right: 60 },
+                        margins: { top: 30, bottom: 30, left: 60, right: 60 },
                         children: [
                           new Paragraph({
                             alignment: AlignmentType.CENTER,
@@ -538,7 +551,7 @@ export async function generateReimbursementDocx(
                         width: { size: 3600, type: WidthType.DXA },
                         shading: { fill: 'B95318' },
                         borders: thinGrayBorder,
-                        margins: { top: 40, bottom: 40, left: 60, right: 60 },
+                        margins: { top: 30, bottom: 30, left: 60, right: 60 },
                         children: [
                           new Paragraph({
                             alignment: AlignmentType.CENTER,
@@ -562,7 +575,7 @@ export async function generateReimbursementDocx(
                       new TableCell({
                         width: { size: 3600, type: WidthType.DXA },
                         borders: thinGrayBorder,
-                        margins: { top: 40, bottom: 40, left: 60, right: 60 },
+                        margins: { top: 30, bottom: 30, left: 60, right: 60 },
                         children: [
                           new Paragraph({
                             alignment: AlignmentType.CENTER,
@@ -605,18 +618,18 @@ export async function generateReimbursementDocx(
 
   const checkPayableTable = new Table({
     width: { size: 10000, type: WidthType.DXA },
-    borders: noBorder,
+    borders: tableNoBorder,
     rows: [
       new TableRow({
         children: [
           // Left: Name, ID, Jabatan, Memo
           new TableCell({
             width: { size: 6200, type: WidthType.DXA },
-            borders: noBorder,
+            borders: cellNoBorder,
             children: [
               new Table({
                 width: { size: 6000, type: WidthType.DXA },
-                borders: noBorder,
+                borders: tableNoBorder,
                 rows: [
                   ['Name :', requesterName, true],
                   ['ID :', requesterId, false],
@@ -628,7 +641,7 @@ export async function generateReimbursementDocx(
                     children: [
                       new TableCell({
                         width: { size: 1600, type: WidthType.DXA },
-                        borders: noBorder,
+                        borders: cellNoBorder,
                         margins: { top: 30, bottom: 30, left: 0, right: 40 },
                         children: [
                           new Paragraph({
@@ -669,7 +682,7 @@ export async function generateReimbursementDocx(
           // Right: Bank Account Details Box
           new TableCell({
             width: { size: 3800, type: WidthType.DXA },
-            borders: noBorder,
+            borders: cellNoBorder,
             children: [
               new Table({
                 width: { size: 3600, type: WidthType.DXA },
@@ -681,7 +694,7 @@ export async function generateReimbursementDocx(
                       new TableCell({
                         width: { size: 3600, type: WidthType.DXA },
                         borders: thinGrayBorder,
-                        margins: { top: 80, bottom: 80, left: 120, right: 120 },
+                        margins: { top: 70, bottom: 70, left: 120, right: 120 },
                         children: [
                           new Paragraph({
                             children: [
@@ -694,7 +707,7 @@ export async function generateReimbursementDocx(
                             ],
                           }),
                           new Paragraph({
-                            spacing: { before: 40 },
+                            spacing: { before: 30 },
                             children: [
                               new TextRun({
                                 text: `A/C : ${bankAccount}`,
@@ -705,7 +718,7 @@ export async function generateReimbursementDocx(
                             ],
                           }),
                           new Paragraph({
-                            spacing: { before: 40 },
+                            spacing: { before: 30 },
                             children: [
                               new TextRun({
                                 text: `AN. : ${bankHolder.toUpperCase()}`,
@@ -750,12 +763,12 @@ export async function generateReimbursementDocx(
       borders: thinGrayBorder,
       rows: [
         new TableRow({
-          height: { value: 360, rule: HeightRule.ATLEAST },
+          height: { value: 340, rule: HeightRule.ATLEAST },
           children: [
             new TableCell({
               width: { size: 10000, type: WidthType.DXA },
               borders: thinGrayBorder,
-              margins: { top: 60, bottom: 60, left: 100, right: 100 },
+              margins: { top: 50, bottom: 50, left: 100, right: 100 },
               children: [
                 new Paragraph({
                   children: [
@@ -777,7 +790,7 @@ export async function generateReimbursementDocx(
   // Section: Itemized Expenses
   page1Children.push(
     new Paragraph({
-      spacing: { before: 160, after: 60 },
+      spacing: { before: 150, after: 60 },
       children: [
         new TextRun({
           text: 'Itemized Expenses',
@@ -790,7 +803,6 @@ export async function generateReimbursementDocx(
     })
   );
 
-  // Table Columns: ITEM (700), DATE (1400), DESCRIPTION (4700), RECEIPT (1400), COST (1800)
   const itemizedRows: TableRow[] = [];
 
   // 1. Header row
@@ -808,7 +820,7 @@ export async function generateReimbursementDocx(
           width: { size: col.width, type: WidthType.DXA },
           shading: { fill: 'B95318' },
           borders: thinGrayBorder,
-          margins: { top: 50, bottom: 50, left: 80, right: 80 },
+          margins: { top: 40, bottom: 40, left: 80, right: 80 },
           children: [
             new Paragraph({
               alignment: col.align,
@@ -836,13 +848,13 @@ export async function generateReimbursementDocx(
     const item = itemizedList[i];
     itemizedRows.push(
       new TableRow({
-        height: { value: 320, rule: HeightRule.ATLEAST },
+        height: { value: 300, rule: HeightRule.ATLEAST },
         children: [
           // Col 1: ITEM
           new TableCell({
             width: { size: 700, type: WidthType.DXA },
             borders: thinGrayBorder,
-            margins: { top: 40, bottom: 40, left: 60, right: 60 },
+            margins: { top: 30, bottom: 30, left: 60, right: 60 },
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
@@ -860,7 +872,7 @@ export async function generateReimbursementDocx(
           new TableCell({
             width: { size: 1400, type: WidthType.DXA },
             borders: thinGrayBorder,
-            margins: { top: 40, bottom: 40, left: 60, right: 60 },
+            margins: { top: 30, bottom: 30, left: 60, right: 60 },
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
@@ -878,7 +890,7 @@ export async function generateReimbursementDocx(
           new TableCell({
             width: { size: 4700, type: WidthType.DXA },
             borders: thinGrayBorder,
-            margins: { top: 40, bottom: 40, left: 80, right: 80 },
+            margins: { top: 30, bottom: 30, left: 80, right: 80 },
             children: [
               new Paragraph({
                 children: [
@@ -895,7 +907,7 @@ export async function generateReimbursementDocx(
           new TableCell({
             width: { size: 1400, type: WidthType.DXA },
             borders: thinGrayBorder,
-            margins: { top: 40, bottom: 40, left: 60, right: 60 },
+            margins: { top: 30, bottom: 30, left: 60, right: 60 },
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
@@ -913,13 +925,13 @@ export async function generateReimbursementDocx(
           new TableCell({
             width: { size: 1800, type: WidthType.DXA },
             borders: thinGrayBorder,
-            margins: { top: 40, bottom: 40, left: 60, right: 60 },
+            margins: { top: 30, bottom: 30, left: 60, right: 60 },
             children: [
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
                 children: [
                   new TextRun({
-                    text: item && item.cost > 0 ? formatNumber(item.cost) : '',
+                    text: item && item.cost > 0 ? formatCurrencyNumber(item.cost) : '',
                     size: 18,
                     font: 'Arial',
                   }),
@@ -939,8 +951,8 @@ export async function generateReimbursementDocx(
       children: [
         new TableCell({
           width: { size: 6800, type: WidthType.DXA },
-          borders: noBorder,
-          margins: { top: 40, bottom: 40, left: 80, right: 120 },
+          borders: cellNoBorder,
+          margins: { top: 30, bottom: 30, left: 80, right: 120 },
           children: [
             new Paragraph({
               alignment: AlignmentType.RIGHT,
@@ -959,7 +971,7 @@ export async function generateReimbursementDocx(
           width: { size: 1400, type: WidthType.DXA },
           shading: { fill: 'F8CBAD' },
           borders: thinGrayBorder,
-          margins: { top: 40, bottom: 40, left: 60, right: 60 },
+          margins: { top: 30, bottom: 30, left: 60, right: 60 },
           children: [
             new Paragraph({
               alignment: AlignmentType.CENTER,
@@ -978,13 +990,13 @@ export async function generateReimbursementDocx(
           width: { size: 1800, type: WidthType.DXA },
           shading: { fill: 'F8CBAD' },
           borders: thinGrayBorder,
-          margins: { top: 40, bottom: 40, left: 60, right: 60 },
+          margins: { top: 30, bottom: 30, left: 60, right: 60 },
           children: [
             new Paragraph({
               alignment: AlignmentType.RIGHT,
               children: [
                 new TextRun({
-                  text: formatNumber(totalAmount),
+                  text: formatCurrencyNumber(totalAmount),
                   bold: true,
                   size: 20,
                   font: 'Arial',
@@ -1008,7 +1020,7 @@ export async function generateReimbursementDocx(
   page1Children.push(
     new Paragraph({
       alignment: AlignmentType.RIGHT,
-      spacing: { before: 40, after: 120 },
+      spacing: { before: 30, after: 80 },
       children: [
         new TextRun({
           text: "Don't forget to include receipts!",
@@ -1023,7 +1035,7 @@ export async function generateReimbursementDocx(
   // Section: Approval
   page1Children.push(
     new Paragraph({
-      spacing: { before: 60, after: 60 },
+      spacing: { before: 40, after: 40 },
       children: [
         new TextRun({
           text: 'Approval',
@@ -1038,16 +1050,16 @@ export async function generateReimbursementDocx(
   page1Children.push(
     new Table({
       width: { size: 10000, type: WidthType.DXA },
-      borders: noBorder,
+      borders: tableNoBorder,
       rows: [
         // Row 1: Names (Dwi N / Adrian Nugroho) & Positions (Finance / Direktur)
         new TableRow({
-          height: { value: 360, rule: HeightRule.ATLEAST },
+          height: { value: 340, rule: HeightRule.ATLEAST },
           children: [
             new TableCell({
-              width: { size: 6200, type: WidthType.DXA },
+              width: { size: 6000, type: WidthType.DXA },
               borders: thinGrayBorder,
-              margins: { top: 50, bottom: 50, left: 100, right: 100 },
+              margins: { top: 40, bottom: 40, left: 80, right: 80 },
               children: [
                 new Paragraph({
                   children: [
@@ -1062,9 +1074,9 @@ export async function generateReimbursementDocx(
               ],
             }),
             new TableCell({
-              width: { size: 3800, type: WidthType.DXA },
+              width: { size: 4000, type: WidthType.DXA },
               borders: thinGrayBorder,
-              margins: { top: 50, bottom: 50, left: 100, right: 100 },
+              margins: { top: 40, bottom: 40, left: 80, right: 80 },
               children: [
                 new Paragraph({
                   children: [
@@ -1085,9 +1097,9 @@ export async function generateReimbursementDocx(
         new TableRow({
           children: [
             new TableCell({
-              width: { size: 6200, type: WidthType.DXA },
-              borders: noBorder,
-              margins: { top: 20, bottom: 40, left: 10, right: 10 },
+              width: { size: 6000, type: WidthType.DXA },
+              borders: cellNoBorder,
+              margins: { top: 15, bottom: 30, left: 10, right: 10 },
               children: [
                 new Paragraph({
                   children: [
@@ -1102,9 +1114,9 @@ export async function generateReimbursementDocx(
               ],
             }),
             new TableCell({
-              width: { size: 3800, type: WidthType.DXA },
-              borders: noBorder,
-              margins: { top: 20, bottom: 40, left: 10, right: 10 },
+              width: { size: 4000, type: WidthType.DXA },
+              borders: cellNoBorder,
+              margins: { top: 15, bottom: 30, left: 10, right: 10 },
               children: [
                 new Paragraph({
                   children: [
@@ -1123,12 +1135,12 @@ export async function generateReimbursementDocx(
 
         // Row 3: Signature Box and Date Box
         new TableRow({
-          height: { value: 650, rule: HeightRule.ATLEAST },
+          height: { value: 500, rule: HeightRule.ATLEAST },
           children: [
             new TableCell({
-              width: { size: 6200, type: WidthType.DXA },
+              width: { size: 6000, type: WidthType.DXA },
               borders: thinGrayBorder,
-              margins: { top: 40, bottom: 40, left: 100, right: 100 },
+              margins: { top: 30, bottom: 30, left: 80, right: 80 },
               children: [
                 new Paragraph({
                   children: financeSigImage
@@ -1138,8 +1150,8 @@ export async function generateReimbursementDocx(
                           transformation: fitImageDimensions(
                             financeSigImage.width,
                             financeSigImage.height,
-                            120,
-                            35
+                            110,
+                            30
                           ),
                           type: financeSigImage.type,
                         }),
@@ -1149,9 +1161,9 @@ export async function generateReimbursementDocx(
               ],
             }),
             new TableCell({
-              width: { size: 3800, type: WidthType.DXA },
+              width: { size: 4000, type: WidthType.DXA },
               borders: thinGrayBorder,
-              margins: { top: 40, bottom: 40, left: 100, right: 100 },
+              margins: { top: 30, bottom: 30, left: 80, right: 80 },
               children: [
                 new Paragraph({
                   children: [
@@ -1171,9 +1183,9 @@ export async function generateReimbursementDocx(
         new TableRow({
           children: [
             new TableCell({
-              width: { size: 6200, type: WidthType.DXA },
-              borders: noBorder,
-              margins: { top: 20, bottom: 0, left: 10, right: 10 },
+              width: { size: 6000, type: WidthType.DXA },
+              borders: cellNoBorder,
+              margins: { top: 15, bottom: 0, left: 10, right: 10 },
               children: [
                 new Paragraph({
                   children: [
@@ -1188,9 +1200,9 @@ export async function generateReimbursementDocx(
               ],
             }),
             new TableCell({
-              width: { size: 3800, type: WidthType.DXA },
-              borders: noBorder,
-              margins: { top: 20, bottom: 0, left: 10, right: 10 },
+              width: { size: 4000, type: WidthType.DXA },
+              borders: cellNoBorder,
+              margins: { top: 15, bottom: 0, left: 10, right: 10 },
               children: [
                 new Paragraph({
                   children: [
@@ -1212,18 +1224,21 @@ export async function generateReimbursementDocx(
 
   // -------------------------------------------------------------
   // BUILD PAGE 2+: RECEIPTS (Max 6 photos per page in 3x2 grid)
+  // Dynamic: Only render the exact number of frames corresponding to uploaded photos!
   // -------------------------------------------------------------
   const receiptsPerPage = 6;
-  const numReceiptPages = Math.max(
-    1,
-    Math.ceil(validReceiptImages.length / receiptsPerPage)
-  );
+  const numReceiptPages =
+    validReceiptImages.length > 0
+      ? Math.ceil(validReceiptImages.length / receiptsPerPage)
+      : 0;
 
-  const makeFrameCell = (imgData?: LoadedImageData | null) => {
-    const children: Paragraph[] = [];
-    if (imgData) {
-      const fit = fitImageDimensions(imgData.width, imgData.height, 195, 290);
-      children.push(
+  const makeFrameCell = (imgData: LoadedImageData) => {
+    const fit = fitImageDimensions(imgData.width, imgData.height, 195, 290);
+    return new TableCell({
+      width: { size: 3100, type: WidthType.DXA },
+      borders: orangeFrameBorder,
+      margins: { top: 80, bottom: 80, left: 60, right: 60 },
+      children: [
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
@@ -1233,24 +1248,15 @@ export async function generateReimbursementDocx(
               type: imgData.type,
             }),
           ],
-        })
-      );
-    } else {
-      children.push(new Paragraph({ text: '' }));
-    }
-
-    return new TableCell({
-      width: { size: 3100, type: WidthType.DXA },
-      borders: orangeFrameBorder,
-      margins: { top: 80, bottom: 80, left: 60, right: 60 },
-      children,
+        }),
+      ],
     });
   };
 
   const makeSpacerCell = (w: number) => {
     return new TableCell({
       width: { size: w, type: WidthType.DXA },
-      borders: noBorder,
+      borders: cellNoBorder,
       children: [new Paragraph({ text: '' })],
     });
   };
@@ -1281,27 +1287,33 @@ export async function generateReimbursementDocx(
 
     const startIndex = p * receiptsPerPage;
     const pImgs = validReceiptImages.slice(startIndex, startIndex + receiptsPerPage);
+    const photoCount = pImgs.length;
 
-    // 3 on top, 3 on bottom
-    const topImgs = [pImgs[0] || null, pImgs[1] || null, pImgs[2] || null];
-    const botImgs = [pImgs[3] || null, pImgs[4] || null, pImgs[5] || null];
+    // Top row (up to 3 photos)
+    const topCount = Math.min(photoCount, 3);
+    const topRowCells: TableCell[] = [];
+    for (let c = 0; c < 3; c++) {
+      if (c < topCount) {
+        topRowCells.push(makeFrameCell(pImgs[c]));
+      } else {
+        // Borderless spacer so the grid stays aligned without extra empty frames!
+        topRowCells.push(makeSpacerCell(3100));
+      }
+      if (c < 2) {
+        topRowCells.push(makeSpacerCell(350));
+      }
+    }
 
-    const receiptGridTable = new Table({
-      width: { size: 10000, type: WidthType.DXA },
-      borders: noBorder,
-      rows: [
-        // Row 1: Top 3 frames
-        new TableRow({
-          height: { value: 4600, rule: HeightRule.ATLEAST },
-          children: [
-            makeFrameCell(topImgs[0]),
-            makeSpacerCell(350),
-            makeFrameCell(topImgs[1]),
-            makeSpacerCell(350),
-            makeFrameCell(topImgs[2]),
-          ],
-        }),
-        // Spacer Row
+    const gridRows: TableRow[] = [
+      new TableRow({
+        height: { value: 4600, rule: HeightRule.ATLEAST },
+        children: topRowCells,
+      }),
+    ];
+
+    // Bottom row (only if photoCount > 3)
+    if (photoCount > 3) {
+      gridRows.push(
         new TableRow({
           height: { value: 240, rule: HeightRule.EXACT },
           children: [
@@ -1311,22 +1323,38 @@ export async function generateReimbursementDocx(
             makeSpacerCell(350),
             makeSpacerCell(3100),
           ],
-        }),
-        // Row 2: Bottom 3 frames
+        })
+      );
+
+      const botCount = photoCount - 3;
+      const botRowCells: TableCell[] = [];
+      for (let c = 0; c < 3; c++) {
+        if (c < botCount) {
+          botRowCells.push(makeFrameCell(pImgs[3 + c]));
+        } else {
+          // Borderless spacer
+          botRowCells.push(makeSpacerCell(3100));
+        }
+        if (c < 2) {
+          botRowCells.push(makeSpacerCell(350));
+        }
+      }
+
+      gridRows.push(
         new TableRow({
           height: { value: 4600, rule: HeightRule.ATLEAST },
-          children: [
-            makeFrameCell(botImgs[0]),
-            makeSpacerCell(350),
-            makeFrameCell(botImgs[1]),
-            makeSpacerCell(350),
-            makeFrameCell(botImgs[2]),
-          ],
-        }),
-      ],
-    });
+          children: botRowCells,
+        })
+      );
+    }
 
-    page1Children.push(receiptGridTable);
+    page1Children.push(
+      new Table({
+        width: { size: 10000, type: WidthType.DXA },
+        borders: tableNoBorder,
+        rows: gridRows,
+      })
+    );
   }
 
   // Final Document Creation
@@ -1336,10 +1364,10 @@ export async function generateReimbursementDocx(
         properties: {
           page: {
             margin: {
-              top: 720,
-              bottom: 720,
-              left: 800,
-              right: 800,
+              top: 650,
+              bottom: 650,
+              left: 750,
+              right: 750,
             },
           },
         },

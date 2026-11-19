@@ -23,6 +23,8 @@ import {
   FileCheck,
   X,
   ZoomIn,
+  Phone,
+  Hash,
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -36,6 +38,8 @@ export default function ProfilePage() {
   // Controlled form states
   const [fullName, setFullName] = useState('');
   const [department, setDepartment] = useState('Staff OPS');
+  const [phone, setPhone] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
   const [bankName, setBankName] = useState('');
   const [bankAccountNumber, setBankAccountNumber] = useState('');
   const [bankAccountHolder, setBankAccountHolder] = useState('');
@@ -59,6 +63,8 @@ export default function ProfilePage() {
       if (data) {
         setFullName(data.full_name || '');
         setDepartment(data.department || 'Staff OPS');
+        setPhone(data.phone || '');
+        setEmployeeId(data.employee_id || '');
         setBankName(data.bank_name || '');
         setBankAccountNumber(data.bank_account_number || '');
         setBankAccountHolder(data.bank_account_holder || '');
@@ -251,6 +257,8 @@ export default function ProfilePage() {
                 ...prev,
                 full_name: fullName,
                 department: department,
+                phone: phone,
+                employee_id: employeeId,
                 bank_name: bankName,
                 bank_account_number: bankAccountNumber,
                 bank_account_holder: bankAccountHolder,
@@ -449,6 +457,39 @@ export default function ProfilePage() {
                 value={profile?.role === 'director' ? 'Director' : 'Finance'}
               />
             )}
+          </div>
+
+          {/* Kolom ID Karyawan dan Nomor Telepon (Phone) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <Hash className="w-3.5 h-3.5 text-orange-400" />
+                <span>ID Karyawan</span>
+              </label>
+              <input
+                name="employee_id"
+                type="text"
+                placeholder="Contoh: CSK-003"
+                value={employeeId}
+                onChange={(e) => setEmployeeId(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-orange-400" />
+                <span>Nomor Telepon / WhatsApp (Phone)</span>
+              </label>
+              <input
+                name="phone"
+                type="text"
+                placeholder="Contoh: 0882 3991 9129"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
           </div>
 
           {/* INFORMASI REKENING BANK */}

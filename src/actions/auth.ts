@@ -169,6 +169,11 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
   const avatar_url: string | null =
     profile?.avatar_url || (user.user_metadata?.avatar_url as string) || null;
 
+  const phone: string | null =
+    (profile as any)?.phone || (user.user_metadata?.phone as string) || null;
+  const employee_id: string | null =
+    (profile as any)?.employee_id || (user.user_metadata?.employee_id as string) || null;
+
   const bank_name: string | null =
     profile?.bank_name || (user.user_metadata?.bank_name as string) || null;
   const bank_account_number: string | null =
@@ -182,6 +187,8 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
     full_name: profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
     role: (profile?.role as UserRole) || (user.user_metadata?.role as UserRole) || 'employee',
     department: profile?.department || user.user_metadata?.department || 'Staff OPS',
+    phone,
+    employee_id,
     bank_name,
     bank_account_number,
     bank_account_holder,
@@ -307,6 +314,8 @@ export async function updateProfileBank(formData: FormData) {
   const bank_name = formData.get('bank_name') as string;
   const bank_account_number = formData.get('bank_account_number') as string;
   const bank_account_holder = formData.get('bank_account_holder') as string;
+  const phone = (formData.get('phone') as string) || '';
+  const employee_id = (formData.get('employee_id') as string) || '';
   let avatar_url = (formData.get('avatar_url') as string) || '';
   const avatar_file = formData.get('avatar_file') as File | null;
   let signature_url = (formData.get('signature_url') as string) || '';
@@ -464,6 +473,8 @@ export async function updateProfileBank(formData: FormData) {
       data: {
         full_name: full_name || undefined,
         department: department || undefined,
+        phone: phone || '',
+        employee_id: employee_id || '',
         avatar_url: avatar_url || null,
         signature_url: signature_url || undefined,
         bank_name: bank_name || '',
@@ -481,6 +492,8 @@ export async function updateProfileBank(formData: FormData) {
     email: user.email,
     full_name: full_name || user.user_metadata?.full_name || 'User',
     department: department || (effectiveRole === 'director' ? 'Director' : effectiveRole === 'finance' ? 'Finance' : 'Staff OPS'),
+    phone: phone || null,
+    employee_id: employee_id || null,
     avatar_url: avatar_url || null,
     bank_name: bank_name || null,
     bank_account_number: bank_account_number || null,
@@ -493,6 +506,15 @@ export async function updateProfileBank(formData: FormData) {
   let { error } = await supabase
     .from('profiles')
     .upsert(fullPayload, { onConflict: 'id' });
+
+  if (error && (error.message.includes('phone') || error.message.includes('employee_id'))) {
+    delete fullPayload.phone;
+    delete fullPayload.employee_id;
+    const retryRes = await supabase
+      .from('profiles')
+      .upsert(fullPayload, { onConflict: 'id' });
+    error = retryRes.error;
+  }
 
   if (error && (error.message.includes('signature_url') || error.message.includes('avatar_url'))) {
     delete fullPayload.signature_url;
@@ -752,4 +774,27 @@ export async function updatePassword(prevState: any, formData: FormData) {
   await supabase.auth.signOut();
 
   return { success: 'Kata sandi berhasil diperbarui! Silakan masuk kembali.' };
+}
+
+export async function getRequesterProfileInfo(userId: string): Promise<{
+  phone?: string | null;
+  employee_id?: string | null;
+}> {
+  if (!userId) return { phone: null, employee_id: null };
+  const supabase = await createClient();
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (!error && data) {
+      return {
+        phone: (data as any).phone || null,
+        employee_id: (data as any).employee_id || null,
+      };
+    }
+  } catch {}
+  return { phone: null, employee_id: null };
 }

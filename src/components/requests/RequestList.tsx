@@ -20,7 +20,7 @@ import {
   deleteReceiptAction,
   getLatestRequests,
 } from '@/actions/requests';
-import { getGlobalFinanceSignature, getGlobalDirectorSignature } from '@/actions/auth';
+import { getGlobalFinanceSignature, getGlobalDirectorSignature, getRequesterProfileInfo } from '@/actions/auth';
 import {
   Search,
   Filter,
@@ -47,6 +47,7 @@ import OvertimeVoucherPdf from './OvertimeVoucherPdf';
 import MonthlyRecapReportPdf from './MonthlyRecapReportPdf';
 import EditRequestModal from './EditRequestModal';
 import EditOvertimeModal from './EditOvertimeModal';
+import WordVoucherPreviewModal from './WordVoucherPreviewModal';
 import { triggerSuccessNotification } from '@/components/ui/DynamicIslandSuccess';
 import { generateReimbursementDocx, downloadDocxFile } from '@/lib/wordVoucherGenerator';
 import {
@@ -106,6 +107,8 @@ export default function RequestList({
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [wordLoadingId, setWordLoadingId] = useState<string | null>(null);
+  const [wordPreviewReq, setWordPreviewReq] = useState<ReimbursementRequest | null>(null);
+  const [wordApprovers, setWordApprovers] = useState<{ finSig: any; dirSig: any } | null>(null);
 
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState<string>(
@@ -563,6 +566,48 @@ export default function RequestList({
     setPdfData(printData);
   };
 
+  const handleOpenWordPreview = async (req: ReimbursementRequest) => {
+    try {
+      setWordLoadingId(req.id);
+      const finSig = await getBestFinanceSignature();
+      const dirSig = await getBestDirectorSignature();
+
+      let enrichedReq = req;
+      if (req.user_id) {
+        try {
+          const extra = await getRequesterProfileInfo(req.user_id);
+          if (extra.phone || extra.employee_id) {
+            enrichedReq = {
+              ...req,
+              profiles: {
+                ...req.profiles,
+                phone: extra.phone || req.profiles?.phone,
+                employee_id: extra.employee_id || req.profiles?.employee_id,
+              } as any,
+            };
+          }
+        } catch {}
+      }
+
+      setWordApprovers({
+        finSig: {
+          name: finSig.name || 'Dwi N',
+          signature: finSig.signature,
+        },
+        dirSig: {
+          name: dirSig.name || 'Adrian Nugroho',
+          signature: dirSig.signature,
+        },
+      });
+      setWordPreviewReq(enrichedReq);
+    } catch (err: any) {
+      console.error('Gagal membuka preview Word:', err);
+      alert('Gagal membuka preview: ' + (err.message || 'Terjadi kesalahan'));
+    } finally {
+      setWordLoadingId(null);
+    }
+  };
+
   const handleExportDocx = async (req: ReimbursementRequest) => {
     try {
       setWordLoadingId(req.id);
@@ -575,9 +620,26 @@ export default function RequestList({
           (r.reimbursement_type || 'Petty Cash') === (req.reimbursement_type || 'Petty Cash')
       );
 
+      let enrichedReq = req;
+      if (req.user_id) {
+        try {
+          const extra = await getRequesterProfileInfo(req.user_id);
+          if (extra.phone || extra.employee_id) {
+            enrichedReq = {
+              ...req,
+              profiles: {
+                ...req.profiles,
+                phone: extra.phone || req.profiles?.phone,
+                employee_id: extra.employee_id || req.profiles?.employee_id,
+              } as any,
+            };
+          }
+        } catch {}
+      }
+
       const blob = await generateReimbursementDocx({
-        request: req,
-        sameDateRequests: sameDateRequests.length > 0 ? sameDateRequests : [req],
+        request: enrichedReq,
+        sameDateRequests: sameDateRequests.length > 0 ? sameDateRequests : [enrichedReq],
         financeApprover: {
           name: finSig.name || 'Dwi N',
           signature: finSig.signature,
@@ -1341,25 +1403,6 @@ export default function RequestList({
                             ? 'Dihitung Direktur'
                             : formatRupiah(req.amount)}
                         </div>
-                        {currentRole === 'finance' && reqType !== 'Lembur' && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleExportDocx(req);
-                            }}
-                            disabled={wordLoadingId === req.id}
-                            className="mt-1 px-2 py-0.5 rounded-md bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 text-[10px] font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                            title="Cetak Dokumen MS Word (.docx)"
-                          >
-                            {wordLoadingId === req.id ? (
-                              <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                            ) : (
-                              <FileText className="w-2.5 h-2.5" />
-                            )}
-                            <span>Word</span>
-                          </button>
-                        )}
                       </div>
                     </div>
 
@@ -1386,25 +1429,6 @@ export default function RequestList({
                       ? 'Dihitung Direktur'
                       : formatRupiah(req.amount)}
                   </div>
-                  {currentRole === 'finance' && reqType !== 'Lembur' && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleExportDocx(req);
-                      }}
-                      disabled={wordLoadingId === req.id}
-                      className="mt-1.5 px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
-                      title="Cetak Dokumen MS Word (.docx)"
-                    >
-                      {wordLoadingId === req.id ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <FileText className="w-3 h-3 text-blue-400" />
-                      )}
-                      <span>Cetak Word</span>
-                    </button>
-                  )}
                 </div>
               </div>
             );
@@ -1713,7 +1737,7 @@ export default function RequestList({
                   </button>
                 )}
 
-                {/* Export / Cetak MS Word (.docx) Button Khusus Akun Finance */}
+                {/* Preview & Cetak MS Word (.docx) Button Khusus Akun Finance */}
                 {currentRole === 'finance' &&
                   !(
                     selectedRequest.reimbursement_type === 'Lembur' ||
@@ -1722,10 +1746,10 @@ export default function RequestList({
                   ) && (
                     <button
                       type="button"
-                      onClick={() => handleExportDocx(selectedRequest)}
+                      onClick={() => handleOpenWordPreview(selectedRequest)}
                       disabled={wordLoadingId === selectedRequest.id}
                       className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition flex items-center justify-center cursor-pointer shadow-md disabled:opacity-50"
-                      title="Cetak Dokumen MS Word (.docx)"
+                      title="Preview & Download Dokumen MS Word (.docx)"
                     >
                       {wordLoadingId === selectedRequest.id ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -1942,6 +1966,25 @@ export default function RequestList({
         <MonthlyRecapReportPdf
           data={monthlyRecapData}
           onClose={() => setMonthlyRecapData(null)}
+        />
+      )}
+
+      {/* Preview Modal Format MS Word (.docx) & Cetak */}
+      {wordPreviewReq && wordApprovers && (
+        <WordVoucherPreviewModal
+          request={wordPreviewReq}
+          sameDateRequests={requests.filter(
+            (r) =>
+              r.request_date === wordPreviewReq.request_date &&
+              (r.reimbursement_type || 'Petty Cash') ===
+                (wordPreviewReq.reimbursement_type || 'Petty Cash')
+          )}
+          financeApprover={wordApprovers.finSig}
+          directorApprover={wordApprovers.dirSig}
+          onClose={() => {
+            setWordPreviewReq(null);
+            setWordApprovers(null);
+          }}
         />
       )}
 

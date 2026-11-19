@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS department TEXT DEFAULT 'Staff OPS';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS signature_url TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS employee_id TEXT;
 
 -- 2. TABEL REIMBURSEMENT_REQUESTS (PENGAJUAN BIAYA)
 CREATE TABLE IF NOT EXISTS public.reimbursement_requests (
