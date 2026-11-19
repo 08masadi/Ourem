@@ -576,13 +576,19 @@ export default function RequestList({
       if (req.user_id) {
         try {
           const extra = await getRequesterProfileInfo(req.user_id);
-          if (extra.phone || extra.employee_id) {
+          if (extra) {
             enrichedReq = {
               ...req,
               profiles: {
                 ...req.profiles,
+                full_name: extra.full_name || req.profiles?.full_name,
+                email: extra.email || req.profiles?.email,
                 phone: extra.phone || req.profiles?.phone,
                 employee_id: extra.employee_id || req.profiles?.employee_id,
+                department: extra.department || req.profiles?.department,
+                bank_name: extra.bank_name || req.profiles?.bank_name,
+                bank_account_number: extra.bank_account_number || req.profiles?.bank_account_number,
+                bank_account_holder: extra.bank_account_holder || req.profiles?.bank_account_holder,
               } as any,
             };
           }
@@ -624,13 +630,19 @@ export default function RequestList({
       if (req.user_id) {
         try {
           const extra = await getRequesterProfileInfo(req.user_id);
-          if (extra.phone || extra.employee_id) {
+          if (extra) {
             enrichedReq = {
               ...req,
               profiles: {
                 ...req.profiles,
+                full_name: extra.full_name || req.profiles?.full_name,
+                email: extra.email || req.profiles?.email,
                 phone: extra.phone || req.profiles?.phone,
                 employee_id: extra.employee_id || req.profiles?.employee_id,
+                department: extra.department || req.profiles?.department,
+                bank_name: extra.bank_name || req.profiles?.bank_name,
+                bank_account_number: extra.bank_account_number || req.profiles?.bank_account_number,
+                bank_account_holder: extra.bank_account_holder || req.profiles?.bank_account_holder,
               } as any,
             };
           }

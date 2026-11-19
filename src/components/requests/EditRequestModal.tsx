@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useTransition, useRef } from 'react';
-import { ReimbursementRequest, ReimbursementType } from '@/types/database';
+import { ReimbursementRequest, ReimbursementType, DEPARTMENT_OPTIONS } from '@/types/database';
 import { updateReimbursement } from '@/actions/requests';
 import {
   AccountBlockData,
@@ -474,15 +474,20 @@ export default function EditRequestModal({
                 <span>Department</span>
               </label>
               <div className="relative">
-                <input
-                  type="text"
-                  readOnly
+                <select
+                  name="department"
                   value={department}
-                  className="w-full pl-9 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-slate-200 font-semibold cursor-not-allowed select-none shadow-inner"
-                />
-                <Lock className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  onChange={(e) => setDepartment(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                >
+                  {DEPARTMENT_OPTIONS.map((dep) => (
+                    <option key={dep} value={dep}>
+                      {dep}
+                    </option>
+                  ))}
+                </select>
+                <Briefcase className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
-              <input type="hidden" name="department" value={department} />
             </div>
 
             <div>
@@ -582,6 +587,7 @@ export default function EditRequestModal({
                         </optgroup>
 
                         <optgroup label="─── OPERASIONAL LAINNYA ───" className="bg-slate-900 text-teal-400 font-bold">
+                          <option value="Entertainment Executive" className="text-white">Entertainment Executive</option>
                           <option value="Hotel & Penginapan" className="text-white">Hotel & Penginapan</option>
                           <option value="Medis & Kesehatan" className="text-white">Medis & Kesehatan</option>
                           <option value="Operasional Kantor" className="text-white">Operasional Kantor</option>

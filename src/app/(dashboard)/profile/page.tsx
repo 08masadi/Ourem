@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect, useRef } from 'react';
 import { getCurrentUserProfile, updateProfileBank, uploadAvatarAction, signOutAction } from '@/actions/auth';
-import { UserProfile } from '@/types/database';
+import { UserProfile, DEPARTMENT_OPTIONS } from '@/types/database';
 import AvatarCropperModal from '@/components/profile/AvatarCropperModal';
 import { triggerSuccessNotification } from '@/components/ui/DynamicIslandSuccess';
 import {
@@ -441,13 +441,11 @@ export default function ProfilePage() {
                   onChange={(e) => setDepartment(e.target.value)}
                   className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
                 >
-                  <option value="Staff OPS">Staff OPS</option>
-                  <option value="Staff Administration">Staff Administration</option>
-                  <option value="Staff Purchasing">Staff Purchasing</option>
-                  <option value="Sales Marketing">Sales Marketing</option>
-                  <option value="Finance">Finance</option>
-                  <option value="Director">Director</option>
-                  <option value="Manager">Manager</option>
+                  {DEPARTMENT_OPTIONS.map((dep) => (
+                    <option key={dep} value={dep}>
+                      {dep}
+                    </option>
+                  ))}
                 </select>
               </div>
             ) : (

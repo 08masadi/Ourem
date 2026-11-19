@@ -467,7 +467,7 @@ export async function updateProfileBank(formData: FormData) {
     // ignore
   }
 
-  // Update user_metadata in auth so avatar, signature, and bank info are always permanently retained
+  // Update user_metadata in auth so avatar, signature, phone, employee_id, and bank info are always permanently retained
   try {
     await supabase.auth.updateUser({
       data: {
@@ -486,54 +486,54 @@ export async function updateProfileBank(formData: FormData) {
     // Ignore auth metadata error
   }
 
-  // Update profiles table with upsert to ensure row is always persisted
-  const fullPayload: Record<string, any> = {
+  // Update profiles table with known safe columns only (avoid schema cache errors)
+  const safePayload: Record<string, any> = {
     id: user.id,
     email: user.email,
     full_name: full_name || user.user_metadata?.full_name || 'User',
     department: department || (effectiveRole === 'director' ? 'Director' : effectiveRole === 'finance' ? 'Finance' : 'Staff OPS'),
-    phone: phone || null,
-    employee_id: employee_id || null,
-    avatar_url: avatar_url || null,
     bank_name: bank_name || null,
     bank_account_number: bank_account_number || null,
     bank_account_holder: bank_account_holder || null,
     updated_at: new Date().toISOString(),
   };
 
-  if (signature_url) fullPayload.signature_url = signature_url;
+  if (avatar_url) safePayload.avatar_url = avatar_url;
+  if (signature_url) safePayload.signature_url = signature_url;
 
   let { error } = await supabase
     .from('profiles')
-    .upsert(fullPayload, { onConflict: 'id' });
-
-  if (error && (error.message.includes('phone') || error.message.includes('employee_id'))) {
-    delete fullPayload.phone;
-    delete fullPayload.employee_id;
-    const retryRes = await supabase
-      .from('profiles')
-      .upsert(fullPayload, { onConflict: 'id' });
-    error = retryRes.error;
-  }
+    .upsert(safePayload, { onConflict: 'id' });
 
   if (error && (error.message.includes('signature_url') || error.message.includes('avatar_url'))) {
-    delete fullPayload.signature_url;
-    delete fullPayload.avatar_url;
+    delete safePayload.signature_url;
+    delete safePayload.avatar_url;
     const retryRes = await supabase
       .from('profiles')
-      .upsert(fullPayload, { onConflict: 'id' });
+      .upsert(safePayload, { onConflict: 'id' });
     error = retryRes.error;
   }
 
   if (error && error.message.includes('department')) {
-    delete fullPayload.department;
+    delete safePayload.department;
     const retryRes = await supabase
       .from('profiles')
-      .upsert(fullPayload, { onConflict: 'id' });
+      .upsert(safePayload, { onConflict: 'id' });
     error = retryRes.error;
   }
 
-  if (error) {
+  // Try to update phone & employee_id to profiles table if columns exist, but never fail if they don't
+  if (phone || employee_id) {
+    try {
+      const extraCols: Record<string, any> = {};
+      if (phone) extraCols.phone = phone;
+      if (employee_id) extraCols.employee_id = employee_id;
+      await supabase.from('profiles').update(extraCols).eq('id', user.id);
+    } catch {}
+  }
+
+  // If error is merely about columns or schema cache, ignore since user_metadata was saved
+  if (error && !error.message.toLowerCase().includes('column') && !error.message.toLowerCase().includes('schema cache')) {
     return { error: error.message };
   }
 
@@ -777,10 +777,16 @@ export async function updatePassword(prevState: any, formData: FormData) {
 }
 
 export async function getRequesterProfileInfo(userId: string): Promise<{
+  full_name?: string | null;
+  email?: string | null;
+  department?: string | null;
   phone?: string | null;
   employee_id?: string | null;
+  bank_name?: string | null;
+  bank_account_number?: string | null;
+  bank_account_holder?: string | null;
 }> {
-  if (!userId) return { phone: null, employee_id: null };
+  if (!userId) return {};
   const supabase = await createClient();
   try {
     const { data, error } = await supabase
@@ -791,10 +797,16 @@ export async function getRequesterProfileInfo(userId: string): Promise<{
 
     if (!error && data) {
       return {
+        full_name: data.full_name || null,
+        email: data.email || null,
+        department: data.department || null,
         phone: (data as any).phone || null,
         employee_id: (data as any).employee_id || null,
+        bank_name: data.bank_name || null,
+        bank_account_number: data.bank_account_number || null,
+        bank_account_holder: data.bank_account_holder || null,
       };
     }
   } catch {}
-  return { phone: null, employee_id: null };
+  return {};
 }

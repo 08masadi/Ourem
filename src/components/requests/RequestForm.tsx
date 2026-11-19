@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect, useRef } from 'react';
 import { createReimbursement } from '@/actions/requests';
 import { getCurrentUserProfile } from '@/actions/auth';
-import { ReimbursementType, UserProfile } from '@/types/database';
+import { ReimbursementType, UserProfile, DEPARTMENT_OPTIONS } from '@/types/database';
 import {
   AccountBlockData,
   formatAccountBlocksToDescription,
@@ -312,6 +312,13 @@ export default function RequestForm() {
       account: primaryAccount,
       customer: primaryCustomer,
       signature_url: sigToSend,
+      full_name: userProfile?.full_name,
+      email: userProfile?.email,
+      phone: userProfile?.phone || (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_phone') : '') || undefined,
+      employee_id: userProfile?.employee_id || (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_employee_id') : '') || undefined,
+      bank_name: userProfile?.bank_name || undefined,
+      bank_account_number: userProfile?.bank_account_number || undefined,
+      bank_account_holder: userProfile?.bank_account_holder || undefined,
     });
 
     const autoTitle = primaryCustomer ? `${primaryAccount} - ${primaryCustomer}` : primaryAccount;
@@ -323,6 +330,9 @@ export default function RequestForm() {
     formData.set('account', primaryAccount);
     formData.set('customer', primaryCustomer);
     formData.set('department', department);
+    if (userProfile?.full_name) formData.set('nama_karyawan', userProfile.full_name);
+    if (userProfile?.phone) formData.set('phone', userProfile.phone);
+    if (userProfile?.employee_id) formData.set('employee_id', userProfile.employee_id);
     formData.set('request_date', requestDate);
     formData.set('description', combinedDescription);
     formData.set('amount', totalAmount.toString());
@@ -442,15 +452,20 @@ export default function RequestForm() {
               <span>Department</span>
             </label>
             <div className="relative">
-              <input
-                type="text"
-                readOnly
+              <select
+                name="department"
                 value={department}
-                className="w-full pl-9 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-slate-200 font-semibold cursor-not-allowed select-none shadow-inner"
-              />
-              <Lock className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                onChange={(e) => setDepartment(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+              >
+                {DEPARTMENT_OPTIONS.map((dep) => (
+                  <option key={dep} value={dep}>
+                    {dep}
+                  </option>
+                ))}
+              </select>
+              <Briefcase className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
-            <input type="hidden" name="department" value={department} />
           </div>
 
           <div>
@@ -555,6 +570,7 @@ export default function RequestForm() {
                       </optgroup>
 
                       <optgroup label="─── OPERASIONAL LAINNYA ───" className="bg-slate-900 text-teal-400 font-bold">
+                        <option value="Entertainment Executive" className="text-white">Entertainment Executive</option>
                         <option value="Hotel & Penginapan" className="text-white">Hotel & Penginapan</option>
                         <option value="Medis & Kesehatan" className="text-white">Medis & Kesehatan</option>
                         <option value="Operasional Kantor" className="text-white">Operasional Kantor</option>

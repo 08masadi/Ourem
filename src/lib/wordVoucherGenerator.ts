@@ -16,7 +16,7 @@ import {
   ImageRun,
 } from 'docx';
 import { ReimbursementRequest, ReimbursementType } from '@/types/database';
-import { parseAccountBlocksFromDescription, normalizeAccount, getCleanDescription } from './formatters';
+import { parseAccountBlocksFromDescription, normalizeAccount, getCleanDescription, extractMetadataFromDescription } from './formatters';
 
 export interface DocxApprover {
   name: string;
@@ -232,24 +232,18 @@ export async function generateReimbursementDocx(
           : [{ customer: reqItem.customer || '', description: reqItem.title }];
 
       entries.forEach((entry, eIdx) => {
-        const descParts: string[] = [];
-        if (entry.customer && entry.customer.trim()) {
-          descParts.push(entry.customer.trim());
-        }
         const cleanDesc = getCleanDescription(entry.description);
-        if (cleanDesc && cleanDesc.trim()) {
-          descParts.push(cleanDesc.trim());
-        } else if (reqItem.title && !descParts.includes(reqItem.title)) {
-          descParts.push(reqItem.title.trim());
-        }
-
-        const fullDescription =
-          descParts.length > 0 ? `${blockAcc} -- ${descParts.join(' - ')}` : blockAcc;
+        const itemDesc =
+          cleanDesc && cleanDesc.trim()
+            ? cleanDesc.trim()
+            : reqItem.title && !reqItem.title.startsWith('Form Lembur')
+            ? reqItem.title.trim()
+            : '';
 
         itemizedList.push({
           itemNum: runningItem++,
           date: formatDateSlash(reqItem.request_date),
-          description: fullDescription,
+          description: itemDesc,
           receipt: 'Attached',
           cost: eIdx === 0 ? blockAmount : 0,
         });
@@ -293,21 +287,54 @@ export async function generateReimbursementDocx(
     financeSigImage = await fetchImageBuffer(financeApprover.signature);
   }
 
-  // Requester details
-  const requesterName = request.profiles?.full_name || 'Staff';
+  const meta = extractMetadataFromDescription(request.description);
+
+  // Requester details: Based on employee profile / metadata (not role/jabatan)
+  const requesterName =
+    request.profiles?.full_name ||
+    (request as any).nama_karyawan ||
+    meta.full_name ||
+    (request.profiles?.email ? request.profiles.email.split('@')[0] : 'Employee');
+
   const requesterPhone =
-    request.profiles?.phone || (request.profiles as any)?.phone || '0882 3991 9129';
-  const requesterEmail = request.profiles?.email || 'karyawan@ouffice.co.id';
+    request.profiles?.phone ||
+    (request.profiles as any)?.phone ||
+    meta.phone ||
+    '';
+
+  const requesterEmail =
+    request.profiles?.email ||
+    meta.email ||
+    '';
+
   const requesterId =
     request.profiles?.employee_id ||
     (request.profiles as any)?.employee_id ||
-    `CSK-${(request.user_id || '003').slice(-3).toUpperCase()}`;
+    meta.employee_id ||
+    `CSK-${(request.user_id || '001').slice(-3).toUpperCase()}`;
+
   const requesterJabatan =
-    request.department || request.profiles?.department || 'Sales Executive';
-  const bankName = request.profiles?.bank_name || 'BCA';
-  const bankAccount = request.profiles?.bank_account_number || '000 000 0000';
-  const bankHolder = request.profiles?.bank_account_holder || requesterName;
-  const memoText = `Pembayaran ke Rekening ${bankName}`;
+    request.department ||
+    request.profiles?.department ||
+    meta.department ||
+    'Staff OPS';
+
+  const bankName =
+    request.profiles?.bank_name ||
+    meta.bank_name ||
+    'BCA';
+
+  const bankAccount =
+    request.profiles?.bank_account_number ||
+    meta.bank_account_number ||
+    '';
+
+  const bankHolder =
+    request.profiles?.bank_account_holder ||
+    meta.bank_account_holder ||
+    requesterName;
+
+  const memoText = bankName ? `Pembayaran ke Rekening ${bankName}` : 'Pembayaran ke Rekening BCA';
   const purposeText =
     request.title || getCleanDescription(request.description) || 'Reimburst Operasional';
 
@@ -380,14 +407,31 @@ export async function generateReimbursementDocx(
                     height: { value: 340, rule: HeightRule.ATLEAST },
                     children: [
                       new TableCell({
-                        width: { size: 1900, type: WidthType.DXA },
+                        width: { size: 1700, type: WidthType.DXA },
                         borders: cellNoBorder,
-                        margins: { top: 30, bottom: 30, left: 0, right: 40 },
+                        margins: { top: 30, bottom: 30, left: 0, right: 10 },
                         children: [
                           new Paragraph({
                             children: [
                               new TextRun({
-                                text: 'Requester Name :',
+                                text: 'Requester Name',
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                      new TableCell({
+                        width: { size: 200, type: WidthType.DXA },
+                        borders: cellNoBorder,
+                        margins: { top: 30, bottom: 30, left: 0, right: 30 },
+                        children: [
+                          new Paragraph({
+                            alignment: AlignmentType.RIGHT,
+                            children: [
+                              new TextRun({
+                                text: ':',
                                 size: 18,
                                 font: 'Arial',
                               }),
@@ -418,13 +462,26 @@ export async function generateReimbursementDocx(
                     height: { value: 340, rule: HeightRule.ATLEAST },
                     children: [
                       new TableCell({
-                        width: { size: 1900, type: WidthType.DXA },
+                        width: { size: 1700, type: WidthType.DXA },
                         borders: cellNoBorder,
-                        margins: { top: 30, bottom: 30, left: 0, right: 40 },
+                        margins: { top: 30, bottom: 30, left: 0, right: 10 },
                         children: [
                           new Paragraph({
                             children: [
-                              new TextRun({ text: 'Phone :', size: 18, font: 'Arial' }),
+                              new TextRun({ text: 'Phone', size: 18, font: 'Arial' }),
+                            ],
+                          }),
+                        ],
+                      }),
+                      new TableCell({
+                        width: { size: 200, type: WidthType.DXA },
+                        borders: cellNoBorder,
+                        margins: { top: 30, bottom: 30, left: 0, right: 30 },
+                        children: [
+                          new Paragraph({
+                            alignment: AlignmentType.RIGHT,
+                            children: [
+                              new TextRun({ text: ':', size: 18, font: 'Arial' }),
                             ],
                           }),
                         ],
@@ -451,13 +508,26 @@ export async function generateReimbursementDocx(
                     height: { value: 340, rule: HeightRule.ATLEAST },
                     children: [
                       new TableCell({
-                        width: { size: 1900, type: WidthType.DXA },
+                        width: { size: 1700, type: WidthType.DXA },
                         borders: cellNoBorder,
-                        margins: { top: 30, bottom: 30, left: 0, right: 40 },
+                        margins: { top: 30, bottom: 30, left: 0, right: 10 },
                         children: [
                           new Paragraph({
                             children: [
-                              new TextRun({ text: 'Email :', size: 18, font: 'Arial' }),
+                              new TextRun({ text: 'Email', size: 18, font: 'Arial' }),
+                            ],
+                          }),
+                        ],
+                      }),
+                      new TableCell({
+                        width: { size: 200, type: WidthType.DXA },
+                        borders: cellNoBorder,
+                        margins: { top: 30, bottom: 30, left: 0, right: 30 },
+                        children: [
+                          new Paragraph({
+                            alignment: AlignmentType.RIGHT,
+                            children: [
+                              new TextRun({ text: ':', size: 18, font: 'Arial' }),
                             ],
                           }),
                         ],
@@ -631,23 +701,40 @@ export async function generateReimbursementDocx(
                 width: { size: 6000, type: WidthType.DXA },
                 borders: tableNoBorder,
                 rows: [
-                  ['Name :', requesterName, true],
-                  ['ID :', requesterId, false],
-                  ['Jabatan :', requesterJabatan, false],
-                  ['Memo :', memoText, false],
+                  ['Name', requesterName, true],
+                  ['ID', requesterId, false],
+                  ['Jabatan', requesterJabatan, false],
+                  ['Memo', memoText, false],
                 ].map(([label, val, isBold]) => {
                   return new TableRow({
                     height: { value: 320, rule: HeightRule.ATLEAST },
                     children: [
                       new TableCell({
-                        width: { size: 1600, type: WidthType.DXA },
+                        width: { size: 1400, type: WidthType.DXA },
                         borders: cellNoBorder,
-                        margins: { top: 30, bottom: 30, left: 0, right: 40 },
+                        margins: { top: 30, bottom: 30, left: 0, right: 10 },
                         children: [
                           new Paragraph({
                             children: [
                               new TextRun({
                                 text: label as string,
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                      new TableCell({
+                        width: { size: 200, type: WidthType.DXA },
+                        borders: cellNoBorder,
+                        margins: { top: 30, bottom: 30, left: 0, right: 30 },
+                        children: [
+                          new Paragraph({
+                            alignment: AlignmentType.RIGHT,
+                            children: [
+                              new TextRun({
+                                text: ':',
                                 size: 18,
                                 font: 'Arial',
                               }),

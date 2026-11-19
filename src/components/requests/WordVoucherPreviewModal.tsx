@@ -15,6 +15,7 @@ import {
   parseAccountBlocksFromDescription,
   normalizeAccount,
   getCleanDescription,
+  extractMetadataFromDescription,
 } from '@/lib/formatters';
 import { printVoucherDocument } from '@/lib/printUtils';
 
@@ -71,24 +72,18 @@ export default function WordVoucherPreviewModal({
           : [{ customer: reqItem.customer || '', description: reqItem.title }];
 
       entries.forEach((entry, eIdx) => {
-        const descParts: string[] = [];
-        if (entry.customer && entry.customer.trim()) {
-          descParts.push(entry.customer.trim());
-        }
         const cleanDesc = getCleanDescription(entry.description);
-        if (cleanDesc && cleanDesc.trim()) {
-          descParts.push(cleanDesc.trim());
-        } else if (reqItem.title && !descParts.includes(reqItem.title)) {
-          descParts.push(reqItem.title.trim());
-        }
-
-        const fullDescription =
-          descParts.length > 0 ? `${blockAcc} -- ${descParts.join(' - ')}` : blockAcc;
+        const itemDesc =
+          cleanDesc && cleanDesc.trim()
+            ? cleanDesc.trim()
+            : reqItem.title && !reqItem.title.startsWith('Form Lembur')
+            ? reqItem.title.trim()
+            : '';
 
         itemizedList.push({
           itemNum: runningItem++,
           date: formatDateSlash(reqItem.request_date),
-          description: fullDescription,
+          description: itemDesc,
           receipt: 'Attached',
           cost: eIdx === 0 ? blockAmount : 0,
         });
@@ -118,21 +113,54 @@ export default function WordVoucherPreviewModal({
   });
   const allReceiptUrls = Array.from(receiptUrlSet).filter(Boolean);
 
-  // Requester details
-  const requesterName = request.profiles?.full_name || 'Staff';
+  const meta = extractMetadataFromDescription(request.description);
+
+  // Requester details: Based on employee profile / metadata (not role/jabatan)
+  const requesterName =
+    request.profiles?.full_name ||
+    (request as any).nama_karyawan ||
+    meta.full_name ||
+    (request.profiles?.email ? request.profiles.email.split('@')[0] : 'Employee');
+
   const requesterPhone =
-    request.profiles?.phone || (request.profiles as any)?.phone || '0882 3991 9129';
-  const requesterEmail = request.profiles?.email || 'karyawan@ouffice.co.id';
+    request.profiles?.phone ||
+    (request.profiles as any)?.phone ||
+    meta.phone ||
+    '';
+
+  const requesterEmail =
+    request.profiles?.email ||
+    meta.email ||
+    '';
+
   const requesterId =
     request.profiles?.employee_id ||
     (request.profiles as any)?.employee_id ||
-    `CSK-${(request.user_id || '003').slice(-3).toUpperCase()}`;
+    meta.employee_id ||
+    `CSK-${(request.user_id || '001').slice(-3).toUpperCase()}`;
+
   const requesterJabatan =
-    request.department || request.profiles?.department || 'Sales Executive';
-  const bankName = request.profiles?.bank_name || 'BCA';
-  const bankAccount = request.profiles?.bank_account_number || '000 000 0000';
-  const bankHolder = request.profiles?.bank_account_holder || requesterName;
-  const memoText = `Pembayaran ke Rekening ${bankName}`;
+    request.department ||
+    request.profiles?.department ||
+    meta.department ||
+    'Staff OPS';
+
+  const bankName =
+    request.profiles?.bank_name ||
+    meta.bank_name ||
+    'BCA';
+
+  const bankAccount =
+    request.profiles?.bank_account_number ||
+    meta.bank_account_number ||
+    '';
+
+  const bankHolder =
+    request.profiles?.bank_account_holder ||
+    meta.bank_account_holder ||
+    requesterName;
+
+  const memoText = bankName ? `Pembayaran ke Rekening ${bankName}` : 'Pembayaran ke Rekening BCA';
   const purposeText =
     request.title || getCleanDescription(request.description) || 'Reimburst Operasional';
 
@@ -257,21 +285,34 @@ export default function WordVoucherPreviewModal({
                   <table className="border-collapse text-[11px] w-[58%]">
                     <tbody>
                       <tr>
-                        <td className="py-1 pr-2 font-normal text-gray-700 w-[140px]">
-                          Requester Name :
+                        <td className="py-1 pr-1 font-normal text-gray-700 whitespace-nowrap w-[110px]">
+                          Requester Name
+                        </td>
+                        <td className="py-1 pr-2 font-normal text-gray-700 text-right w-[15px]">
+                          :
                         </td>
                         <td className="py-1 px-2 border border-gray-400 font-bold bg-white">
                           {requesterName}
                         </td>
                       </tr>
                       <tr>
-                        <td className="py-1 pr-2 font-normal text-gray-700">Phone :</td>
+                        <td className="py-1 pr-1 font-normal text-gray-700 whitespace-nowrap">
+                          Phone
+                        </td>
+                        <td className="py-1 pr-2 font-normal text-gray-700 text-right">
+                          :
+                        </td>
                         <td className="py-1 px-2 border border-gray-400 bg-white">
                           {requesterPhone}
                         </td>
                       </tr>
                       <tr>
-                        <td className="py-1 pr-2 font-normal text-gray-700">Email :</td>
+                        <td className="py-1 pr-1 font-normal text-gray-700 whitespace-nowrap">
+                          Email
+                        </td>
+                        <td className="py-1 pr-2 font-normal text-gray-700 text-right">
+                          :
+                        </td>
                         <td className="py-1 px-2 border border-gray-400 text-blue-600 underline bg-white">
                           {requesterEmail}
                         </td>
@@ -316,27 +357,45 @@ export default function WordVoucherPreviewModal({
                     <table className="border-collapse text-[11px] w-[58%]">
                       <tbody>
                         <tr>
-                          <td className="py-1 pr-2 font-normal text-gray-700 w-[100px]">
-                            Name :
+                          <td className="py-1 pr-1 font-normal text-gray-700 whitespace-nowrap w-[90px]">
+                            Name
+                          </td>
+                          <td className="py-1 pr-2 font-normal text-gray-700 text-right w-[15px]">
+                            :
                           </td>
                           <td className="py-1 px-2 border border-gray-400 font-bold bg-white">
                             {requesterName}
                           </td>
                         </tr>
                         <tr>
-                          <td className="py-1 pr-2 font-normal text-gray-700">ID :</td>
+                          <td className="py-1 pr-1 font-normal text-gray-700 whitespace-nowrap">
+                            ID
+                          </td>
+                          <td className="py-1 pr-2 font-normal text-gray-700 text-right">
+                            :
+                          </td>
                           <td className="py-1 px-2 border border-gray-400 font-mono bg-white">
                             {requesterId}
                           </td>
                         </tr>
                         <tr>
-                          <td className="py-1 pr-2 font-normal text-gray-700">Jabatan :</td>
+                          <td className="py-1 pr-1 font-normal text-gray-700 whitespace-nowrap">
+                            Jabatan
+                          </td>
+                          <td className="py-1 pr-2 font-normal text-gray-700 text-right">
+                            :
+                          </td>
                           <td className="py-1 px-2 border border-gray-400 bg-white">
                             {requesterJabatan}
                           </td>
                         </tr>
                         <tr>
-                          <td className="py-1 pr-2 font-normal text-gray-700">Memo :</td>
+                          <td className="py-1 pr-1 font-normal text-gray-700 whitespace-nowrap">
+                            Memo
+                          </td>
+                          <td className="py-1 pr-2 font-normal text-gray-700 text-right">
+                            :
+                          </td>
                           <td className="py-1 px-2 border border-gray-400 bg-white">
                             {memoText}
                           </td>

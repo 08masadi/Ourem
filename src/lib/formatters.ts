@@ -26,6 +26,13 @@ export interface RequestMetadataPayload {
   blocks?: AccountBlockData[];
   entries?: CustomerDescriptionEntry[];
   overtime_data?: OvertimeData;
+  full_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  employee_id?: string | null;
+  bank_name?: string | null;
+  bank_account_number?: string | null;
+  bank_account_holder?: string | null;
 }
 
 /**
@@ -110,6 +117,13 @@ export function extractMetadataFromDescription(description?: string | null): Req
           blocks: parsed.blocks,
           entries: parsed.entries,
           overtime_data: parsed.overtime_data,
+          full_name: parsed.full_name,
+          email: parsed.email,
+          phone: parsed.phone,
+          employee_id: parsed.employee_id,
+          bank_name: parsed.bank_name,
+          bank_account_number: parsed.bank_account_number,
+          bank_account_holder: parsed.bank_account_holder,
         };
       }
     } catch {

@@ -21,6 +21,7 @@ export const DEPARTMENT_OPTIONS = [
   'Staff OPS',
   'Staff Administration',
   'Staff Purchasing',
+  'Sales Executive',
   'Sales Marketing',
   'Finance',
   'Director',
