@@ -67,12 +67,14 @@ export async function signUp(prevState: any, formData: FormData) {
   const full_name = (formData.get('full_name') as string || '').trim();
   const role = (formData.get('role') as UserRole) || 'employee';
   let department = (formData.get('department') as string || '').trim();
-  if (role === 'director') {
-    department = 'Director';
-  } else if (role === 'finance') {
-    department = 'Finance';
-  } else if (!department) {
-    department = 'Staff OPS';
+  if (!department) {
+    if (role === 'director') {
+      department = 'Director';
+    } else if (role === 'finance') {
+      department = 'Finance';
+    } else {
+      department = 'Staff OPS';
+    }
   }
 
   const origin = (formData.get('origin') as string) || 'https://ourem.vercel.app';

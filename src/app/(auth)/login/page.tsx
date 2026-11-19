@@ -3,7 +3,7 @@
 import { useState, useTransition, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { signIn, signUp, requestPasswordReset } from '@/actions/auth';
-import { UserRole } from '@/types/database';
+import { UserRole, DEPARTMENT_OPTIONS } from '@/types/database';
 import {
   Lock,
   Mail,
@@ -40,10 +40,6 @@ function LoginContent() {
       setDepartment('Director');
     } else if (newRole === 'finance') {
       setDepartment('Finance');
-    } else {
-      if (department === 'Director' || department === 'Finance') {
-        setDepartment('Staff OPS');
-      }
     }
   };
 
@@ -72,7 +68,7 @@ function LoginContent() {
     const form = e.currentTarget;
     const formData = new FormData(form);
     formData.set('role', role);
-    formData.set('department', role === 'director' ? 'Director' : role === 'finance' ? 'Finance' : department);
+    formData.set('department', department);
 
     startTransition(async () => {
       try {
@@ -340,39 +336,22 @@ function LoginContent() {
                         <Briefcase className="w-3.5 h-3.5 text-orange-400" />
                         <span>Departemen</span>
                       </span>
-                      {role !== 'employee' && (
-                        <span className="text-[10px] text-slate-400 italic">
-                          (Otomatis sesuai peran)
-                        </span>
-                      )}
                     </label>
-                    {role === 'employee' ? (
-                      <div className="relative">
-                        <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
-                        <select
-                          name="department"
-                          value={department}
-                          onChange={(e) => setDepartment(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
-                        >
-                          <option value="Staff OPS">Staff OPS</option>
-                          <option value="Staff Administration">Staff Administration</option>
-                          <option value="Staff Purchasing">Staff Purchasing</option>
-                          <option value="Sales Marketing">Sales Marketing</option>
-                          <option value="Manager">Manager</option>
-                        </select>
-                      </div>
-                    ) : (
-                      <div className="relative">
-                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                        <input
-                          type="text"
-                          readOnly
-                          value={role === 'director' ? 'Director' : 'Finance'}
-                          className="w-full pl-10 pr-4 py-2.5 bg-slate-950/50 border border-slate-800 rounded-xl text-xs text-slate-300 font-semibold cursor-not-allowed select-none shadow-inner"
-                        />
-                      </div>
-                    )}
+                    <div className="relative">
+                      <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                      <select
+                        name="department"
+                        value={department}
+                        onChange={(e) => setDepartment(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
+                      >
+                        {DEPARTMENT_OPTIONS.map((dep) => (
+                          <option key={dep} value={dep}>
+                            {dep}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </>
               )}
