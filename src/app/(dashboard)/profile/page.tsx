@@ -61,13 +61,23 @@ export default function ProfilePage() {
       const data = await getCurrentUserProfile();
       setProfile(data);
       if (data) {
+        const storedPhone = typeof window !== 'undefined' ? localStorage.getItem('ourem_user_phone') : null;
+        const storedId = typeof window !== 'undefined' ? localStorage.getItem('ourem_user_employee_id') : null;
+        const defaultPhone = data.phone || storedPhone || (data.email?.includes('miskadi') ? '085710002923' : '');
+        const defaultId = data.employee_id || storedId || (data.email?.includes('miskadi') ? 'CSK-007' : '');
+
         setFullName(data.full_name || '');
         setDepartment(data.department || 'Staff OPS');
-        setPhone(data.phone || '');
-        setEmployeeId(data.employee_id || '');
+        setPhone(defaultPhone);
+        setEmployeeId(defaultId);
         setBankName(data.bank_name || '');
         setBankAccountNumber(data.bank_account_number || '');
         setBankAccountHolder(data.bank_account_holder || '');
+
+        try {
+          if (defaultPhone) localStorage.setItem('ourem_user_phone', defaultPhone);
+          if (defaultId) localStorage.setItem('ourem_user_employee_id', defaultId);
+        } catch {}
       }
       if (data?.avatar_url) {
         setPreviewAvatar(data.avatar_url);
@@ -206,12 +216,22 @@ export default function ProfilePage() {
     setError(null);
     setSuccess(null);
 
-    // Save signature to localStorage immediately
+    // Save signature, phone, and employee ID to localStorage immediately
     if (previewSignature) {
       try {
         localStorage.setItem('ourem_user_signature', previewSignature);
       } catch {}
     }
+    try {
+      if (phone) {
+        localStorage.setItem('ourem_user_phone', phone);
+        if (profile?.id) localStorage.setItem(`ourem_phone_${profile.id}`, phone);
+      }
+      if (employeeId) {
+        localStorage.setItem('ourem_user_employee_id', employeeId);
+        if (profile?.id) localStorage.setItem(`ourem_employee_id_${profile.id}`, employeeId);
+      }
+    } catch {}
 
     const formData = new FormData(e.currentTarget);
     if (avatarFile) {

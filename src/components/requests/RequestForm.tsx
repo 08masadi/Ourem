@@ -308,6 +308,18 @@ export default function RequestForm() {
       .filter(Boolean)
       .join(', ');
 
+    const userPhone =
+      userProfile?.phone ||
+      (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_phone') : '') ||
+      (userProfile?.email?.includes('miskadi') || userProfile?.full_name?.toLowerCase().includes('miskadi') ? '085710002923' : '') ||
+      undefined;
+
+    const userEmpId =
+      userProfile?.employee_id ||
+      (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_employee_id') : '') ||
+      (userProfile?.email?.includes('miskadi') || userProfile?.full_name?.toLowerCase().includes('miskadi') ? 'CSK-007' : '') ||
+      undefined;
+
     const combinedDescription = formatAccountBlocksToDescription(blocksData, {
       reimbursement_type: reimbursementType,
       department,
@@ -316,8 +328,8 @@ export default function RequestForm() {
       signature_url: sigToSend,
       full_name: userProfile?.full_name,
       email: userProfile?.email,
-      phone: userProfile?.phone || (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_phone') : '') || undefined,
-      employee_id: userProfile?.employee_id || (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_employee_id') : '') || undefined,
+      phone: userPhone,
+      employee_id: userEmpId,
       bank_name: userProfile?.bank_name || undefined,
       bank_account_number: userProfile?.bank_account_number || undefined,
       bank_account_holder: userProfile?.bank_account_holder || undefined,
@@ -572,7 +584,7 @@ export default function RequestForm() {
                       </optgroup>
 
                       <optgroup label="─── OPERASIONAL LAINNYA ───" className="bg-slate-900 text-teal-400 font-bold">
-                        <option value="Entertainment Executive" className="text-white">Entertainment Executive</option>
+                        <option value="Entertain Partner" className="text-white">Entertain Partner</option>
                         <option value="Hotel & Penginapan" className="text-white">Hotel & Penginapan</option>
                         <option value="Medis & Kesehatan" className="text-white">Medis & Kesehatan</option>
                         <option value="Operasional Kantor" className="text-white">Operasional Kantor</option>

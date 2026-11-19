@@ -617,7 +617,7 @@ export default function EditRequestModal({
                         </optgroup>
 
                         <optgroup label="─── OPERASIONAL LAINNYA ───" className="bg-slate-900 text-teal-400 font-bold">
-                          <option value="Entertainment Executive" className="text-white">Entertainment Executive</option>
+                          <option value="Entertain Partner" className="text-white">Entertain Partner</option>
                           <option value="Hotel & Penginapan" className="text-white">Hotel & Penginapan</option>
                           <option value="Medis & Kesehatan" className="text-white">Medis & Kesehatan</option>
                           <option value="Operasional Kantor" className="text-white">Operasional Kantor</option>
