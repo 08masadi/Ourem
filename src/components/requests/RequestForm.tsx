@@ -40,6 +40,7 @@ interface AccountBlockState {
   entries: Array<{
     customer: string;
     description: string;
+    receipt_date?: string;
   }>;
 }
 
@@ -61,7 +62,7 @@ export default function RequestForm() {
       amount: '',
       receiptFile: null,
       receiptPreview: null,
-      entries: [{ customer: '', description: '' }],
+      entries: [{ customer: '', description: '', receipt_date: new Date().toISOString().split('T')[0] }],
     },
   ]);
 
@@ -167,7 +168,7 @@ export default function RequestForm() {
         amount: '',
         receiptFile: null,
         receiptPreview: null,
-        entries: [{ customer: '', description: '' }],
+        entries: [{ customer: '', description: '', receipt_date: requestDate }],
       },
     ]);
   };
@@ -214,7 +215,7 @@ export default function RequestForm() {
         if (idx !== blockIndex) return b;
         return {
           ...b,
-          entries: [...b.entries, { customer: '', description: '' }],
+          entries: [...b.entries, { customer: '', description: '', receipt_date: requestDate }],
         };
       })
     );
@@ -236,7 +237,7 @@ export default function RequestForm() {
   const updateCustomerEntry = (
     blockIndex: number,
     entryIndex: number,
-    field: 'customer' | 'description',
+    field: 'customer' | 'description' | 'receipt_date',
     value: string
   ) => {
     setBlocks((prev) =>
@@ -292,6 +293,7 @@ export default function RequestForm() {
       entries: b.entries.map((e) => ({
         customer: e.customer.trim(),
         description: e.description.trim(),
+        receipt_date: e.receipt_date || requestDate,
       })),
     }));
 
@@ -595,36 +597,58 @@ export default function RequestForm() {
                       #{entryIndex + 1}
                     </span>
 
-                    {/* Customer Input */}
-                    <div className="w-full sm:w-5/12">
-                      <label className="block text-[10px] font-semibold text-slate-400 mb-1">
-                        Customer / Klien / Project
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={entry.customer}
-                        onChange={(e) =>
-                          updateCustomerEntry(blockIndex, entryIndex, 'customer', e.target.value)
-                        }
-                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      />
+                    {/* Customer & Tanggal Nota Input */}
+                    <div className="w-full sm:w-5/12 space-y-2">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-400 mb-1">
+                          Customer / Klien / Project
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={entry.customer}
+                          onChange={(e) =>
+                            updateCustomerEntry(blockIndex, entryIndex, 'customer', e.target.value)
+                          }
+                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-400 mb-1 flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-orange-400" />
+                          <span>Tanggal Nota</span>
+                        </label>
+                        <input
+                          type="date"
+                          value={entry.receipt_date || requestDate}
+                          onChange={(e) =>
+                            updateCustomerEntry(blockIndex, entryIndex, 'receipt_date', e.target.value)
+                          }
+                          onClick={(e) => {
+                            try {
+                              e.currentTarget.showPicker?.();
+                            } catch {}
+                          }}
+                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                          style={{ colorScheme: 'dark' }}
+                        />
+                      </div>
                     </div>
 
                     {/* Description Textarea (Tanpa Bullet) */}
-                    <div className="w-full sm:flex-1">
+                    <div className="w-full sm:flex-1 flex flex-col">
                       <label className="block text-[10px] font-semibold text-slate-400 mb-1 flex items-center gap-1">
                         <List className="w-3 h-3 text-orange-400" />
                         <span>Description (Keterangan)</span>
                       </label>
                       <textarea
-                        rows={2}
+                        rows={4}
                         required
                         value={entry.description}
                         onChange={(e) =>
                           updateCustomerEntry(blockIndex, entryIndex, 'description', e.target.value)
                         }
-                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed"
+                        className="w-full flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed min-h-[88px]"
                       />
                     </div>
 

@@ -518,6 +518,7 @@ export default function RequestList({
           customer: entry.customer || '-',
           description: getCleanDescription(entry.description) || item.title,
           amount: blockAmount,
+          receipt_date: (entry as any).receipt_date || item.request_date,
           blockId,
         }));
       });

@@ -82,7 +82,7 @@ export default function WordVoucherPreviewModal({
 
         itemizedList.push({
           itemNum: runningItem++,
-          date: formatDateSlash(reqItem.request_date),
+          date: formatDateSlash(entry.receipt_date || reqItem.request_date),
           description: itemDesc,
           receipt: 'Attached',
           cost: eIdx === 0 ? blockAmount : 0,
@@ -165,7 +165,8 @@ export default function WordVoucherPreviewModal({
     request.title || getCleanDescription(request.description) || 'Reimburst Operasional';
 
   const requestDateFormatted = formatDateSlash(request.request_date);
-  const rfNumberFormatted = formatRfNumber(request.request_date, request.id);
+  const rfNumberFormatted =
+    request.rf_number || meta.rf_number || formatRfNumber(request.request_date, request.id);
 
   // Approver details
   const finName = financeApprover?.name || 'Dwi N';
@@ -265,8 +266,8 @@ export default function WordVoucherPreviewModal({
         <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
           <div
             ref={printRef}
-            className="bg-white text-black p-6 sm:p-10 rounded-2xl shadow-lg mx-auto max-w-[210mm] text-[12px] leading-tight font-sans"
-            style={{ fontFamily: 'Arial, sans-serif' }}
+            className="bg-white text-black p-6 sm:p-10 rounded-2xl shadow-lg mx-auto max-w-[210mm] text-[11pt] leading-normal font-sans"
+            style={{ fontFamily: 'Arial, sans-serif', fontSize: '11pt' }}
           >
             {/* ================= PAGE 1 ================= */}
             <div className="min-h-[297mm] flex flex-col justify-between">
@@ -275,14 +276,14 @@ export default function WordVoucherPreviewModal({
                 <h1 className="text-2xl font-black text-[#E65100] tracking-tight">
                   Reimbursement Form
                 </h1>
-                <p className="text-xs font-bold text-gray-600 mb-4">
+                <p className="text-[11pt] font-bold text-gray-600 mb-4">
                   PT. CITRA SARI KENCANA (Ouffice.co.id)
                 </p>
 
                 {/* Top Section: Requester Table (Left) + Request Date & RF Number (Right) */}
                 <div className="flex justify-between items-start gap-4 mb-4">
                   {/* Left: Requester Info */}
-                  <table className="border-collapse text-[11px] w-[58%]">
+                  <table className="border-collapse text-[11pt] w-[58%]">
                     <tbody>
                       <tr>
                         <td className="py-1 pr-1 font-normal text-gray-700 whitespace-nowrap w-[110px]">
@@ -321,10 +322,10 @@ export default function WordVoucherPreviewModal({
                   </table>
 
                   {/* Right: Request Date & RF Number Box */}
-                  <table className="border-collapse text-[11px] w-[38%] text-center">
+                  <table className="border-collapse text-[11pt] w-[38%] text-center">
                     <tbody>
                       <tr>
-                        <td className="bg-[#B95318] text-white font-bold py-1 px-2 border border-gray-400 text-xs">
+                        <td className="bg-[#B95318] text-white font-bold py-1 px-2 border border-gray-400 text-[11pt]">
                           Request Date
                         </td>
                       </tr>
@@ -334,7 +335,7 @@ export default function WordVoucherPreviewModal({
                         </td>
                       </tr>
                       <tr>
-                        <td className="bg-[#B95318] text-white font-bold py-1 px-2 border border-gray-400 text-xs">
+                        <td className="bg-[#B95318] text-white font-bold py-1 px-2 border border-gray-400 text-[11pt]">
                           RF Number
                         </td>
                       </tr>
@@ -349,12 +350,12 @@ export default function WordVoucherPreviewModal({
 
                 {/* Make Check Payable To */}
                 <div className="mb-4">
-                  <h2 className="text-xs font-bold text-black mb-1.5">
+                  <h2 className="text-[11pt] font-bold text-black mb-1.5">
                     Make Check Payable To
                   </h2>
                   <div className="flex justify-between items-start gap-4">
                     {/* Left: Name, ID, Jabatan, Memo */}
-                    <table className="border-collapse text-[11px] w-[58%]">
+                    <table className="border-collapse text-[11pt] w-[58%]">
                       <tbody>
                         <tr>
                           <td className="py-1 pr-1 font-normal text-gray-700 whitespace-nowrap w-[90px]">
@@ -404,7 +405,7 @@ export default function WordVoucherPreviewModal({
                     </table>
 
                     {/* Right: Bank Account Box */}
-                    <div className="border border-gray-400 p-2.5 w-[38%] text-[11px] bg-white space-y-1">
+                    <div className="border border-gray-400 p-2.5 w-[38%] text-[11pt] bg-white space-y-1">
                       <div className="font-bold">BANK {bankName.toUpperCase()}</div>
                       <div className="font-bold">A/C : {bankAccount}</div>
                       <div className="font-bold">AN. : {bankHolder.toUpperCase()}</div>
@@ -414,18 +415,18 @@ export default function WordVoucherPreviewModal({
 
                 {/* Describe Purpose */}
                 <div className="mb-4">
-                  <h2 className="text-xs font-bold text-black mb-1.5">Describe Purpose</h2>
-                  <div className="border border-gray-400 p-2 min-h-[30px] text-[11px] bg-white">
+                  <h2 className="text-[11pt] font-bold text-black mb-1.5">Describe Purpose</h2>
+                  <div className="border border-gray-400 p-2 min-h-[30px] text-[11pt] bg-white">
                     {purposeText}
                   </div>
                 </div>
 
                 {/* Itemized Expenses */}
                 <div className="mb-4">
-                  <h2 className="text-sm font-bold text-[#E65100] mb-1.5">
+                  <h2 className="text-[11pt] font-bold text-[#E65100] mb-1.5">
                     Itemized Expenses
                   </h2>
-                  <table className="w-full border-collapse text-[11px]">
+                  <table className="w-full border-collapse text-[11pt]">
                     <thead>
                       <tr className="bg-[#B95318] text-white font-bold text-center">
                         <th className="py-1 px-1.5 border border-gray-400 w-[6%]">ITEM</th>
@@ -485,8 +486,8 @@ export default function WordVoucherPreviewModal({
 
                 {/* Approval */}
                 <div className="mb-2">
-                  <h2 className="text-xs font-bold text-black mb-1.5">Approval</h2>
-                  <table className="w-full border-collapse text-[11px]">
+                  <h2 className="text-[11pt] font-bold text-black mb-1.5">Approval</h2>
+                  <table className="w-full border-collapse text-[11pt]">
                     <tbody>
                       {/* Names & Position */}
                       <tr>
@@ -511,13 +512,7 @@ export default function WordVoucherPreviewModal({
                       {/* Signature & Date */}
                       <tr>
                         <td className="border border-gray-400 py-1 px-2 h-[45px] align-middle">
-                          {financeApprover?.signature && (
-                            <img
-                              src={financeApprover.signature}
-                              alt="Signature"
-                              className="h-[36px] object-contain"
-                            />
-                          )}
+                          {/* Kotak tanda tangan kosong untuk tanda tangan basah / manual */}
                         </td>
                         <td className="border border-gray-400 py-1 px-2 h-[45px] align-middle font-mono">
                           {paymentDate}

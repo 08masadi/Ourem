@@ -242,7 +242,7 @@ export async function generateReimbursementDocx(
 
         itemizedList.push({
           itemNum: runningItem++,
-          date: formatDateSlash(reqItem.request_date),
+          date: formatDateSlash(entry.receipt_date || reqItem.request_date),
           description: itemDesc,
           receipt: 'Attached',
           cost: eIdx === 0 ? blockAmount : 0,
@@ -280,12 +280,6 @@ export async function generateReimbursementDocx(
   const validReceiptImages = loadedReceiptImages.filter(
     (img): img is LoadedImageData => img !== null
   );
-
-  // Fetch signatures if available
-  let financeSigImage: LoadedImageData | null = null;
-  if (financeApprover?.signature) {
-    financeSigImage = await fetchImageBuffer(financeApprover.signature);
-  }
 
   const meta = extractMetadataFromDescription(request.description);
 
@@ -339,7 +333,8 @@ export async function generateReimbursementDocx(
     request.title || getCleanDescription(request.description) || 'Reimburst Operasional';
 
   const requestDateFormatted = formatDateSlash(request.request_date);
-  const rfNumberFormatted = formatRfNumber(request.request_date, request.id);
+  const rfNumberFormatted =
+    request.rf_number || meta.rf_number || formatRfNumber(request.request_date, request.id);
 
   // Approver names
   const finName = financeApprover?.name || 'Dwi N';
@@ -415,7 +410,7 @@ export async function generateReimbursementDocx(
                             children: [
                               new TextRun({
                                 text: 'Requester Name',
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -432,7 +427,7 @@ export async function generateReimbursementDocx(
                             children: [
                               new TextRun({
                                 text: ':',
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -449,7 +444,7 @@ export async function generateReimbursementDocx(
                               new TextRun({
                                 text: requesterName,
                                 bold: true,
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -468,7 +463,7 @@ export async function generateReimbursementDocx(
                         children: [
                           new Paragraph({
                             children: [
-                              new TextRun({ text: 'Phone', size: 18, font: 'Arial' }),
+                              new TextRun({ text: 'Phone', size: 22, font: 'Arial' }),
                             ],
                           }),
                         ],
@@ -481,7 +476,7 @@ export async function generateReimbursementDocx(
                           new Paragraph({
                             alignment: AlignmentType.RIGHT,
                             children: [
-                              new TextRun({ text: ':', size: 18, font: 'Arial' }),
+                              new TextRun({ text: ':', size: 22, font: 'Arial' }),
                             ],
                           }),
                         ],
@@ -495,7 +490,7 @@ export async function generateReimbursementDocx(
                             children: [
                               new TextRun({
                                 text: requesterPhone,
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -514,7 +509,7 @@ export async function generateReimbursementDocx(
                         children: [
                           new Paragraph({
                             children: [
-                              new TextRun({ text: 'Email', size: 18, font: 'Arial' }),
+                              new TextRun({ text: 'Email', size: 22, font: 'Arial' }),
                             ],
                           }),
                         ],
@@ -527,7 +522,7 @@ export async function generateReimbursementDocx(
                           new Paragraph({
                             alignment: AlignmentType.RIGHT,
                             children: [
-                              new TextRun({ text: ':', size: 18, font: 'Arial' }),
+                              new TextRun({ text: ':', size: 22, font: 'Arial' }),
                             ],
                           }),
                         ],
@@ -541,7 +536,7 @@ export async function generateReimbursementDocx(
                             children: [
                               new TextRun({
                                 text: requesterEmail,
-                                size: 18,
+                                size: 22,
                                 color: '0563C1',
                                 underline: {},
                                 font: 'Arial',
@@ -583,7 +578,7 @@ export async function generateReimbursementDocx(
                                 text: 'Request Date',
                                 bold: true,
                                 color: 'FFFFFF',
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -605,7 +600,7 @@ export async function generateReimbursementDocx(
                             children: [
                               new TextRun({
                                 text: requestDateFormatted,
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -630,7 +625,7 @@ export async function generateReimbursementDocx(
                                 text: 'RF Number',
                                 bold: true,
                                 color: 'FFFFFF',
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -652,7 +647,7 @@ export async function generateReimbursementDocx(
                             children: [
                               new TextRun({
                                 text: rfNumberFormatted,
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -679,7 +674,7 @@ export async function generateReimbursementDocx(
         new TextRun({
           text: 'Make Check Payable To',
           bold: true,
-          size: 20,
+          size: 22,
           font: 'Arial',
         }),
       ],
@@ -718,7 +713,7 @@ export async function generateReimbursementDocx(
                             children: [
                               new TextRun({
                                 text: label as string,
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -735,7 +730,7 @@ export async function generateReimbursementDocx(
                             children: [
                               new TextRun({
                                 text: ':',
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -752,7 +747,7 @@ export async function generateReimbursementDocx(
                               new TextRun({
                                 text: val as string,
                                 bold: Boolean(isBold),
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -788,7 +783,7 @@ export async function generateReimbursementDocx(
                               new TextRun({
                                 text: `BANK ${bankName.toUpperCase()}`,
                                 bold: true,
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -799,7 +794,7 @@ export async function generateReimbursementDocx(
                               new TextRun({
                                 text: `A/C : ${bankAccount}`,
                                 bold: true,
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -810,7 +805,7 @@ export async function generateReimbursementDocx(
                               new TextRun({
                                 text: `AN. : ${bankHolder.toUpperCase()}`,
                                 bold: true,
-                                size: 18,
+                                size: 22,
                                 font: 'Arial',
                               }),
                             ],
@@ -837,7 +832,7 @@ export async function generateReimbursementDocx(
         new TextRun({
           text: 'Describe Purpose',
           bold: true,
-          size: 20,
+          size: 22,
           font: 'Arial',
         }),
       ],
@@ -861,7 +856,7 @@ export async function generateReimbursementDocx(
                   children: [
                     new TextRun({
                       text: purposeText,
-                      size: 18,
+                      size: 22,
                       font: 'Arial',
                     }),
                   ],
@@ -882,7 +877,7 @@ export async function generateReimbursementDocx(
         new TextRun({
           text: 'Itemized Expenses',
           bold: true,
-          size: 26,
+          size: 22,
           color: 'E65100',
           font: 'Arial',
         }),
@@ -916,7 +911,7 @@ export async function generateReimbursementDocx(
                   text: col.label,
                   bold: true,
                   color: 'FFFFFF',
-                  size: 18,
+                  size: 22,
                   font: 'Arial',
                 }),
               ],
@@ -948,7 +943,7 @@ export async function generateReimbursementDocx(
                 children: [
                   new TextRun({
                     text: String(i + 1),
-                    size: 18,
+                    size: 22,
                     font: 'Arial',
                   }),
                 ],
@@ -966,7 +961,7 @@ export async function generateReimbursementDocx(
                 children: [
                   new TextRun({
                     text: item ? item.date : '',
-                    size: 18,
+                    size: 22,
                     font: 'Arial',
                   }),
                 ],
@@ -983,7 +978,7 @@ export async function generateReimbursementDocx(
                 children: [
                   new TextRun({
                     text: item ? item.description : '',
-                    size: 18,
+                    size: 22,
                     font: 'Arial',
                   }),
                 ],
@@ -1001,7 +996,7 @@ export async function generateReimbursementDocx(
                 children: [
                   new TextRun({
                     text: item ? item.receipt : '',
-                    size: 18,
+                    size: 22,
                     font: 'Arial',
                   }),
                 ],
@@ -1019,7 +1014,7 @@ export async function generateReimbursementDocx(
                 children: [
                   new TextRun({
                     text: item && item.cost > 0 ? formatCurrencyNumber(item.cost) : '',
-                    size: 18,
+                    size: 22,
                     font: 'Arial',
                   }),
                 ],
@@ -1047,7 +1042,7 @@ export async function generateReimbursementDocx(
                 new TextRun({
                   text: 'TOTAL',
                   bold: true,
-                  size: 20,
+                  size: 22,
                   font: 'Arial',
                 }),
               ],
@@ -1066,7 +1061,7 @@ export async function generateReimbursementDocx(
                 new TextRun({
                   text: 'IDR',
                   bold: true,
-                  size: 20,
+                  size: 22,
                   font: 'Arial',
                 }),
               ],
@@ -1085,7 +1080,7 @@ export async function generateReimbursementDocx(
                 new TextRun({
                   text: formatCurrencyNumber(totalAmount),
                   bold: true,
-                  size: 20,
+                  size: 22,
                   font: 'Arial',
                 }),
               ],
@@ -1112,7 +1107,7 @@ export async function generateReimbursementDocx(
         new TextRun({
           text: "Don't forget to include receipts!",
           italics: true,
-          size: 16,
+          size: 22,
           font: 'Arial',
         }),
       ],
@@ -1127,7 +1122,7 @@ export async function generateReimbursementDocx(
         new TextRun({
           text: 'Approval',
           bold: true,
-          size: 20,
+          size: 22,
           font: 'Arial',
         }),
       ],
@@ -1150,10 +1145,10 @@ export async function generateReimbursementDocx(
               children: [
                 new Paragraph({
                   children: [
-                    new TextRun({ text: finName, size: 18, font: 'Arial' }),
+                    new TextRun({ text: finName, size: 22, font: 'Arial' }),
                     new TextRun({
                       text: `                                                    ${dirName}`,
-                      size: 18,
+                      size: 22,
                       font: 'Arial',
                     }),
                   ],
@@ -1167,10 +1162,10 @@ export async function generateReimbursementDocx(
               children: [
                 new Paragraph({
                   children: [
-                    new TextRun({ text: 'Finance', size: 18, font: 'Arial' }),
+                    new TextRun({ text: 'Finance', size: 22, font: 'Arial' }),
                     new TextRun({
                       text: '                                Direktur',
-                      size: 18,
+                      size: 22,
                       font: 'Arial',
                     }),
                   ],
@@ -1192,7 +1187,7 @@ export async function generateReimbursementDocx(
                   children: [
                     new TextRun({
                       text: 'Approved By (Name)',
-                      size: 15,
+                      size: 22,
                       color: '595959',
                       font: 'Arial',
                     }),
@@ -1209,7 +1204,7 @@ export async function generateReimbursementDocx(
                   children: [
                     new TextRun({
                       text: 'Position',
-                      size: 15,
+                      size: 22,
                       color: '595959',
                       font: 'Arial',
                     }),
@@ -1230,20 +1225,7 @@ export async function generateReimbursementDocx(
               margins: { top: 30, bottom: 30, left: 80, right: 80 },
               children: [
                 new Paragraph({
-                  children: financeSigImage
-                    ? [
-                        new ImageRun({
-                          data: financeSigImage.data,
-                          transformation: fitImageDimensions(
-                            financeSigImage.width,
-                            financeSigImage.height,
-                            110,
-                            30
-                          ),
-                          type: financeSigImage.type,
-                        }),
-                      ]
-                    : [new TextRun({ text: '' })],
+                  children: [new TextRun({ text: '', font: 'Arial', size: 22 })],
                 }),
               ],
             }),
@@ -1256,7 +1238,7 @@ export async function generateReimbursementDocx(
                   children: [
                     new TextRun({
                       text: paymentDate,
-                      size: 18,
+                      size: 22,
                       font: 'Arial',
                     }),
                   ],
@@ -1278,7 +1260,7 @@ export async function generateReimbursementDocx(
                   children: [
                     new TextRun({
                       text: 'Signature',
-                      size: 15,
+                      size: 22,
                       color: '595959',
                       font: 'Arial',
                     }),
@@ -1295,7 +1277,7 @@ export async function generateReimbursementDocx(
                   children: [
                     new TextRun({
                       text: 'Date',
-                      size: 15,
+                      size: 22,
                       color: '595959',
                       font: 'Arial',
                     }),
@@ -1446,6 +1428,16 @@ export async function generateReimbursementDocx(
 
   // Final Document Creation
   const doc = new Document({
+    styles: {
+      default: {
+        document: {
+          run: {
+            font: 'Arial',
+            size: 22,
+          },
+        },
+      },
+    },
     sections: [
       {
         properties: {

@@ -53,6 +53,7 @@ export interface ReimbursementRequest {
   title: string;
   category: ReimbursementCategory;
   reimbursement_type?: ReimbursementType;
+  rf_number?: string | null;
   account?: string | null;
   customer?: string | null;
   department?: string | null;
@@ -84,6 +85,7 @@ export interface ReimbursementVoucherPrintData {
     customer: string;
     description: string;
     amount: number;
+    receipt_date?: string | null;
   }[];
   totalAmount: number;
   employeeSignature?: string | null;

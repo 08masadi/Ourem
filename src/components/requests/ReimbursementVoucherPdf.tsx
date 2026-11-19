@@ -5,6 +5,7 @@ import { ReimbursementVoucherPrintData } from '@/types/database';
 import { Download, Printer, X, Loader2 } from 'lucide-react';
 import { normalizeAccount } from '@/lib/formatters';
 import { printVoucherDocument, downloadVoucherPdf } from '@/lib/printUtils';
+import { formatDateSlash } from '@/lib/wordVoucherGenerator';
 
 interface ReimbursementVoucherPdfProps {
   data: ReimbursementVoucherPrintData;
@@ -19,6 +20,7 @@ interface AccountGroup {
     customer: string;
     description: string;
     amount: number;
+    receipt_date?: string | null;
   }>;
 }
 
@@ -57,6 +59,7 @@ export default function ReimbursementVoucherPdf({
       customer: item.customer,
       description: item.description,
       amount: item.amount,
+      receipt_date: item.receipt_date,
     });
   });
 
@@ -293,7 +296,18 @@ export default function ReimbursementVoucherPdf({
                             verticalAlign: 'middle',
                             color: '#ffffff',
                           }}
-                          className="border border-[#EA580C] w-[18%]"
+                          className="border border-[#EA580C] w-[15%]"
+                        >
+                          Tanggal Nota
+                        </th>
+                        <th
+                          style={{
+                            height: '16pt',
+                            padding: '0 4px',
+                            verticalAlign: 'middle',
+                            color: '#ffffff',
+                          }}
+                          className="border border-[#EA580C] w-[17%]"
                         >
                           Account
                         </th>
@@ -304,7 +318,7 @@ export default function ReimbursementVoucherPdf({
                             verticalAlign: 'middle',
                             color: '#ffffff',
                           }}
-                          className="border border-[#EA580C] w-[22%]"
+                          className="border border-[#EA580C] w-[18%]"
                         >
                           Customer
                         </th>
@@ -315,7 +329,7 @@ export default function ReimbursementVoucherPdf({
                             verticalAlign: 'middle',
                             color: '#ffffff',
                           }}
-                          className="border border-[#EA580C] w-[42%]"
+                          className="border border-[#EA580C] w-[35%]"
                         >
                           Description
                         </th>
@@ -326,7 +340,7 @@ export default function ReimbursementVoucherPdf({
                             verticalAlign: 'middle',
                             color: '#ffffff',
                           }}
-                          className="border border-[#EA580C] w-[18%] text-center font-extrabold"
+                          className="border border-[#EA580C] w-[15%] text-center font-extrabold"
                         >
                           Amount
                         </th>
@@ -351,6 +365,20 @@ export default function ReimbursementVoucherPdf({
                               lineHeight: '14.5pt',
                             }}
                           >
+                            {/* Tanggal Nota Column */}
+                            <td
+                              className="border-r border-[#EA580C] text-center font-bold"
+                              style={{
+                                height: '14.5pt',
+                                lineHeight: '14.5pt',
+                                verticalAlign: 'middle',
+                                padding: '0 4px',
+                                color: '#000000',
+                              }}
+                            >
+                              {item.receipt_date ? formatDateSlash(item.receipt_date) : data.date}
+                            </td>
+
                             {/* Merge Account cell on first row of this account group */}
                             {itemIdx === 0 && (
                               <td
@@ -439,6 +467,10 @@ export default function ReimbursementVoucherPdf({
                             style={{ height: '14.5pt', padding: '0 4px' }}
                           ></td>
                           <td
+                            className="border-r border-[#EA580C]"
+                            style={{ height: '14.5pt', padding: '0 4px' }}
+                          ></td>
+                          <td
                             className="text-right"
                             style={{ height: '14.5pt', padding: '0 8px' }}
                           ></td>
@@ -455,7 +487,7 @@ export default function ReimbursementVoucherPdf({
                         }}
                       >
                         <td
-                          colSpan={3}
+                          colSpan={4}
                           className="text-center font-bold tracking-wide border-r border-[#EA580C]"
                           style={{
                             height: '16pt',

@@ -7,7 +7,9 @@ import {
   AccountBlockData,
   formatAccountBlocksToDescription,
   parseAccountBlocksFromDescription,
+  extractMetadataFromDescription,
 } from '@/lib/formatters';
+import { formatRfNumber } from '@/lib/wordVoucherGenerator';
 import {
   X,
   Calendar,
@@ -45,6 +47,7 @@ interface AccountBlockState {
   entries: Array<{
     customer: string;
     description: string;
+    receipt_date?: string;
   }>;
 }
 
@@ -53,6 +56,8 @@ export default function EditRequestModal({
   onClose,
   onSuccess,
 }: EditRequestModalProps) {
+  const meta = extractMetadataFromDescription(request.description);
+
   const [reimbursementType, setReimbursementType] = useState<ReimbursementType>(
     request.reimbursement_type || 'Petty Cash'
   );
@@ -60,6 +65,9 @@ export default function EditRequestModal({
     request.department || request.profiles?.department || 'Staff OPS'
   );
   const [requestDate, setRequestDate] = useState<string>(request.request_date || '');
+  const [rfNumber, setRfNumber] = useState<string>(
+    request.rf_number || meta.rf_number || formatRfNumber(request.request_date, request.id)
+  );
 
   // Initialize blocks
   const [blocks, setBlocks] = useState<AccountBlockState[]>(() => {
@@ -81,8 +89,12 @@ export default function EditRequestModal({
         receiptPreview: b.receipt_url || null,
         entries:
           b.entries.length > 0
-            ? b.entries
-            : [{ customer: '', description: '' }],
+            ? b.entries.map((e) => ({
+                customer: e.customer || '',
+                description: e.description || '',
+                receipt_date: e.receipt_date || request.request_date || '',
+              }))
+            : [{ customer: '', description: '', receipt_date: request.request_date || '' }],
       }));
     }
 
@@ -93,7 +105,7 @@ export default function EditRequestModal({
         amount: String(request.amount || ''),
         receiptFile: null,
         receiptPreview: request.receipt_url || null,
-        entries: [{ customer: request.customer || '', description: '' }],
+        entries: [{ customer: request.customer || '', description: '', receipt_date: request.request_date || '' }],
       },
     ];
   });
@@ -184,7 +196,7 @@ export default function EditRequestModal({
         amount: '',
         receiptFile: null,
         receiptPreview: null,
-        entries: [{ customer: '', description: '' }],
+        entries: [{ customer: '', description: '', receipt_date: requestDate }],
       },
     ]);
   };
@@ -230,7 +242,7 @@ export default function EditRequestModal({
         if (idx !== blockIndex) return b;
         return {
           ...b,
-          entries: [...b.entries, { customer: '', description: '' }],
+          entries: [...b.entries, { customer: '', description: '', receipt_date: requestDate }],
         };
       })
     );
@@ -252,7 +264,7 @@ export default function EditRequestModal({
   const updateCustomerEntry = (
     blockIndex: number,
     entryIndex: number,
-    field: 'customer' | 'description',
+    field: 'customer' | 'description' | 'receipt_date',
     value: string
   ) => {
     setBlocks((prev) =>
@@ -306,6 +318,7 @@ export default function EditRequestModal({
       entries: b.entries.map((e) => ({
         customer: e.customer.trim(),
         description: e.description.trim(),
+        receipt_date: e.receipt_date || requestDate,
       })),
     }));
 
@@ -316,7 +329,9 @@ export default function EditRequestModal({
       .join(', ');
 
     const combinedDescription = formatAccountBlocksToDescription(blocksData, {
+      ...meta,
       reimbursement_type: reimbursementType,
+      rf_number: rfNumber.trim() || undefined,
       department,
       account: primaryAccount,
       customer: primaryCustomer,
@@ -373,6 +388,7 @@ export default function EditRequestModal({
             ...request,
             title: autoTitle,
             reimbursement_type: reimbursementType,
+            rf_number: rfNumber.trim() || undefined,
             category: primaryAccount as any,
             account: primaryAccount,
             customer: primaryCustomer,
@@ -466,8 +482,8 @@ export default function EditRequestModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Department & Tanggal */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Department, Tanggal & RF Number */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
                 <Briefcase className="w-3.5 h-3.5 text-orange-400" />
@@ -507,6 +523,20 @@ export default function EditRequestModal({
                 }}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
                 style={{ colorScheme: 'dark' }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-orange-400" />
+                <span>RF Number</span>
+              </label>
+              <input
+                type="text"
+                value={rfNumber}
+                onChange={(e) => setRfNumber(e.target.value)}
+                placeholder="RF-DDMMYYYY/XXX"
+                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           </div>
@@ -612,34 +642,58 @@ export default function EditRequestModal({
                         #{entryIndex + 1}
                       </span>
 
-                      <div className="w-full sm:w-5/12">
-                        <label className="block text-[10px] font-semibold text-slate-400 mb-1">
-                          Customer / Klien / Project
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={entry.customer}
-                          onChange={(e) =>
-                            updateCustomerEntry(blockIndex, entryIndex, 'customer', e.target.value)
-                          }
-                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                        />
+                      {/* Customer & Tanggal Nota Input */}
+                      <div className="w-full sm:w-5/12 space-y-2">
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 mb-1">
+                            Customer / Klien / Project
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={entry.customer}
+                            onChange={(e) =>
+                              updateCustomerEntry(blockIndex, entryIndex, 'customer', e.target.value)
+                            }
+                            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 mb-1 flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-orange-400" />
+                            <span>Tanggal Nota</span>
+                          </label>
+                          <input
+                            type="date"
+                            value={entry.receipt_date || requestDate}
+                            onChange={(e) =>
+                              updateCustomerEntry(blockIndex, entryIndex, 'receipt_date', e.target.value)
+                            }
+                            onClick={(e) => {
+                              try {
+                                e.currentTarget.showPicker?.();
+                              } catch {}
+                            }}
+                            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                            style={{ colorScheme: 'dark' }}
+                          />
+                        </div>
                       </div>
 
-                      <div className="w-full sm:flex-1">
+                      {/* Description Textarea */}
+                      <div className="w-full sm:flex-1 flex flex-col">
                         <label className="block text-[10px] font-semibold text-slate-400 mb-1 flex items-center gap-1">
                           <List className="w-3 h-3 text-orange-400" />
                           <span>Description (Keterangan)</span>
                         </label>
                         <textarea
-                          rows={2}
+                          rows={4}
                           required
                           value={entry.description}
                           onChange={(e) =>
                             updateCustomerEntry(blockIndex, entryIndex, 'description', e.target.value)
                           }
-                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed"
+                          className="w-full flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed min-h-[88px]"
                         />
                       </div>
 

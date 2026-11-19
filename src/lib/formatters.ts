@@ -5,6 +5,7 @@ export interface CustomerDescriptionEntry {
   customer: string;
   description: string;
   amount?: number;
+  receipt_date?: string;
 }
 
 export interface AccountBlockData {
@@ -14,11 +15,13 @@ export interface AccountBlockData {
   entries: Array<{
     customer: string;
     description: string;
+    receipt_date?: string;
   }>;
 }
 
 export interface RequestMetadataPayload {
   reimbursement_type?: string;
+  rf_number?: string | null;
   department?: string;
   account?: string;
   customer?: string;
@@ -110,6 +113,7 @@ export function extractMetadataFromDescription(description?: string | null): Req
       if (parsed && !Array.isArray(parsed) && typeof parsed === 'object') {
         return {
           reimbursement_type: parsed.reimbursement_type,
+          rf_number: parsed.rf_number,
           department: parsed.department,
           account: parsed.account,
           customer: parsed.customer,
@@ -209,20 +213,22 @@ export function parseAccountBlocksFromDescription(
               ? b.entries.map((e: any) => ({
                   customer: e.customer || '',
                   description: getCleanDescription(e.description) || '',
+                  receipt_date: e.receipt_date || undefined,
                 }))
-              : [{ customer: '', description: '' }],
+              : [{ customer: '', description: '', receipt_date: undefined }],
         }));
       }
 
       // Case 2: Object with entries array
       if (parsed && Array.isArray(parsed.entries) && parsed.entries.length > 0) {
-        const groupMap = new Map<string, Array<{ customer: string; description: string }>>();
+        const groupMap = new Map<string, Array<{ customer: string; description: string; receipt_date?: string }>>();
         parsed.entries.forEach((e: any) => {
           const acc = e.account || parsed.account || fallbackAccount || 'Bensin';
           if (!groupMap.has(acc)) groupMap.set(acc, []);
           groupMap.get(acc)!.push({
             customer: e.customer || '',
             description: getCleanDescription(e.description) || '',
+            receipt_date: e.receipt_date || undefined,
           });
         });
 
@@ -240,13 +246,14 @@ export function parseAccountBlocksFromDescription(
 
       // Case 3: Direct array
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const groupMap = new Map<string, Array<{ customer: string; description: string }>>();
+        const groupMap = new Map<string, Array<{ customer: string; description: string; receipt_date?: string }>>();
         parsed.forEach((e: any) => {
           const acc = e.account || fallbackAccount || 'Bensin';
           if (!groupMap.has(acc)) groupMap.set(acc, []);
           groupMap.get(acc)!.push({
             customer: e.customer || '',
             description: getCleanDescription(e.description) || '',
+            receipt_date: e.receipt_date || undefined,
           });
         });
 
@@ -273,6 +280,7 @@ export function parseAccountBlocksFromDescription(
         {
           customer: fallbackCustomer || '',
           description: getCleanDescription(description),
+          receipt_date: undefined,
         },
       ],
     },
@@ -308,6 +316,7 @@ export function parseCustomerEntries(
               customer: fallbackCustomer || '',
               description: '',
               amount: Number(block.amount) || 0,
+              receipt_date: undefined,
             });
           } else {
             blockEntries.forEach((e: any, idx: number) => {
@@ -316,6 +325,7 @@ export function parseCustomerEntries(
                 customer: e.customer || '',
                 description: getCleanDescription(e.description) || '',
                 amount: idx === 0 ? Number(block.amount) || 0 : 0,
+                receipt_date: e.receipt_date || undefined,
               });
             });
           }
@@ -329,6 +339,7 @@ export function parseCustomerEntries(
           account: item.account || fallbackAccount || '',
           customer: item.customer || '',
           description: getCleanDescription(item.description) || '',
+          receipt_date: item.receipt_date || undefined,
         }));
       }
 
@@ -338,6 +349,7 @@ export function parseCustomerEntries(
           account: item.account || parsed.account || fallbackAccount || '',
           customer: item.customer || '',
           description: getCleanDescription(item.description) || '',
+          receipt_date: item.receipt_date || undefined,
         }));
       }
     } catch {
