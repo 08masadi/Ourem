@@ -1336,6 +1336,7 @@ export default function RequestList({
           editRequest.title?.startsWith('Form Lembur')) ? (
           <EditOvertimeModal
             request={editRequest}
+            currentRole={currentRole}
             onClose={() => setEditRequest(null)}
             onSuccess={(updated) => {
               setRequests((prev) =>

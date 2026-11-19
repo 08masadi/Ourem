@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useTransition } from 'react';
-import { ReimbursementRequest, DEPARTMENT_OPTIONS } from '@/types/database';
+import { ReimbursementRequest, DEPARTMENT_OPTIONS, UserRole } from '@/types/database';
 import { updateOvertimeRequest } from '@/actions/requests';
 import { extractOvertimeFromDescription, getCleanDescription } from '@/lib/formatters';
 import {
@@ -21,15 +21,18 @@ import {
 
 interface EditOvertimeModalProps {
   request: ReimbursementRequest;
+  currentRole?: UserRole;
   onClose: () => void;
   onSuccess: (updated: ReimbursementRequest) => void;
 }
 
 export default function EditOvertimeModal({
   request,
+  currentRole,
   onClose,
   onSuccess,
 }: EditOvertimeModalProps) {
+  const canEditNominal = currentRole === 'director' || currentRole === 'finance';
   const ov = extractOvertimeFromDescription(request.description);
 
   const [tanggalLembur, setTanggalLembur] = useState(
@@ -38,7 +41,7 @@ export default function EditOvertimeModal({
   const [tipeHari, setTipeHari] = useState<'hari kerja' | 'hari libur'>(
     ov?.tipe_hari || 'hari kerja'
   );
-  const [lokasiLembur, setLokasiLembur] = useState(ov?.lokasi_lembur || 'Kantor');
+  const [lokasiLembur, setLokasiLembur] = useState(ov?.lokasi_lembur || '');
   const [namaKaryawan, setNamaKaryawan] = useState(
     ov?.nama_karyawan || request.profiles?.full_name || 'Staff'
   );
@@ -46,7 +49,7 @@ export default function EditOvertimeModal({
     request.department || request.profiles?.department || 'Staff OPS'
   );
   const [perusahaan, setPerusahaan] = useState(
-    ov?.perusahaan || request.customer || 'PT. CITRA SARI KENCANA'
+    ov?.perusahaan || request.customer || ''
   );
   const [namaPekerjaan, setNamaPekerjaan] = useState(
     ov?.nama_pekerjaan || request.title.replace(/^Form Lembur - /, '')
@@ -223,7 +226,8 @@ export default function EditOvertimeModal({
                   required
                   value={lokasiLembur}
                   onChange={(e) => setLokasiLembur(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                  placeholder="Masukkan lokasi lembur..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500 placeholder:text-slate-600"
                 />
               </div>
 
@@ -258,15 +262,9 @@ export default function EditOvertimeModal({
 
               {/* Department */}
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center justify-between">
-                  <span className="flex items-center gap-1">
-                    <Briefcase className="w-3 h-3 text-orange-400" />
-                    <span>Department</span>
-                  </span>
-                  <span className="text-[10px] text-amber-400/90 font-medium flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">
-                    <Lock className="w-2.5 h-2.5" />
-                    <span>Terkunci Otomatis</span>
-                  </span>
+                <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
+                  <Briefcase className="w-3 h-3 text-orange-400" />
+                  <span>Department</span>
                 </label>
                 <div className="relative">
                   <input
@@ -299,7 +297,8 @@ export default function EditOvertimeModal({
                 required
                 value={perusahaan}
                 onChange={(e) => setPerusahaan(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                placeholder="Masukkan nama perusahaan atau klien..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500 placeholder:text-slate-600"
               />
             </div>
 
@@ -334,25 +333,53 @@ export default function EditOvertimeModal({
 
             {/* Nominal Kompensasi */}
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
-                <span className="text-[10px] font-black text-orange-400 border border-orange-500/40 px-1 py-0.2 rounded bg-orange-500/10 font-mono">
-                  RP
+              <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <span className="text-[10px] font-black text-orange-400 border border-orange-500/40 px-1 py-0.2 rounded bg-orange-500/10 font-mono">
+                    RP
+                  </span>
+                  <span>Nominal Kompensasi / Uang Lembur (Rp)</span>
                 </span>
-                <span>Nominal Kompensasi / Uang Lembur (Rp)</span>
+                {canEditNominal ? (
+                  <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
+                    Dapat Diisi (Mode {currentRole === 'director' ? 'Director' : 'Finance'})
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
+                    <Lock className="w-2.5 h-2.5" />
+                    <span>Dihitung Direktur / Finance</span>
+                  </span>
+                )}
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-xs font-bold text-slate-400">
+                <span className={`absolute left-3 top-2 text-xs font-bold ${canEditNominal ? 'text-slate-400' : 'text-slate-500'}`}>
                   Rp
                 </span>
-                <input
-                  type="text"
-                  value={nominal}
-                  onChange={handleNominalChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-orange-400 font-mono focus:outline-none focus:border-orange-500"
-                />
+                {canEditNominal ? (
+                  <input
+                    type="text"
+                    value={nominal}
+                    onChange={handleNominalChange}
+                    placeholder="0"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-orange-400 font-mono focus:outline-none focus:border-orange-500"
+                  />
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      readOnly
+                      disabled
+                      value={nominal === '0' || !nominal ? 'Dihitung oleh Direktur' : nominal}
+                      className="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-slate-400 font-mono cursor-not-allowed select-none shadow-inner"
+                    />
+                    <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2" />
+                  </>
+                )}
               </div>
               <p className="text-[11px] text-slate-500 mt-1">
-                Isi jika ada perkiraan uang lembur/transport, atau biarkan 0 jika dihitung oleh Direktur.
+                {canEditNominal
+                  ? 'Masukkan nominal kompensasi / uang lembur yang disetujui untuk karyawan.'
+                  : 'Hanya akun Direktur dan Finance yang dapat mengisi dan menentukan nominal kompensasi lembur.'}
               </p>
             </div>
           </div>

@@ -191,9 +191,9 @@ export async function createOvertimeRequest(prevState: any, formData: FormData) 
     ((formData.get('tipe_hari') as string) === 'hari libur' ? 'hari libur' : 'hari kerja') as
       | 'hari kerja'
       | 'hari libur';
-  const lokasi_lembur = (formData.get('lokasi_lembur') as string) || 'Kantor';
+  const lokasi_lembur = (formData.get('lokasi_lembur') as string) || '';
   const nama_karyawan = (formData.get('nama_karyawan') as string) || '';
-  const perusahaan = (formData.get('perusahaan') as string) || 'PT. CITRA SARI KENCANA';
+  const perusahaan = (formData.get('perusahaan') as string) || '';
   const nama_pekerjaan = (formData.get('nama_pekerjaan') as string) || '';
   const jam_lembur = (formData.get('jam_lembur') as string) || '';
   const uraian_pekerjaan = (formData.get('uraian_pekerjaan') as string) || '';
@@ -534,9 +534,9 @@ export async function updateOvertimeRequest(prevState: any, formData: FormData) 
     ((formData.get('tipe_hari') as string) === 'hari libur' ? 'hari libur' : 'hari kerja') as
       | 'hari kerja'
       | 'hari libur';
-  const lokasi_lembur = (formData.get('lokasi_lembur') as string) || 'Kantor';
+  const lokasi_lembur = (formData.get('lokasi_lembur') as string) || '';
   const nama_karyawan = (formData.get('nama_karyawan') as string) || '';
-  const perusahaan = (formData.get('perusahaan') as string) || 'PT. CITRA SARI KENCANA';
+  const perusahaan = (formData.get('perusahaan') as string) || '';
   const nama_pekerjaan = (formData.get('nama_pekerjaan') as string) || '';
   const jam_lembur = (formData.get('jam_lembur') as string) || '';
   const uraian_pekerjaan = (formData.get('uraian_pekerjaan') as string) || '';

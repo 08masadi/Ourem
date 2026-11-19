@@ -34,11 +34,11 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
     new Date().toISOString().split('T')[0]
   );
   const [tipeHari, setTipeHari] = useState<'hari kerja' | 'hari libur'>('hari kerja');
-  const [lokasiLembur, setLokasiLembur] = useState('Kantor');
+  const [lokasiLembur, setLokasiLembur] = useState('');
   const [namaKaryawan, setNamaKaryawan] = useState(
     userProfile?.full_name || 'Staff'
   );
-  const [perusahaan, setPerusahaan] = useState('PT. CITRA SARI KENCANA');
+  const [perusahaan, setPerusahaan] = useState('');
   const [namaPekerjaan, setNamaPekerjaan] = useState('');
   const [jamLembur, setJamLembur] = useState('17:00 - 21:00 (4 Jam)');
   const [uraianPekerjaan, setUraianPekerjaan] = useState('');
@@ -209,7 +209,8 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 required
                 value={lokasiLembur}
                 onChange={(e) => setLokasiLembur(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                placeholder="Masukkan lokasi lembur..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500 placeholder:text-slate-600"
               />
             </div>
 
@@ -229,15 +230,9 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
 
             {/* Department */}
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  <Briefcase className="w-3.5 h-3.5 text-orange-400" />
-                  <span>Department</span>
-                </span>
-                <span className="text-[10px] text-amber-400/90 font-medium flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
-                  <Lock className="w-2.5 h-2.5" />
-                  <span>Terkunci Otomatis</span>
-                </span>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <Briefcase className="w-3.5 h-3.5 text-orange-400" />
+                <span>Department</span>
               </label>
               <div className="relative">
                 <input
@@ -248,9 +243,6 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 />
                 <Lock className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
-              <p className="text-[10px] text-slate-500 mt-1">
-                Departemen terhubung otomatis dari profil akun Anda.
-              </p>
             </div>
 
             {/* Jam Lembur */}
@@ -289,7 +281,8 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 required
                 value={perusahaan}
                 onChange={(e) => setPerusahaan(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                placeholder="Masukkan nama perusahaan atau klien..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500 placeholder:text-slate-600"
               />
             </div>
 
@@ -322,27 +315,35 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
               />
             </div>
 
-            {/* Nominal Uang Lembur (Opsional / Custom) */}
+            {/* Nominal Uang Lembur (Terkunci untuk Employee) */}
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <span className="text-[10px] font-black text-orange-400 border border-orange-500/40 px-1 py-0.2 rounded bg-orange-500/10 font-mono">
-                  RP
+              <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-black text-orange-400 border border-orange-500/40 px-1 py-0.2 rounded bg-orange-500/10 font-mono">
+                    RP
+                  </span>
+                  <span>Nominal Kompensasi / Uang Lembur (Rp)</span>
                 </span>
-                <span>Nominal Kompensasi / Uang Lembur (Rp)</span>
+                <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
+                  <Lock className="w-2.5 h-2.5" />
+                  <span>Dihitung Direktur / Finance</span>
+                </span>
               </label>
               <div className="relative">
-                <span className="absolute left-3.5 top-2.5 text-xs font-bold text-slate-400">
+                <span className="absolute left-3.5 top-2.5 text-xs font-bold text-slate-500">
                   Rp
                 </span>
                 <input
                   type="text"
-                  value={nominal}
-                  onChange={handleNominalChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-3.5 py-2.5 text-xs font-bold text-orange-400 font-mono focus:outline-none focus:border-orange-500"
+                  readOnly
+                  disabled
+                  value="Dihitung oleh Direktur"
+                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-10 pr-9 py-2.5 text-xs font-bold text-slate-400 font-mono cursor-not-allowed select-none shadow-inner"
                 />
+                <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2" />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Masukkan perkiraan uang lembur/transport jika ada, atau biarkan 0 jika dihitung otomatis oleh Direktur.
+              <p className="text-[11px] text-slate-500 mt-1">
+                Nominal kompensasi ditentukan dan diisi oleh Direktur / Finance saat proses persetujuan.
               </p>
             </div>
           </div>
