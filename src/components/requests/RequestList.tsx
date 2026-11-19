@@ -1141,7 +1141,24 @@ export default function RequestList({
           </p>
         </div>
       ) : (
-        <div className="max-h-[60vh] sm:max-h-[66vh] overflow-y-auto space-y-2.5 sm:space-y-3 pr-1 sm:pr-2 custom-scrollbar overscroll-contain">
+        <div
+          onTouchStart={() => {
+            if (typeof window !== 'undefined' && (window as any).AndroidApp?.setSwipeRefreshEnabled) {
+              (window as any).AndroidApp.setSwipeRefreshEnabled(false);
+            }
+          }}
+          onTouchEnd={() => {
+            if (typeof window !== 'undefined' && (window as any).AndroidApp?.setSwipeRefreshEnabled) {
+              (window as any).AndroidApp.setSwipeRefreshEnabled(true);
+            }
+          }}
+          onTouchCancel={() => {
+            if (typeof window !== 'undefined' && (window as any).AndroidApp?.setSwipeRefreshEnabled) {
+              (window as any).AndroidApp.setSwipeRefreshEnabled(true);
+            }
+          }}
+          className="max-h-[380px] sm:max-h-[440px] lg:max-h-[500px] overflow-y-auto space-y-2.5 sm:space-y-3 pr-1.5 sm:pr-2.5 custom-scrollbar overscroll-contain"
+        >
           {filteredRequests.map((req) => {
             const isPendingApproval = req.status === 'Menunggu Approval';
             const isApproved = req.status === 'Disetujui';
