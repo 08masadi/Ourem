@@ -26,6 +26,7 @@ import {
   CheckCircle2,
   Camera,
   Crop,
+  Lock,
 } from 'lucide-react';
 import Link from 'next/link';
 import ImageCropperModal from './ImageCropperModal';
@@ -436,23 +437,29 @@ export default function RequestForm() {
         {/* Department & Tanggal */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
-              <Briefcase className="w-3.5 h-3.5 text-orange-400" />
-              <span>Department</span>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Briefcase className="w-3.5 h-3.5 text-orange-400" />
+                <span>Department</span>
+              </span>
+              <span className="text-[10px] text-amber-400/90 font-medium flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                <Lock className="w-2.5 h-2.5" />
+                <span>Terkunci Otomatis</span>
+              </span>
             </label>
-            <select
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
-            >
-              <option value="Staff OPS">Staff OPS</option>
-              <option value="Staff Administration">Staff Administration</option>
-              <option value="Staff Purchasing">Staff Purchasing</option>
-              <option value="Sales Marketing">Sales Marketing</option>
-              <option value="Finance">Finance</option>
-              <option value="Director">Director</option>
-              <option value="Manager">Manager</option>
-            </select>
+            <div className="relative">
+              <input
+                type="text"
+                readOnly
+                value={department}
+                className="w-full pl-9 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-slate-200 font-semibold cursor-not-allowed select-none shadow-inner"
+              />
+              <Lock className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            </div>
+            <input type="hidden" name="department" value={department} />
+            <p className="text-[10px] text-slate-500 mt-1">
+              Departemen terhubung otomatis dari profil akun Anda.
+            </p>
           </div>
 
           <div>
@@ -841,7 +848,7 @@ export default function RequestForm() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+        <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-slate-800">
           <Link
             href="/employee"
             className="px-5 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition cursor-pointer"

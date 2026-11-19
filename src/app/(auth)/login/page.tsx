@@ -18,6 +18,7 @@ import {
   Send,
   Eye,
   EyeOff,
+  Briefcase,
 } from 'lucide-react';
 
 function LoginContent() {
@@ -25,12 +26,26 @@ function LoginContent() {
   const [isRegister, setIsRegister] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [role, setRole] = useState<UserRole>('employee');
+  const [department, setDepartment] = useState('Staff OPS');
   const [emailInput, setEmailInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [resetEmailSent, setResetEmailSent] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const handleRoleChange = (newRole: UserRole) => {
+    setRole(newRole);
+    if (newRole === 'director') {
+      setDepartment('Director');
+    } else if (newRole === 'finance') {
+      setDepartment('Finance');
+    } else {
+      if (department === 'Director' || department === 'Finance') {
+        setDepartment('Staff OPS');
+      }
+    }
+  };
 
   // Handle URL query parameters (e.g. ?reset=success or ?error=...)
   useEffect(() => {
@@ -57,6 +72,7 @@ function LoginContent() {
     const form = e.currentTarget;
     const formData = new FormData(form);
     formData.set('role', role);
+    formData.set('department', role === 'director' ? 'Director' : role === 'finance' ? 'Finance' : department);
 
     startTransition(async () => {
       try {
@@ -284,7 +300,7 @@ function LoginContent() {
                     <div className="grid grid-cols-3 gap-2">
                       <button
                         type="button"
-                        onClick={() => setRole('employee')}
+                        onClick={() => handleRoleChange('employee')}
                         className={`py-2 px-2.5 rounded-xl border text-[11px] font-bold text-center transition cursor-pointer ${
                           role === 'employee'
                             ? 'bg-orange-500/20 border-orange-500 text-orange-400'
@@ -295,7 +311,7 @@ function LoginContent() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setRole('director')}
+                        onClick={() => handleRoleChange('director')}
                         className={`py-2 px-2.5 rounded-xl border text-[11px] font-bold text-center transition cursor-pointer ${
                           role === 'director'
                             ? 'bg-amber-500/20 border-amber-500 text-amber-400'
@@ -306,7 +322,7 @@ function LoginContent() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setRole('finance')}
+                        onClick={() => handleRoleChange('finance')}
                         className={`py-2 px-2.5 rounded-xl border text-[11px] font-bold text-center transition cursor-pointer ${
                           role === 'finance'
                             ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
@@ -316,6 +332,47 @@ function LoginContent() {
                         Finance
                       </button>
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <Briefcase className="w-3.5 h-3.5 text-orange-400" />
+                        <span>Departemen</span>
+                      </span>
+                      {role !== 'employee' && (
+                        <span className="text-[10px] text-slate-400 italic">
+                          (Otomatis sesuai peran)
+                        </span>
+                      )}
+                    </label>
+                    {role === 'employee' ? (
+                      <div className="relative">
+                        <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                        <select
+                          name="department"
+                          value={department}
+                          onChange={(e) => setDepartment(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
+                        >
+                          <option value="Staff OPS">Staff OPS</option>
+                          <option value="Staff Administration">Staff Administration</option>
+                          <option value="Staff Purchasing">Staff Purchasing</option>
+                          <option value="Sales Marketing">Sales Marketing</option>
+                          <option value="Manager">Manager</option>
+                        </select>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                        <input
+                          type="text"
+                          readOnly
+                          value={role === 'director' ? 'Director' : 'Finance'}
+                          className="w-full pl-10 pr-4 py-2.5 bg-slate-950/50 border border-slate-800 rounded-xl text-xs text-slate-300 font-semibold cursor-not-allowed select-none shadow-inner"
+                        />
+                      </div>
+                    )}
                   </div>
                 </>
               )}

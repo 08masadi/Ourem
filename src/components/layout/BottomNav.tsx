@@ -33,7 +33,7 @@ export default function BottomNav({ role }: BottomNavProps) {
     role === 'director' ? directorLinks : role === 'finance' ? financeLinks : employeeLinks;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-50 px-4 py-2">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-40 px-4 py-2">
       <div className="flex justify-around items-center max-w-md mx-auto">
         {links.map((link) => {
           const Icon = link.icon;

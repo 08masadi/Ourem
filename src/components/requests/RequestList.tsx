@@ -1373,7 +1373,7 @@ export default function RequestList({
       {/* Modal: View Details & Receipt */}
       {selectedRequest && (
         <div
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4 cursor-pointer"
           onClick={handleCloseDetail}
         >
           <div
@@ -1739,7 +1739,7 @@ export default function RequestList({
 
       {/* Modal: Rejection Reason (Director) */}
       {rejectModalReq && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
             <h3 className="font-bold text-white text-base">Alasan Penolakan Pengajuan</h3>
             <p className="text-xs text-slate-400">
@@ -1773,7 +1773,7 @@ export default function RequestList({
 
       {/* Modal: Mark as Paid (Finance) */}
       {paymentModalReq && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
             <h3 className="font-bold text-white text-base">Pencairan Dana (Mark as Paid)</h3>
             <p className="text-xs text-slate-400">

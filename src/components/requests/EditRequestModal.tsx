@@ -26,6 +26,7 @@ import {
   Image as ImageIcon,
   Camera,
   Crop,
+  Lock,
 } from 'lucide-react';
 import ImageCropperModal from './ImageCropperModal';
 
@@ -391,9 +392,9 @@ export default function EditRequestModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm">
-      <div className="flex min-h-full items-start justify-center p-3 sm:p-6">
-        <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl my-4 sm:my-8">
+    <div className="fixed inset-0 z-[70] overflow-y-auto bg-black/85 backdrop-blur-sm">
+      <div className="flex min-h-full items-start justify-center p-3 sm:p-6 pb-28 sm:pb-8">
+        <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl my-4 sm:my-8 mb-24 sm:mb-8">
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
           <div className="flex items-center gap-3">
@@ -468,23 +469,29 @@ export default function EditRequestModal({
           {/* Department & Tanggal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <Briefcase className="w-3.5 h-3.5 text-orange-400" />
-                <span>Department</span>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Department</span>
+                </span>
+                <span className="text-[10px] text-amber-400/90 font-medium flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                  <Lock className="w-2.5 h-2.5" />
+                  <span>Terkunci Otomatis</span>
+                </span>
               </label>
-              <select
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
-              >
-                <option value="Staff OPS">Staff OPS</option>
-                <option value="Staff Administration">Staff Administration</option>
-                <option value="Staff Purchasing">Staff Purchasing</option>
-                <option value="Sales Marketing">Sales Marketing</option>
-                <option value="Finance">Finance</option>
-                <option value="Director">Director</option>
-                <option value="Manager">Manager</option>
-              </select>
+              <div className="relative">
+                <input
+                  type="text"
+                  readOnly
+                  value={department}
+                  className="w-full pl-9 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-slate-200 font-semibold cursor-not-allowed select-none shadow-inner"
+                />
+                <Lock className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+              <input type="hidden" name="department" value={department} />
+              <p className="text-[10px] text-slate-500 mt-1">
+                Departemen terhubung otomatis dari profil pengaju.
+              </p>
             </div>
 
             <div>
@@ -852,7 +859,7 @@ export default function EditRequestModal({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-4 pb-3 border-t border-slate-800">
             <button
               type="button"
               onClick={onClose}

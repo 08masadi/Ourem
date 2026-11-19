@@ -66,6 +66,15 @@ export async function signUp(prevState: any, formData: FormData) {
   const password = formData.get('password') as string;
   const full_name = (formData.get('full_name') as string || '').trim();
   const role = (formData.get('role') as UserRole) || 'employee';
+  let department = (formData.get('department') as string || '').trim();
+  if (role === 'director') {
+    department = 'Director';
+  } else if (role === 'finance') {
+    department = 'Finance';
+  } else if (!department) {
+    department = 'Staff OPS';
+  }
+
   const origin = (formData.get('origin') as string) || 'https://ourem.vercel.app';
 
   const email = (rawEmail || '').trim().toLowerCase();
@@ -97,6 +106,7 @@ export async function signUp(prevState: any, formData: FormData) {
       data: {
         full_name,
         role,
+        department,
       },
     },
   });
@@ -107,13 +117,19 @@ export async function signUp(prevState: any, formData: FormData) {
 
   if (data.user) {
     // Upsert to profiles table
-    await supabase.from('profiles').upsert({
+    const profilePayload: Record<string, any> = {
       id: data.user.id,
       email,
       full_name,
       role,
+      department,
       updated_at: new Date().toISOString(),
-    });
+    };
+    let { error: profErr } = await supabase.from('profiles').upsert(profilePayload);
+    if (profErr && profErr.message.includes('department')) {
+      delete profilePayload.department;
+      await supabase.from('profiles').upsert(profilePayload);
+    }
   }
 
   // If session is already created (email confirmation disabled in Supabase)

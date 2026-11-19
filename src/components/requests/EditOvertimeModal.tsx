@@ -16,6 +16,7 @@ import {
   Loader2,
   AlertCircle,
   Save,
+  Lock,
 } from 'lucide-react';
 
 interface EditOvertimeModalProps {
@@ -114,9 +115,9 @@ export default function EditOvertimeModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm">
-      <div className="flex min-h-full items-start sm:items-center justify-center p-3 sm:p-4">
-        <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-2xl my-auto sm:my-6 flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-[70] overflow-y-auto bg-black/85 backdrop-blur-sm">
+      <div className="flex min-h-full items-start sm:items-center justify-center p-3 sm:p-4 pb-28 sm:pb-6">
+        <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-2xl my-auto sm:my-6 mb-24 sm:mb-6 flex flex-col max-h-[90vh]">
           {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-5 shrink-0">
           <div className="flex items-center gap-3">
@@ -257,20 +258,25 @@ export default function EditOvertimeModal({
 
               {/* Department */}
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Department
+                <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <Briefcase className="w-3 h-3 text-orange-400" />
+                    <span>Department</span>
+                  </span>
+                  <span className="text-[10px] text-amber-400/90 font-medium flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">
+                    <Lock className="w-2.5 h-2.5" />
+                    <span>Terkunci Otomatis</span>
+                  </span>
                 </label>
-                <select
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
-                >
-                  {DEPARTMENT_OPTIONS.map((dep) => (
-                    <option key={dep} value={dep}>
-                      {dep}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <input
+                    type="text"
+                    readOnly
+                    value={department}
+                    className="w-full pl-8 pr-3 py-2 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-slate-200 font-semibold cursor-not-allowed select-none shadow-inner"
+                  />
+                  <Lock className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                </div>
               </div>
             </div>
           </div>
@@ -352,7 +358,7 @@ export default function EditOvertimeModal({
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-2.5">
+          <div className="pt-4 pb-3 border-t border-slate-800 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}

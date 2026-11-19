@@ -17,6 +17,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Sparkles,
+  Lock,
 } from 'lucide-react';
 import OvertimeVoucherPdf from './OvertimeVoucherPdf';
 
@@ -228,20 +229,28 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
 
             {/* Department */}
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                Department
+              <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Department</span>
+                </span>
+                <span className="text-[10px] text-amber-400/90 font-medium flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                  <Lock className="w-2.5 h-2.5" />
+                  <span>Terkunci Otomatis</span>
+                </span>
               </label>
-              <select
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
-              >
-                {DEPARTMENT_OPTIONS.map((dep) => (
-                  <option key={dep} value={dep}>
-                    {dep}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  type="text"
+                  readOnly
+                  value={department}
+                  className="w-full pl-9 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-slate-200 font-semibold cursor-not-allowed select-none shadow-inner"
+                />
+                <Lock className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+              <p className="text-[10px] text-slate-500 mt-1">
+                Departemen terhubung otomatis dari profil akun Anda.
+              </p>
             </div>
 
             {/* Jam Lembur */}
@@ -340,7 +349,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="pt-4 pb-8 sm:pb-0 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => setShowPreviewPdf(true)}
