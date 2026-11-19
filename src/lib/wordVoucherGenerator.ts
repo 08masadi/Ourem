@@ -1,0 +1,1382 @@
+'use client';
+
+import {
+  Document,
+  Paragraph,
+  TextRun,
+  Table,
+  TableRow,
+  TableCell,
+  WidthType,
+  AlignmentType,
+  BorderStyle,
+  HeightRule,
+  PageBreak,
+  Packer,
+  ImageRun,
+} from 'docx';
+import { ReimbursementRequest, ReimbursementType } from '@/types/database';
+import { parseAccountBlocksFromDescription, normalizeAccount, getCleanDescription } from './formatters';
+
+export interface DocxApprover {
+  name: string;
+  signature?: string | null;
+}
+
+export interface GenerateDocxOptions {
+  request: ReimbursementRequest;
+  sameDateRequests?: ReimbursementRequest[];
+  financeApprover?: DocxApprover;
+  directorApprover?: DocxApprover;
+}
+
+interface LoadedImageData {
+  data: Uint8Array;
+  type: 'png' | 'jpg' | 'gif';
+  width: number;
+  height: number;
+}
+
+// Border definitions
+const thinGrayBorder = {
+  top: { style: BorderStyle.SINGLE, size: 6, color: 'BFBFBF' },
+  bottom: { style: BorderStyle.SINGLE, size: 6, color: 'BFBFBF' },
+  left: { style: BorderStyle.SINGLE, size: 6, color: 'BFBFBF' },
+  right: { style: BorderStyle.SINGLE, size: 6, color: 'BFBFBF' },
+};
+
+const noBorder = {
+  top: { style: BorderStyle.NONE },
+  bottom: { style: BorderStyle.NONE },
+  left: { style: BorderStyle.NONE },
+  right: { style: BorderStyle.NONE },
+};
+
+const orangeFrameBorder = {
+  top: { style: BorderStyle.SINGLE, size: 14, color: 'ED7D31' },
+  bottom: { style: BorderStyle.SINGLE, size: 14, color: 'ED7D31' },
+  left: { style: BorderStyle.SINGLE, size: 14, color: 'ED7D31' },
+  right: { style: BorderStyle.SINGLE, size: 14, color: 'ED7D31' },
+};
+
+/**
+ * Format currency number to Indonesian standard "1.105.000,00"
+ */
+function formatNumber(num: number): string {
+  return new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(num);
+}
+
+/**
+ * Format YYYY-MM-DD to DD/MM/YYYY
+ */
+function formatDateSlash(dateStr?: string | null): string {
+  if (!dateStr) {
+    const today = new Date();
+    const d = String(today.getDate()).padStart(2, '0');
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const y = today.getFullYear();
+    return `${d}/${m}/${y}`;
+  }
+  const clean = dateStr.split('T')[0];
+  const parts = clean.split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateStr;
+}
+
+/**
+ * Format RF Number (e.g. RF-06112026/085)
+ */
+function formatRfNumber(dateStr?: string | null, id?: string): string {
+  const slashDate = formatDateSlash(dateStr);
+  const cleanDate = slashDate.replace(/\//g, '');
+  const seq = id ? id.slice(-3).toUpperCase() : '085';
+  return `RF-${cleanDate}/${seq}`;
+}
+
+/**
+ * Fetch image and determine dimensions and format
+ */
+async function fetchImageBuffer(url: string): Promise<LoadedImageData | null> {
+  if (!url || typeof window === 'undefined') return null;
+
+  try {
+    let res: Response;
+    try {
+      res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) {
+        throw new Error('Direct fetch failed');
+      }
+    } catch {
+      // Fallback via Next.js proxy
+      res = await fetch(`/api/image-proxy?url=${encodeURIComponent(url)}`);
+    }
+
+    if (!res.ok) return null;
+
+    const contentType = res.headers.get('content-type') || '';
+    let type: 'png' | 'jpg' | 'gif' = 'jpg';
+    if (contentType.includes('png') || url.toLowerCase().includes('.png')) {
+      type = 'png';
+    } else if (contentType.includes('gif') || url.toLowerCase().includes('.gif')) {
+      type = 'gif';
+    }
+
+    const arrayBuffer = await res.arrayBuffer();
+    const uint8 = new Uint8Array(arrayBuffer);
+
+    // Get dimensions via browser Image object
+    const dims = await new Promise<{ width: number; height: number }>((resolve) => {
+      try {
+        const blob = new Blob([arrayBuffer], { type: contentType || 'image/jpeg' });
+        const objUrl = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => {
+          const w = img.naturalWidth || 400;
+          const h = img.naturalHeight || 500;
+          URL.revokeObjectURL(objUrl);
+          resolve({ width: w, height: h });
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objUrl);
+          resolve({ width: 400, height: 500 });
+        };
+        img.src = objUrl;
+      } catch {
+        resolve({ width: 400, height: 500 });
+      }
+    });
+
+    return {
+      data: uint8,
+      type,
+      width: dims.width,
+      height: dims.height,
+    };
+  } catch (err) {
+    console.warn('Gagal memuat gambar struk untuk Word:', url, err);
+    return null;
+  }
+}
+
+/**
+ * Fit image inside bounding box while preserving aspect ratio
+ */
+function fitImageDimensions(
+  origW: number,
+  origH: number,
+  maxW: number = 195,
+  maxH: number = 290
+): { width: number; height: number } {
+  if (!origW || !origH) return { width: maxW, height: maxH };
+  const ratio = Math.min(maxW / origW, maxH / origH, 1);
+  return {
+    width: Math.max(30, Math.round(origW * ratio)),
+    height: Math.max(30, Math.round(origH * ratio)),
+  };
+}
+
+/**
+ * Generate MS Word (.docx) document matching user template
+ */
+export async function generateReimbursementDocx(
+  options: GenerateDocxOptions
+): Promise<Blob> {
+  const { request, sameDateRequests, financeApprover, directorApprover } = options;
+
+  const targetRequests =
+    sameDateRequests && sameDateRequests.length > 0 ? sameDateRequests : [request];
+  const determinedType: ReimbursementType = request.reimbursement_type || 'Petty Cash';
+
+  // 1. Gather all itemized entries
+  const itemizedList: Array<{
+    itemNum: number;
+    date: string;
+    description: string;
+    receipt: string;
+    cost: number;
+  }> = [];
+
+  let runningItem = 1;
+  targetRequests.forEach((reqItem) => {
+    const blocks = parseAccountBlocksFromDescription(
+      reqItem.description,
+      reqItem.account || reqItem.category,
+      Number(reqItem.amount) || 0,
+      reqItem.customer,
+      reqItem.receipt_url
+    );
+
+    blocks.forEach((block) => {
+      const blockAcc = normalizeAccount(
+        block.account || reqItem.account || reqItem.category,
+        determinedType
+      );
+      const blockAmount = Number(block.amount) || 0;
+      const entries =
+        block.entries && block.entries.length > 0
+          ? block.entries
+          : [{ customer: reqItem.customer || '', description: reqItem.title }];
+
+      entries.forEach((entry, eIdx) => {
+        const descParts: string[] = [];
+        if (entry.customer && entry.customer.trim()) {
+          descParts.push(entry.customer.trim());
+        }
+        const cleanDesc = getCleanDescription(entry.description);
+        if (cleanDesc && cleanDesc.trim()) {
+          descParts.push(cleanDesc.trim());
+        } else if (reqItem.title && !descParts.includes(reqItem.title)) {
+          descParts.push(reqItem.title.trim());
+        }
+
+        const fullDescription =
+          descParts.length > 0 ? `${blockAcc} -- ${descParts.join(' - ')}` : blockAcc;
+
+        itemizedList.push({
+          itemNum: runningItem++,
+          date: formatDateSlash(reqItem.request_date),
+          description: fullDescription,
+          receipt: 'Attached',
+          cost: eIdx === 0 ? blockAmount : 0,
+        });
+      });
+    });
+  });
+
+  const totalAmount = targetRequests.reduce(
+    (sum, r) => sum + (Number(r.amount) || 0),
+    0
+  );
+
+  // 2. Collect all unique receipt photos
+  const receiptUrlSet = new Set<string>();
+  targetRequests.forEach((r) => {
+    if (r.receipt_url) receiptUrlSet.add(r.receipt_url);
+    const blocks = parseAccountBlocksFromDescription(
+      r.description,
+      r.account || r.category,
+      Number(r.amount) || 0,
+      r.customer,
+      r.receipt_url
+    );
+    blocks.forEach((b) => {
+      if (b.receipt_url) receiptUrlSet.add(b.receipt_url);
+    });
+  });
+  const allReceiptUrls = Array.from(receiptUrlSet).filter(Boolean);
+
+  // Fetch all receipt images concurrently
+  const loadedReceiptImages = await Promise.all(
+    allReceiptUrls.map((url) => fetchImageBuffer(url))
+  );
+  const validReceiptImages = loadedReceiptImages.filter(
+    (img): img is LoadedImageData => img !== null
+  );
+
+  // Fetch signatures if available
+  let financeSigImage: LoadedImageData | null = null;
+  if (financeApprover?.signature) {
+    financeSigImage = await fetchImageBuffer(financeApprover.signature);
+  }
+
+  // Requester details
+  const requesterName = request.profiles?.full_name || 'Staff';
+  const requesterPhone = (request.profiles as any)?.phone || '0882 3991 9129';
+  const requesterEmail = request.profiles?.email || 'karyawan@ouffice.co.id';
+  const requesterId = `CSK-${(request.user_id || '003').slice(-3).toUpperCase()}`;
+  const requesterJabatan =
+    request.department || request.profiles?.department || 'Sales Executive';
+  const bankName = request.profiles?.bank_name || 'BCA';
+  const bankAccount = request.profiles?.bank_account_number || '000 000 0000';
+  const bankHolder = request.profiles?.bank_account_holder || requesterName;
+  const memoText = `Pembayaran ke Rekening ${bankName}`;
+  const purposeText =
+    request.title || getCleanDescription(request.description) || 'Reimburst Operasional';
+
+  const requestDateFormatted = formatDateSlash(request.request_date);
+  const rfNumberFormatted = formatRfNumber(request.request_date, request.id);
+
+  // Approver names
+  const finName = financeApprover?.name || 'Dwi N';
+  const dirName = directorApprover?.name || 'Adrian Nugroho';
+  const isPaid = request.payment_status === 'Paid';
+  const paymentDate = request.payment_action_at
+    ? formatDateSlash(request.payment_action_at)
+    : isPaid
+    ? requestDateFormatted
+    : '-';
+
+  // -------------------------------------------------------------
+  // BUILD PAGE 1: REIMBURSEMENT FORM
+  // -------------------------------------------------------------
+  const page1Children: any[] = [];
+
+  // Top Title
+  page1Children.push(
+    new Paragraph({
+      spacing: { after: 40 },
+      children: [
+        new TextRun({
+          text: 'Reimbursement Form',
+          bold: true,
+          size: 38,
+          color: 'E65100',
+          font: 'Arial',
+        }),
+      ],
+    })
+  );
+
+  page1Children.push(
+    new Paragraph({
+      spacing: { after: 120 },
+      children: [
+        new TextRun({
+          text: 'PT. CITRA SARI KENCANA (Ouffice.co.id)',
+          bold: true,
+          size: 22,
+          color: '595959',
+          font: 'Arial',
+        }),
+      ],
+    })
+  );
+
+  // Top Section: Left (Requester Info Table) + Right (Request Date & RF Number Table)
+  const topLayoutTable = new Table({
+    width: { size: 10000, type: WidthType.DXA },
+    borders: noBorder,
+    rows: [
+      new TableRow({
+        children: [
+          // Left: Requester Info
+          new TableCell({
+            width: { size: 6200, type: WidthType.DXA },
+            borders: noBorder,
+            children: [
+              new Table({
+                width: { size: 6000, type: WidthType.DXA },
+                borders: noBorder,
+                rows: [
+                  new TableRow({
+                    height: { value: 340, rule: HeightRule.ATLEAST },
+                    children: [
+                      new TableCell({
+                        width: { size: 2100, type: WidthType.DXA },
+                        borders: noBorder,
+                        margins: { top: 40, bottom: 40, left: 0, right: 60 },
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({
+                                text: 'Requester Name :',
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                      new TableCell({
+                        width: { size: 3900, type: WidthType.DXA },
+                        borders: thinGrayBorder,
+                        margins: { top: 40, bottom: 40, left: 100, right: 100 },
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({
+                                text: requesterName,
+                                bold: true,
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                  new TableRow({
+                    height: { value: 340, rule: HeightRule.ATLEAST },
+                    children: [
+                      new TableCell({
+                        width: { size: 2100, type: WidthType.DXA },
+                        borders: noBorder,
+                        margins: { top: 40, bottom: 40, left: 0, right: 60 },
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({ text: 'Phone :', size: 18, font: 'Arial' }),
+                            ],
+                          }),
+                        ],
+                      }),
+                      new TableCell({
+                        width: { size: 3900, type: WidthType.DXA },
+                        borders: thinGrayBorder,
+                        margins: { top: 40, bottom: 40, left: 100, right: 100 },
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({
+                                text: requesterPhone,
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                  new TableRow({
+                    height: { value: 340, rule: HeightRule.ATLEAST },
+                    children: [
+                      new TableCell({
+                        width: { size: 2100, type: WidthType.DXA },
+                        borders: noBorder,
+                        margins: { top: 40, bottom: 40, left: 0, right: 60 },
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({ text: 'Email :', size: 18, font: 'Arial' }),
+                            ],
+                          }),
+                        ],
+                      }),
+                      new TableCell({
+                        width: { size: 3900, type: WidthType.DXA },
+                        borders: thinGrayBorder,
+                        margins: { top: 40, bottom: 40, left: 100, right: 100 },
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({
+                                text: requesterEmail,
+                                size: 18,
+                                color: '0563C1',
+                                underline: {},
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+
+          // Right: Request Date & RF Number mini table
+          new TableCell({
+            width: { size: 3800, type: WidthType.DXA },
+            borders: noBorder,
+            children: [
+              new Table({
+                width: { size: 3600, type: WidthType.DXA },
+                alignment: AlignmentType.RIGHT,
+                borders: noBorder,
+                rows: [
+                  new TableRow({
+                    height: { value: 280, rule: HeightRule.ATLEAST },
+                    children: [
+                      new TableCell({
+                        width: { size: 3600, type: WidthType.DXA },
+                        shading: { fill: 'B95318' },
+                        borders: thinGrayBorder,
+                        margins: { top: 40, bottom: 40, left: 60, right: 60 },
+                        children: [
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            children: [
+                              new TextRun({
+                                text: 'Request Date',
+                                bold: true,
+                                color: 'FFFFFF',
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                  new TableRow({
+                    height: { value: 320, rule: HeightRule.ATLEAST },
+                    children: [
+                      new TableCell({
+                        width: { size: 3600, type: WidthType.DXA },
+                        borders: thinGrayBorder,
+                        margins: { top: 40, bottom: 40, left: 60, right: 60 },
+                        children: [
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            children: [
+                              new TextRun({
+                                text: requestDateFormatted,
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                  new TableRow({
+                    height: { value: 280, rule: HeightRule.ATLEAST },
+                    children: [
+                      new TableCell({
+                        width: { size: 3600, type: WidthType.DXA },
+                        shading: { fill: 'B95318' },
+                        borders: thinGrayBorder,
+                        margins: { top: 40, bottom: 40, left: 60, right: 60 },
+                        children: [
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            children: [
+                              new TextRun({
+                                text: 'RF Number',
+                                bold: true,
+                                color: 'FFFFFF',
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                  new TableRow({
+                    height: { value: 320, rule: HeightRule.ATLEAST },
+                    children: [
+                      new TableCell({
+                        width: { size: 3600, type: WidthType.DXA },
+                        borders: thinGrayBorder,
+                        margins: { top: 40, bottom: 40, left: 60, right: 60 },
+                        children: [
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            children: [
+                              new TextRun({
+                                text: rfNumberFormatted,
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+    ],
+  });
+  page1Children.push(topLayoutTable);
+
+  // Section: Make Check Payable To
+  page1Children.push(
+    new Paragraph({
+      spacing: { before: 140, after: 60 },
+      children: [
+        new TextRun({
+          text: 'Make Check Payable To',
+          bold: true,
+          size: 20,
+          font: 'Arial',
+        }),
+      ],
+    })
+  );
+
+  const checkPayableTable = new Table({
+    width: { size: 10000, type: WidthType.DXA },
+    borders: noBorder,
+    rows: [
+      new TableRow({
+        children: [
+          // Left: Name, ID, Jabatan, Memo
+          new TableCell({
+            width: { size: 6200, type: WidthType.DXA },
+            borders: noBorder,
+            children: [
+              new Table({
+                width: { size: 6000, type: WidthType.DXA },
+                borders: noBorder,
+                rows: [
+                  ['Name :', requesterName, true],
+                  ['ID :', requesterId, false],
+                  ['Jabatan :', requesterJabatan, false],
+                  ['Memo :', memoText, false],
+                ].map(([label, val, isBold]) => {
+                  return new TableRow({
+                    height: { value: 320, rule: HeightRule.ATLEAST },
+                    children: [
+                      new TableCell({
+                        width: { size: 1600, type: WidthType.DXA },
+                        borders: noBorder,
+                        margins: { top: 30, bottom: 30, left: 0, right: 40 },
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({
+                                text: label as string,
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                      new TableCell({
+                        width: { size: 4400, type: WidthType.DXA },
+                        borders: thinGrayBorder,
+                        margins: { top: 30, bottom: 30, left: 100, right: 100 },
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({
+                                text: val as string,
+                                bold: Boolean(isBold),
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  });
+                }),
+              }),
+            ],
+          }),
+
+          // Right: Bank Account Details Box
+          new TableCell({
+            width: { size: 3800, type: WidthType.DXA },
+            borders: noBorder,
+            children: [
+              new Table({
+                width: { size: 3600, type: WidthType.DXA },
+                alignment: AlignmentType.RIGHT,
+                borders: thinGrayBorder,
+                rows: [
+                  new TableRow({
+                    children: [
+                      new TableCell({
+                        width: { size: 3600, type: WidthType.DXA },
+                        borders: thinGrayBorder,
+                        margins: { top: 80, bottom: 80, left: 120, right: 120 },
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({
+                                text: `BANK ${bankName.toUpperCase()}`,
+                                bold: true,
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                          new Paragraph({
+                            spacing: { before: 40 },
+                            children: [
+                              new TextRun({
+                                text: `A/C : ${bankAccount}`,
+                                bold: true,
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                          new Paragraph({
+                            spacing: { before: 40 },
+                            children: [
+                              new TextRun({
+                                text: `AN. : ${bankHolder.toUpperCase()}`,
+                                bold: true,
+                                size: 18,
+                                font: 'Arial',
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+    ],
+  });
+  page1Children.push(checkPayableTable);
+
+  // Section: Describe Purpose
+  page1Children.push(
+    new Paragraph({
+      spacing: { before: 140, after: 60 },
+      children: [
+        new TextRun({
+          text: 'Describe Purpose',
+          bold: true,
+          size: 20,
+          font: 'Arial',
+        }),
+      ],
+    })
+  );
+
+  page1Children.push(
+    new Table({
+      width: { size: 10000, type: WidthType.DXA },
+      borders: thinGrayBorder,
+      rows: [
+        new TableRow({
+          height: { value: 360, rule: HeightRule.ATLEAST },
+          children: [
+            new TableCell({
+              width: { size: 10000, type: WidthType.DXA },
+              borders: thinGrayBorder,
+              margins: { top: 60, bottom: 60, left: 100, right: 100 },
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: purposeText,
+                      size: 18,
+                      font: 'Arial',
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    })
+  );
+
+  // Section: Itemized Expenses
+  page1Children.push(
+    new Paragraph({
+      spacing: { before: 160, after: 60 },
+      children: [
+        new TextRun({
+          text: 'Itemized Expenses',
+          bold: true,
+          size: 26,
+          color: 'E65100',
+          font: 'Arial',
+        }),
+      ],
+    })
+  );
+
+  // Table Columns: ITEM (700), DATE (1400), DESCRIPTION (4700), RECEIPT (1400), COST (1800)
+  const itemizedRows: TableRow[] = [];
+
+  // 1. Header row
+  itemizedRows.push(
+    new TableRow({
+      height: { value: 320, rule: HeightRule.ATLEAST },
+      children: [
+        { label: 'ITEM', width: 700, align: AlignmentType.CENTER },
+        { label: 'DATE', width: 1400, align: AlignmentType.CENTER },
+        { label: 'DESCRIPTION', width: 4700, align: AlignmentType.LEFT },
+        { label: 'RECEIPT', width: 1400, align: AlignmentType.CENTER },
+        { label: 'COST', width: 1800, align: AlignmentType.RIGHT },
+      ].map((col) => {
+        return new TableCell({
+          width: { size: col.width, type: WidthType.DXA },
+          shading: { fill: 'B95318' },
+          borders: thinGrayBorder,
+          margins: { top: 50, bottom: 50, left: 80, right: 80 },
+          children: [
+            new Paragraph({
+              alignment: col.align,
+              children: [
+                new TextRun({
+                  text: col.label,
+                  bold: true,
+                  color: 'FFFFFF',
+                  size: 18,
+                  font: 'Arial',
+                }),
+              ],
+            }),
+          ],
+        });
+      }),
+    })
+  );
+
+  // 2. Data rows (padded to at least 10 rows)
+  const minRows = 10;
+  const totalItemCount = Math.max(minRows, itemizedList.length);
+
+  for (let i = 0; i < totalItemCount; i++) {
+    const item = itemizedList[i];
+    itemizedRows.push(
+      new TableRow({
+        height: { value: 320, rule: HeightRule.ATLEAST },
+        children: [
+          // Col 1: ITEM
+          new TableCell({
+            width: { size: 700, type: WidthType.DXA },
+            borders: thinGrayBorder,
+            margins: { top: 40, bottom: 40, left: 60, right: 60 },
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                  new TextRun({
+                    text: String(i + 1),
+                    size: 18,
+                    font: 'Arial',
+                  }),
+                ],
+              }),
+            ],
+          }),
+          // Col 2: DATE
+          new TableCell({
+            width: { size: 1400, type: WidthType.DXA },
+            borders: thinGrayBorder,
+            margins: { top: 40, bottom: 40, left: 60, right: 60 },
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                  new TextRun({
+                    text: item ? item.date : '',
+                    size: 18,
+                    font: 'Arial',
+                  }),
+                ],
+              }),
+            ],
+          }),
+          // Col 3: DESCRIPTION
+          new TableCell({
+            width: { size: 4700, type: WidthType.DXA },
+            borders: thinGrayBorder,
+            margins: { top: 40, bottom: 40, left: 80, right: 80 },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: item ? item.description : '',
+                    size: 18,
+                    font: 'Arial',
+                  }),
+                ],
+              }),
+            ],
+          }),
+          // Col 4: RECEIPT
+          new TableCell({
+            width: { size: 1400, type: WidthType.DXA },
+            borders: thinGrayBorder,
+            margins: { top: 40, bottom: 40, left: 60, right: 60 },
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                  new TextRun({
+                    text: item ? item.receipt : '',
+                    size: 18,
+                    font: 'Arial',
+                  }),
+                ],
+              }),
+            ],
+          }),
+          // Col 5: COST
+          new TableCell({
+            width: { size: 1800, type: WidthType.DXA },
+            borders: thinGrayBorder,
+            margins: { top: 40, bottom: 40, left: 60, right: 60 },
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.RIGHT,
+                children: [
+                  new TextRun({
+                    text: item && item.cost > 0 ? formatNumber(item.cost) : '',
+                    size: 18,
+                    font: 'Arial',
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      })
+    );
+  }
+
+  // 3. Total Row (TOTAL | IDR | Amount with peach background)
+  itemizedRows.push(
+    new TableRow({
+      height: { value: 340, rule: HeightRule.ATLEAST },
+      children: [
+        new TableCell({
+          width: { size: 6800, type: WidthType.DXA },
+          borders: noBorder,
+          margins: { top: 40, bottom: 40, left: 80, right: 120 },
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.RIGHT,
+              children: [
+                new TextRun({
+                  text: 'TOTAL',
+                  bold: true,
+                  size: 20,
+                  font: 'Arial',
+                }),
+              ],
+            }),
+          ],
+        }),
+        new TableCell({
+          width: { size: 1400, type: WidthType.DXA },
+          shading: { fill: 'F8CBAD' },
+          borders: thinGrayBorder,
+          margins: { top: 40, bottom: 40, left: 60, right: 60 },
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({
+                  text: 'IDR',
+                  bold: true,
+                  size: 20,
+                  font: 'Arial',
+                }),
+              ],
+            }),
+          ],
+        }),
+        new TableCell({
+          width: { size: 1800, type: WidthType.DXA },
+          shading: { fill: 'F8CBAD' },
+          borders: thinGrayBorder,
+          margins: { top: 40, bottom: 40, left: 60, right: 60 },
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.RIGHT,
+              children: [
+                new TextRun({
+                  text: formatNumber(totalAmount),
+                  bold: true,
+                  size: 20,
+                  font: 'Arial',
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    })
+  );
+
+  page1Children.push(
+    new Table({
+      width: { size: 10000, type: WidthType.DXA },
+      rows: itemizedRows,
+    })
+  );
+
+  // Subtext under Itemized Expenses table
+  page1Children.push(
+    new Paragraph({
+      alignment: AlignmentType.RIGHT,
+      spacing: { before: 40, after: 120 },
+      children: [
+        new TextRun({
+          text: "Don't forget to include receipts!",
+          italics: true,
+          size: 16,
+          font: 'Arial',
+        }),
+      ],
+    })
+  );
+
+  // Section: Approval
+  page1Children.push(
+    new Paragraph({
+      spacing: { before: 60, after: 60 },
+      children: [
+        new TextRun({
+          text: 'Approval',
+          bold: true,
+          size: 20,
+          font: 'Arial',
+        }),
+      ],
+    })
+  );
+
+  page1Children.push(
+    new Table({
+      width: { size: 10000, type: WidthType.DXA },
+      borders: noBorder,
+      rows: [
+        // Row 1: Names (Dwi N / Adrian Nugroho) & Positions (Finance / Direktur)
+        new TableRow({
+          height: { value: 360, rule: HeightRule.ATLEAST },
+          children: [
+            new TableCell({
+              width: { size: 6200, type: WidthType.DXA },
+              borders: thinGrayBorder,
+              margins: { top: 50, bottom: 50, left: 100, right: 100 },
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: finName, size: 18, font: 'Arial' }),
+                    new TextRun({
+                      text: `                                                    ${dirName}`,
+                      size: 18,
+                      font: 'Arial',
+                    }),
+                  ],
+                }),
+              ],
+            }),
+            new TableCell({
+              width: { size: 3800, type: WidthType.DXA },
+              borders: thinGrayBorder,
+              margins: { top: 50, bottom: 50, left: 100, right: 100 },
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: 'Finance', size: 18, font: 'Arial' }),
+                    new TextRun({
+                      text: '                                Direktur',
+                      size: 18,
+                      font: 'Arial',
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+
+        // Row 2: Sub-labels: "Approved By (Name)" and "Position"
+        new TableRow({
+          children: [
+            new TableCell({
+              width: { size: 6200, type: WidthType.DXA },
+              borders: noBorder,
+              margins: { top: 20, bottom: 40, left: 10, right: 10 },
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: 'Approved By (Name)',
+                      size: 15,
+                      color: '595959',
+                      font: 'Arial',
+                    }),
+                  ],
+                }),
+              ],
+            }),
+            new TableCell({
+              width: { size: 3800, type: WidthType.DXA },
+              borders: noBorder,
+              margins: { top: 20, bottom: 40, left: 10, right: 10 },
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: 'Position',
+                      size: 15,
+                      color: '595959',
+                      font: 'Arial',
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+
+        // Row 3: Signature Box and Date Box
+        new TableRow({
+          height: { value: 650, rule: HeightRule.ATLEAST },
+          children: [
+            new TableCell({
+              width: { size: 6200, type: WidthType.DXA },
+              borders: thinGrayBorder,
+              margins: { top: 40, bottom: 40, left: 100, right: 100 },
+              children: [
+                new Paragraph({
+                  children: financeSigImage
+                    ? [
+                        new ImageRun({
+                          data: financeSigImage.data,
+                          transformation: fitImageDimensions(
+                            financeSigImage.width,
+                            financeSigImage.height,
+                            120,
+                            35
+                          ),
+                          type: financeSigImage.type,
+                        }),
+                      ]
+                    : [new TextRun({ text: '' })],
+                }),
+              ],
+            }),
+            new TableCell({
+              width: { size: 3800, type: WidthType.DXA },
+              borders: thinGrayBorder,
+              margins: { top: 40, bottom: 40, left: 100, right: 100 },
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: paymentDate,
+                      size: 18,
+                      font: 'Arial',
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+
+        // Row 4: Sub-labels: "Signature" and "Date"
+        new TableRow({
+          children: [
+            new TableCell({
+              width: { size: 6200, type: WidthType.DXA },
+              borders: noBorder,
+              margins: { top: 20, bottom: 0, left: 10, right: 10 },
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: 'Signature',
+                      size: 15,
+                      color: '595959',
+                      font: 'Arial',
+                    }),
+                  ],
+                }),
+              ],
+            }),
+            new TableCell({
+              width: { size: 3800, type: WidthType.DXA },
+              borders: noBorder,
+              margins: { top: 20, bottom: 0, left: 10, right: 10 },
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: 'Date',
+                      size: 15,
+                      color: '595959',
+                      font: 'Arial',
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    })
+  );
+
+  // -------------------------------------------------------------
+  // BUILD PAGE 2+: RECEIPTS (Max 6 photos per page in 3x2 grid)
+  // -------------------------------------------------------------
+  const receiptsPerPage = 6;
+  const numReceiptPages = Math.max(
+    1,
+    Math.ceil(validReceiptImages.length / receiptsPerPage)
+  );
+
+  const makeFrameCell = (imgData?: LoadedImageData | null) => {
+    const children: Paragraph[] = [];
+    if (imgData) {
+      const fit = fitImageDimensions(imgData.width, imgData.height, 195, 290);
+      children.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new ImageRun({
+              data: imgData.data,
+              transformation: fit,
+              type: imgData.type,
+            }),
+          ],
+        })
+      );
+    } else {
+      children.push(new Paragraph({ text: '' }));
+    }
+
+    return new TableCell({
+      width: { size: 3100, type: WidthType.DXA },
+      borders: orangeFrameBorder,
+      margins: { top: 80, bottom: 80, left: 60, right: 60 },
+      children,
+    });
+  };
+
+  const makeSpacerCell = (w: number) => {
+    return new TableCell({
+      width: { size: w, type: WidthType.DXA },
+      borders: noBorder,
+      children: [new Paragraph({ text: '' })],
+    });
+  };
+
+  for (let p = 0; p < numReceiptPages; p++) {
+    // Page break before each receipts page
+    page1Children.push(
+      new Paragraph({
+        children: [new PageBreak()],
+      })
+    );
+
+    // Receipts Title
+    page1Children.push(
+      new Paragraph({
+        spacing: { after: 120 },
+        children: [
+          new TextRun({
+            text: p === 0 ? 'Receipts' : `Receipts (Hal. ${p + 1})`,
+            bold: true,
+            size: 38,
+            color: 'E65100',
+            font: 'Arial',
+          }),
+        ],
+      })
+    );
+
+    const startIndex = p * receiptsPerPage;
+    const pImgs = validReceiptImages.slice(startIndex, startIndex + receiptsPerPage);
+
+    // 3 on top, 3 on bottom
+    const topImgs = [pImgs[0] || null, pImgs[1] || null, pImgs[2] || null];
+    const botImgs = [pImgs[3] || null, pImgs[4] || null, pImgs[5] || null];
+
+    const receiptGridTable = new Table({
+      width: { size: 10000, type: WidthType.DXA },
+      borders: noBorder,
+      rows: [
+        // Row 1: Top 3 frames
+        new TableRow({
+          height: { value: 4600, rule: HeightRule.ATLEAST },
+          children: [
+            makeFrameCell(topImgs[0]),
+            makeSpacerCell(350),
+            makeFrameCell(topImgs[1]),
+            makeSpacerCell(350),
+            makeFrameCell(topImgs[2]),
+          ],
+        }),
+        // Spacer Row
+        new TableRow({
+          height: { value: 240, rule: HeightRule.EXACT },
+          children: [
+            makeSpacerCell(3100),
+            makeSpacerCell(350),
+            makeSpacerCell(3100),
+            makeSpacerCell(350),
+            makeSpacerCell(3100),
+          ],
+        }),
+        // Row 2: Bottom 3 frames
+        new TableRow({
+          height: { value: 4600, rule: HeightRule.ATLEAST },
+          children: [
+            makeFrameCell(botImgs[0]),
+            makeSpacerCell(350),
+            makeFrameCell(botImgs[1]),
+            makeSpacerCell(350),
+            makeFrameCell(botImgs[2]),
+          ],
+        }),
+      ],
+    });
+
+    page1Children.push(receiptGridTable);
+  }
+
+  // Final Document Creation
+  const doc = new Document({
+    sections: [
+      {
+        properties: {
+          page: {
+            margin: {
+              top: 720,
+              bottom: 720,
+              left: 800,
+              right: 800,
+            },
+          },
+        },
+        children: page1Children,
+      },
+    ],
+  });
+
+  return await Packer.toBlob(doc);
+}
+
+/**
+ * Trigger download of generated docx file.
+ * Handles both Android App JavaScriptInterface and Desktop Web download.
+ */
+export async function downloadDocxFile(blob: Blob, fileName: string): Promise<void> {
+  if (typeof window === 'undefined') return;
+
+  // 1. Check if running inside custom Android WebView
+  const androidApp = (window as any).AndroidApp;
+  if (androidApp && typeof androidApp.saveDocx === 'function') {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64data = reader.result as string;
+      androidApp.saveDocx(base64data, fileName);
+    };
+    reader.readAsDataURL(blob);
+    return;
+  }
+
+  // 2. Standard Web/Desktop browser download
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}

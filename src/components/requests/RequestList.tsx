@@ -48,6 +48,7 @@ import MonthlyRecapReportPdf from './MonthlyRecapReportPdf';
 import EditRequestModal from './EditRequestModal';
 import EditOvertimeModal from './EditOvertimeModal';
 import { triggerSuccessNotification } from '@/components/ui/DynamicIslandSuccess';
+import { generateReimbursementDocx, downloadDocxFile } from '@/lib/wordVoucherGenerator';
 import {
   parseCustomerEntries,
   getCleanDescription,
@@ -104,6 +105,7 @@ export default function RequestList({
   const [paymentNote, setPaymentNote] = useState<string>('');
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [wordLoadingId, setWordLoadingId] = useState<string | null>(null);
 
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState<string>(
@@ -559,6 +561,49 @@ export default function RequestList({
       paidDate: isPaid ? paidDate : null,
     };
     setPdfData(printData);
+  };
+
+  const handleExportDocx = async (req: ReimbursementRequest) => {
+    try {
+      setWordLoadingId(req.id);
+      const finSig = await getBestFinanceSignature();
+      const dirSig = await getBestDirectorSignature();
+
+      const sameDateRequests = requests.filter(
+        (r) =>
+          r.request_date === req.request_date &&
+          (r.reimbursement_type || 'Petty Cash') === (req.reimbursement_type || 'Petty Cash')
+      );
+
+      const blob = await generateReimbursementDocx({
+        request: req,
+        sameDateRequests: sameDateRequests.length > 0 ? sameDateRequests : [req],
+        financeApprover: {
+          name: finSig.name || 'Dwi N',
+          signature: finSig.signature,
+        },
+        directorApprover: {
+          name: dirSig.name || 'Adrian Nugroho',
+          signature: dirSig.signature,
+        },
+      });
+
+      const safeName = (req.profiles?.full_name || 'Staff').replace(/\s+/g, '-');
+      const safeDate = (req.request_date || '').replace(/\//g, '-');
+      const fileName = `Reimbursement-${safeName}-${safeDate}.docx`;
+
+      await downloadDocxFile(blob, fileName);
+
+      triggerSuccessNotification(
+        'Dokumen Word Berhasil Dibuat',
+        `File ${fileName} telah siap dan diunduh.`
+      );
+    } catch (err: any) {
+      console.error('Gagal membuat dokumen Word:', err);
+      alert('Gagal membuat dokumen Word: ' + (err.message || 'Terjadi kesalahan'));
+    } finally {
+      setWordLoadingId(null);
+    }
   };
 
   const openPdfForSingle = async (req: ReimbursementRequest) => {
@@ -1289,13 +1334,32 @@ export default function RequestList({
                       </div>
 
                       {/* Nominal Klaim di Tampilan Mobile (Sejajar di sebelah kanan) */}
-                      <div className="text-right sm:hidden shrink-0 ml-auto">
+                      <div className="text-right sm:hidden shrink-0 ml-auto flex flex-col items-end">
                         <div className="text-[10px] text-slate-400 font-medium leading-tight">Nominal Klaim</div>
                         <div className="text-xs sm:text-sm font-black text-orange-400 font-mono leading-tight">
                           {reqType === 'Lembur' && Number(req.amount) <= 1
                             ? 'Dihitung Direktur'
                             : formatRupiah(req.amount)}
                         </div>
+                        {currentRole === 'finance' && reqType !== 'Lembur' && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleExportDocx(req);
+                            }}
+                            disabled={wordLoadingId === req.id}
+                            className="mt-1 px-2 py-0.5 rounded-md bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 text-[10px] font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                            title="Cetak Dokumen MS Word (.docx)"
+                          >
+                            {wordLoadingId === req.id ? (
+                              <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                            ) : (
+                              <FileText className="w-2.5 h-2.5" />
+                            )}
+                            <span>Word</span>
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -1322,6 +1386,25 @@ export default function RequestList({
                       ? 'Dihitung Direktur'
                       : formatRupiah(req.amount)}
                   </div>
+                  {currentRole === 'finance' && reqType !== 'Lembur' && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleExportDocx(req);
+                      }}
+                      disabled={wordLoadingId === req.id}
+                      className="mt-1.5 px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                      title="Cetak Dokumen MS Word (.docx)"
+                    >
+                      {wordLoadingId === req.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <FileText className="w-3 h-3 text-blue-400" />
+                      )}
+                      <span>Cetak Word</span>
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -1629,6 +1712,28 @@ export default function RequestList({
                     <Download className="w-4 h-4" />
                   </button>
                 )}
+
+                {/* Export / Cetak MS Word (.docx) Button Khusus Akun Finance */}
+                {currentRole === 'finance' &&
+                  !(
+                    selectedRequest.reimbursement_type === 'Lembur' ||
+                    selectedRequest.account === 'Lembur' ||
+                    selectedRequest.title?.startsWith('Form Lembur')
+                  ) && (
+                    <button
+                      type="button"
+                      onClick={() => handleExportDocx(selectedRequest)}
+                      disabled={wordLoadingId === selectedRequest.id}
+                      className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition flex items-center justify-center cursor-pointer shadow-md disabled:opacity-50"
+                      title="Cetak Dokumen MS Word (.docx)"
+                    >
+                      {wordLoadingId === selectedRequest.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <FileText className="w-4 h-4" />
+                      )}
+                    </button>
+                  )}
 
                 {/* Edit Button: Tampilkan untuk selain Director, atau khusus Form Lembur di akun Director */}
                 {(currentRole !== 'director' ||
