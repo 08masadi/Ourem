@@ -468,11 +468,11 @@ html.light .custom-scrollbar {
 }
 
 /* ========================================================
-   PRINT STYLES: A5 LANDSCAPE (210mm x 148mm) SINGLE PAGE
+   PRINT STYLES: A5 LANDSCAPE VOUCHER & A4 PORTRAIT WORD DOC
    ======================================================== */
 @media print {
   @page {
-    size: A5 landscape;
+    size: auto;
     margin: 0;
   }
 
@@ -487,11 +487,11 @@ html.light .custom-scrollbar {
     padding: 0 !important;
     background: #ffffff !important;
     color: #000000 !important;
-    width: 210mm !important;
-    height: 148mm !important;
-    max-width: 210mm !important;
-    max-height: 148mm !important;
-    overflow: hidden !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
 
   /* Hide all UI outside the printable sheet */
@@ -511,8 +511,18 @@ html.light .custom-scrollbar {
     visibility: visible !important;
   }
 
-  /* When Word Reimbursement Form Modal is open and printed */
-  body.has-word-modal-open {
+  /* Only apply A5 148mm fixed bounds when printing standard A5 voucher (.printable-sheet) */
+  body:has(.printable-sheet):not(:has(.printable-word-doc)) {
+    width: 210mm !important;
+    height: 148mm !important;
+    max-width: 210mm !important;
+    max-height: 148mm !important;
+    overflow: hidden !important;
+  }
+
+  /* When Word Reimbursement Form is open or printed */
+  body.has-word-modal-open,
+  body.word-print-body {
     width: 100% !important;
     height: auto !important;
     max-width: none !important;
@@ -521,21 +531,11 @@ html.light .custom-scrollbar {
     background: #ffffff !important;
   }
 
-  body.has-word-modal-open html {
-    width: 100% !important;
-    height: auto !important;
-    max-width: none !important;
-    max-height: none !important;
-    overflow: visible !important;
-    background: #ffffff !important;
-  }
-
-  body.has-word-modal-open .printable-word-doc {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
+  .printable-word-doc {
+    position: static !important;
     width: 100% !important;
     max-width: 100% !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
     box-shadow: none !important;
@@ -543,6 +543,27 @@ html.light .custom-scrollbar {
     color: #000000 !important;
     overflow: visible !important;
     border-radius: 0 !important;
+  }
+
+  .word-preview-page-1 {
+    min-height: 0 !important;
+    height: auto !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .word-receipts-page {
+    min-height: 0 !important;
+    height: auto !important;
+    page-break-before: always !important;
+    break-before: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    border-top: none !important;
   }
 
   .printable-sheet {

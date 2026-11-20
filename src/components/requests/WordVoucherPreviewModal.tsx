@@ -321,7 +321,7 @@ export default function WordVoucherPreviewModal({
           >
             {/* ================= PAGE 1 ================= */}
             <div
-              className="min-h-[297mm] print:min-h-0 print:h-auto flex flex-col justify-between"
+              className="word-preview-page-1 min-h-[297mm] print:min-h-0 print:h-auto flex flex-col justify-between"
               style={{
                 pageBreakAfter: allReceiptUrls.length > 0 ? 'always' : 'auto',
                 breakAfter: allReceiptUrls.length > 0 ? 'page' : 'auto',
@@ -603,7 +603,7 @@ export default function WordVoucherPreviewModal({
                 return (
                   <div
                     key={pIdx}
-                    className="min-h-[297mm] print:min-h-0 print:h-auto pt-10 border-t border-dashed border-gray-300 mt-10 print:border-0 print:pt-0 print:mt-0"
+                    className="word-receipts-page min-h-[297mm] print:min-h-0 print:h-auto pt-10 border-t border-dashed border-gray-300 mt-10 print:border-0 print:pt-0 print:mt-0"
                     style={{
                       pageBreakBefore: 'always',
                       breakBefore: 'page',

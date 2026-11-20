@@ -49,8 +49,8 @@ export function printWordDocument(element: HTMLElement | null, documentTitle: st
     iframe.style.position = 'fixed';
     iframe.style.left = '-9999px';
     iframe.style.top = '-9999px';
-    iframe.style.width = '210mm';
-    iframe.style.height = '297mm';
+    iframe.style.width = '1000px';
+    iframe.style.height = '1400px';
     iframe.style.border = 'none';
     iframe.style.opacity = '0';
     iframe.style.pointerEvents = 'none';
@@ -78,8 +78,8 @@ export function printWordDocument(element: HTMLElement | null, documentTitle: st
           ${stylesHtml}
           <style>
             @page {
-              size: A4 portrait;
-              margin: 8mm 10mm;
+              size: A4 portrait !important;
+              margin: 10mm 12mm !important;
             }
             * {
               box-sizing: border-box !important;
@@ -92,42 +92,114 @@ export function printWordDocument(element: HTMLElement | null, documentTitle: st
               background: #ffffff !important;
               color: #000000 !important;
               width: 100% !important;
+              height: auto !important;
+              min-height: 0 !important;
+              max-width: none !important;
+              max-height: none !important;
+              overflow: visible !important;
+              position: static !important;
               font-family: Arial, Helvetica, sans-serif !important;
+            }
+            body * {
+              visibility: visible !important;
             }
             .word-print-wrapper {
               width: 100% !important;
               max-width: 100% !important;
               margin: 0 !important;
               padding: 0 !important;
+              background: #ffffff !important;
             }
-            .word-print-wrapper .printable-word-doc {
+            .printable-word-doc {
+              position: static !important;
               padding: 0 !important;
               margin: 0 !important;
               box-shadow: none !important;
               border-radius: 0 !important;
               max-width: 100% !important;
               width: 100% !important;
+              height: auto !important;
+              min-height: 0 !important;
+              overflow: visible !important;
+              visibility: visible !important;
             }
-            .avoid-break {
-              page-break-inside: avoid !important;
-              break-inside: avoid !important;
+            .printable-word-doc * {
+              visibility: visible !important;
             }
-            .page-break-before {
-              page-break-before: always !important;
-              break-before: page !important;
-            }
-            .page-break-after {
+            .word-preview-page-1 {
+              min-height: 0 !important;
+              height: auto !important;
               page-break-after: always !important;
               break-after: page !important;
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+              overflow: visible !important;
+            }
+            .word-receipts-page {
+              min-height: 0 !important;
+              height: auto !important;
+              page-break-before: always !important;
+              break-before: page !important;
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+              overflow: visible !important;
+              padding-top: 0 !important;
+              margin-top: 0 !important;
+              border-top: none !important;
             }
             @media print {
+              @page {
+                size: A4 portrait !important;
+                margin: 10mm 12mm !important;
+              }
+              html, body {
+                width: 100% !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-width: none !important;
+                max-height: none !important;
+                overflow: visible !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                position: static !important;
+              }
+              body * {
+                visibility: visible !important;
+              }
+              .printable-word-doc {
+                position: static !important;
+                height: auto !important;
+                overflow: visible !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+              }
+              .word-preview-page-1 {
+                min-height: 0 !important;
+                height: auto !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+              }
+              .word-receipts-page {
+                min-height: 0 !important;
+                height: auto !important;
+                page-break-before: always !important;
+                break-before: page !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                padding-top: 0 !important;
+                margin-top: 0 !important;
+                border-top: none !important;
+              }
               .no-print {
                 display: none !important;
               }
             }
           </style>
         </head>
-        <body>
+        <body class="has-word-modal-open word-print-body">
           <div class="word-print-wrapper">
             ${element.outerHTML}
           </div>
