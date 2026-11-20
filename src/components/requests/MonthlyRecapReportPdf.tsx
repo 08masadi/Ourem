@@ -200,11 +200,12 @@ export default function MonthlyRecapReportPdf({
                         }}
                         className="text-white text-center font-extrabold"
                       >
-                        <th className="border border-[#EA580C] w-[7%] py-0.5">NO</th>
-                        <th className="border border-[#EA580C] w-[35%] py-0.5">NAMA KARYAWAN</th>
-                        <th className="border border-[#EA580C] w-[20%] py-0.5">DEPARTMENT</th>
-                        <th className="border border-[#EA580C] w-[18%] py-0.5">TANGGAL</th>
-                        <th className="border border-[#EA580C] w-[20%] py-0.5">AMOUNT (RP)</th>
+                        <th className="border border-[#EA580C] w-[6%] py-0.5">NO</th>
+                        <th className="border border-[#EA580C] w-[26%] py-0.5">NAMA KARYAWAN</th>
+                        <th className="border border-[#EA580C] w-[17%] py-0.5">TANGGAL PENGAJUAN</th>
+                        <th className="border border-[#EA580C] w-[17%] py-0.5">DEPARTMENT</th>
+                        <th className="border border-[#EA580C] w-[17%] py-0.5">TANGGAL PEMBAYARAN</th>
+                        <th className="border border-[#EA580C] w-[17%] py-0.5">AMOUNT</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -236,6 +237,14 @@ export default function MonthlyRecapReportPdf({
                             {item.employeeName}
                           </td>
 
+                          {/* Tanggal Pengajuan */}
+                          <td
+                            className="text-center font-bold border-r border-[#EA580C] px-2 py-0.5"
+                            style={{ verticalAlign: 'middle', color: '#000000' }}
+                          >
+                            {item.submissionDate || item.date}
+                          </td>
+
                           {/* Department */}
                           <td
                             className="text-center font-bold border-r border-[#EA580C] px-2 py-0.5 uppercase"
@@ -244,12 +253,12 @@ export default function MonthlyRecapReportPdf({
                             {item.department || 'STAFF OPS'}
                           </td>
 
-                          {/* Tanggal */}
+                          {/* Tanggal Pembayaran */}
                           <td
                             className="text-center font-bold border-r border-[#EA580C] px-2 py-0.5"
                             style={{ verticalAlign: 'middle', color: '#000000' }}
                           >
-                            {item.date}
+                            {item.paymentDate || item.date}
                           </td>
 
                           {/* Amount */}
@@ -278,6 +287,7 @@ export default function MonthlyRecapReportPdf({
                           <td className="border-r border-[#EA580C] px-2.5 py-0.5"></td>
                           <td className="border-r border-[#EA580C] px-2 py-0.5"></td>
                           <td className="border-r border-[#EA580C] px-2 py-0.5"></td>
+                          <td className="border-r border-[#EA580C] px-2 py-0.5"></td>
                           <td className="text-right border-r border-[#EA580C] px-2.5 py-0.5"></td>
                         </tr>
                       ))}
@@ -293,7 +303,7 @@ export default function MonthlyRecapReportPdf({
                         }}
                       >
                         <td
-                          colSpan={4}
+                          colSpan={5}
                           className="text-center font-black tracking-wider border-r border-[#EA580C] uppercase"
                           style={{
                             height: '17pt',

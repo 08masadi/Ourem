@@ -864,16 +864,36 @@ export default function RequestList({
         (r as any).nama_karyawan ||
         'Karyawan';
       const dept = r.department || r.profiles?.department || 'Staff OPS';
-      const dateFormatted = formatDateIndo(
-        r.payment_action_at ? r.payment_action_at.split('T')[0] : r.request_date
-      );
+
+      // Tanggal Pengajuan (Reimburse ataupun Lembur)
+      let submissionDateRaw = r.request_date;
+      if (isOv) {
+        const ov = extractOvertimeFromDescription(r.description);
+        if (ov?.tanggal_lembur) {
+          submissionDateRaw = ov.tanggal_lembur;
+        }
+      }
+      if (!submissionDateRaw && r.created_at) {
+        submissionDateRaw = r.created_at.split('T')[0];
+      }
+      const submissionDateFormatted = formatDateIndo(submissionDateRaw);
+
+      // Tanggal Pembayaran
+      const paymentDateRaw = r.payment_action_at
+        ? r.payment_action_at.split('T')[0]
+        : r.updated_at
+        ? r.updated_at.split('T')[0]
+        : r.request_date;
+      const paymentDateFormatted = formatDateIndo(paymentDateRaw);
 
       return {
         no: idx + 1,
         id: r.id,
         employeeName: empName,
+        submissionDate: submissionDateFormatted,
         department: dept,
-        date: dateFormatted,
+        date: paymentDateFormatted,
+        paymentDate: paymentDateFormatted,
         description: cleanDesc,
         amount: Number(r.amount) || 0,
       };

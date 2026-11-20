@@ -131,8 +131,10 @@ export interface MonthlyRecapItem {
   no: number;
   id: string;
   employeeName: string;
+  submissionDate?: string;
   department: string;
   date: string;
+  paymentDate?: string;
   description: string;
   amount: number;
 }
