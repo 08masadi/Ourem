@@ -35,11 +35,13 @@ export async function createReimbursement(prevState: any, formData: FormData) {
   const customer = (formData.get('customer') as string) || '';
   const account = (formData.get('account') as string) || (formData.get('category') as string) || 'Bensin';
   const department = (formData.get('department') as string) || 'Staff OPS';
+  const rf_number = (formData.get('rf_number') as string) || '';
+  const describe_purpose = (formData.get('describe_purpose') as string) || '';
   let signature_url = (formData.get('signature_url') as string) || '';
 
+  const userProfile = await getCurrentUserProfile();
   // If no signature_url provided in form, use user's profile signature
   if (!signature_url) {
-    const userProfile = await getCurrentUserProfile();
     signature_url = userProfile?.signature_url || '';
   }
   const amountStr = formData.get('amount') as string;
@@ -308,11 +310,13 @@ export async function updateReimbursement(prevState: any, formData: FormData) {
   const customer = (formData.get('customer') as string) || '';
   const account = (formData.get('account') as string) || (formData.get('category') as string) || 'Bensin';
   const department = (formData.get('department') as string) || 'Staff OPS';
+  const rf_number = (formData.get('rf_number') as string) || '';
+  const describe_purpose = (formData.get('describe_purpose') as string) || '';
   let signature_url = (formData.get('signature_url') as string) || '';
 
+  const userProfile = await getCurrentUserProfile();
   // If no signature_url provided in form, use user's profile signature
   if (!signature_url) {
-    const userProfile = await getCurrentUserProfile();
     signature_url = userProfile?.signature_url || '';
   }
   const amountStr = formData.get('amount') as string;
@@ -417,15 +421,26 @@ export async function updateReimbursement(prevState: any, formData: FormData) {
     updated_at: new Date().toISOString(),
   };
 
+  if (rf_number) {
+    updatePayload.rf_number = rf_number;
+  }
+  if (describe_purpose) {
+    updatePayload.describe_purpose = describe_purpose;
+  }
+
   if (signature_url) {
     updatePayload.signature_url = signature_url;
   }
 
-  let { error: updateError } = await supabase
-    .from('reimbursement_requests')
-    .update(updatePayload)
-    .eq('id', id)
-    .eq('user_id', user.id);
+  const isPrivileged =
+    userProfile?.role === 'finance' ||
+    userProfile?.role === 'director';
+
+  let query = supabase.from('reimbursement_requests').update(updatePayload).eq('id', id);
+  if (!isPrivileged) {
+    query = query.eq('user_id', user.id);
+  }
+  let { error: updateError } = await query;
 
   if (updateError && updateError.message.includes('column')) {
     delete updatePayload.reimbursement_type;
@@ -433,12 +448,14 @@ export async function updateReimbursement(prevState: any, formData: FormData) {
     delete updatePayload.account;
     delete updatePayload.department;
     delete updatePayload.signature_url;
+    delete updatePayload.rf_number;
+    delete updatePayload.describe_purpose;
 
-    const retry = await supabase
-      .from('reimbursement_requests')
-      .update(updatePayload)
-      .eq('id', id)
-      .eq('user_id', user.id);
+    let retryQuery = supabase.from('reimbursement_requests').update(updatePayload).eq('id', id);
+    if (!isPrivileged) {
+      retryQuery = retryQuery.eq('user_id', user.id);
+    }
+    const retry = await retryQuery;
     updateError = retry.error;
   }
 

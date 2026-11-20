@@ -22,6 +22,7 @@ export interface AccountBlockData {
 export interface RequestMetadataPayload {
   reimbursement_type?: string;
   rf_number?: string | null;
+  describe_purpose?: string | null;
   department?: string;
   account?: string;
   customer?: string;
@@ -114,6 +115,7 @@ export function extractMetadataFromDescription(description?: string | null): Req
         return {
           reimbursement_type: parsed.reimbursement_type,
           rf_number: parsed.rf_number,
+          describe_purpose: parsed.describe_purpose,
           department: parsed.department,
           account: parsed.account,
           customer: parsed.customer,

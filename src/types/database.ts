@@ -54,6 +54,7 @@ export interface ReimbursementRequest {
   category: ReimbursementCategory;
   reimbursement_type?: ReimbursementType;
   rf_number?: string | null;
+  describe_purpose?: string | null;
   account?: string | null;
   customer?: string | null;
   department?: string | null;

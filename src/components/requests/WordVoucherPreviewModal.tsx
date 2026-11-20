@@ -212,7 +212,11 @@ export default function WordVoucherPreviewModal({
 
   const memoText = bankName ? `Pembayaran ke Rekening ${bankName}` : 'Pembayaran ke Rekening BCA';
   const purposeText =
-    request.title || getCleanDescription(request.description) || 'Reimburst Operasional';
+    request.describe_purpose ||
+    meta.describe_purpose ||
+    request.title ||
+    getCleanDescription(request.description) ||
+    'Reimburst Operasional';
 
   const requestDateFormatted = formatDateSlash(request.request_date);
   const rfNumberFormatted =
