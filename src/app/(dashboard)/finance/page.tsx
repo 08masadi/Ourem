@@ -3,8 +3,7 @@ import { getCurrentUserProfile } from '@/actions/auth';
 import RequestList from '@/components/requests/RequestList';
 import BannerAvatar from '@/components/layout/BannerAvatar';
 import { extractOvertimeFromDescription } from '@/lib/formatters';
-import Link from 'next/link';
-import { CreditCard, CheckCircle2, Clock, Wallet, PlusCircle } from 'lucide-react';
+import { CreditCard, CheckCircle2, Clock, Wallet } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -60,23 +59,12 @@ export default async function FinanceDashboardPage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/employee/new"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition shadow-md shrink-0 cursor-pointer"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">Buat Pengajuan</span>
-            <span className="sm:hidden">Ajukan</span>
-          </Link>
-
-          <BannerAvatar
-            avatarUrl={profile?.avatar_url}
-            fullName={profile?.full_name}
-            email={profile?.email}
-            role={profile?.role}
-          />
-        </div>
+        <BannerAvatar
+          avatarUrl={profile?.avatar_url}
+          fullName={profile?.full_name}
+          email={profile?.email}
+          role={profile?.role}
+        />
       </div>
 
       {/* Metrics Cards */}
