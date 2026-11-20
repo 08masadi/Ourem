@@ -365,19 +365,22 @@ export default function ReimbursementVoucherPdf({
                               lineHeight: '14.5pt',
                             }}
                           >
-                            {/* Tanggal Nota Column */}
-                            <td
-                              className="border-r border-[#EA580C] text-center font-bold"
-                              style={{
-                                height: '14.5pt',
-                                lineHeight: '14.5pt',
-                                verticalAlign: 'middle',
-                                padding: '0 4px',
-                                color: '#000000',
-                              }}
-                            >
-                              {item.receipt_date ? formatDateSlash(item.receipt_date) : data.date}
-                            </td>
+                            {/* Tanggal Nota Column (Merged per Account Group) */}
+                            {itemIdx === 0 && (
+                              <td
+                                rowSpan={group.items.length}
+                                className="border-r border-[#EA580C] text-center font-bold"
+                                style={{
+                                  height: `${group.items.length * 14.5}pt`,
+                                  verticalAlign: 'middle',
+                                  padding: '0 4px',
+                                  color: '#000000',
+                                  backgroundColor: '#ffffff',
+                                }}
+                              >
+                                {item.receipt_date ? formatDateSlash(item.receipt_date) : data.date}
+                              </td>
+                            )}
 
                             {/* Merge Account cell on first row of this account group */}
                             {itemIdx === 0 && (
