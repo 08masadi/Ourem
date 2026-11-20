@@ -38,6 +38,7 @@ export default function ImageCropperModal({
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [lastTouchDist, setLastTouchDist] = useState<number | null>(null);
   const [imageLoaded, setImageLoaded] = useState<boolean>(false);
+  const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -50,88 +51,17 @@ export default function ImageCropperModal({
       setPan({ x: 0, y: 0 });
       setImageLoaded(false);
       setAspectRatio('receipt');
+      if (imageRef.current && imageRef.current.complete && imageRef.current.naturalWidth > 0) {
+        setNaturalSize({
+          width: imageRef.current.naturalWidth,
+          height: imageRef.current.naturalHeight,
+        });
+        setImageLoaded(true);
+      } else {
+        setNaturalSize(null);
+      }
     }
   }, [isOpen, imageSrc]);
-
-  // Handle Touch Controls (Pan & Pinch-to-zoom for Android / iOS)
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length === 1) {
-      setIsDragging(true);
-      setDragStart({
-        x: e.touches[0].clientX - pan.x,
-        y: e.touches[0].clientY - pan.y,
-      });
-    } else if (e.touches.length === 2) {
-      setIsDragging(false);
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      setLastTouchDist(dist);
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length === 1 && isDragging) {
-      setPan({
-        x: e.touches[0].clientX - dragStart.x,
-        y: e.touches[0].clientY - dragStart.y,
-      });
-    } else if (e.touches.length === 2 && lastTouchDist !== null) {
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      const factor = dist / lastTouchDist;
-      setZoom((prev) => Math.min(Math.max(prev * factor, 0.8), 4));
-      setLastTouchDist(dist);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    setLastTouchDist(null);
-  };
-
-  // Handle Mouse Controls (Pan & Wheel-zoom for Desktop)
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    setIsDragging(true);
-    setDragStart({
-      x: e.clientX - pan.x,
-      y: e.clientY - pan.y,
-    });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-    setPan({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
-    });
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const delta = e.deltaY * -0.0015;
-    setZoom((prev) => Math.min(Math.max(prev + delta, 0.8), 4));
-  };
-
-  // Rotate 90 degrees clockwise
-  const handleRotate = () => {
-    setRotation((prev) => (prev + 90) % 360);
-    setPan({ x: 0, y: 0 }); // Recenter image after rotate
-  };
-
-  // Reset adjustments
-  const handleReset = () => {
-    setRotation(0);
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
-  };
 
   // Calculate crop window dimensions based on aspect ratio
   const getCropBoxDimensions = () => {
@@ -156,6 +86,118 @@ export default function ImageCropperModal({
 
   const cropBox = getCropBoxDimensions();
 
+  // Reactive dimension calculation: Ensure image covers cropbox at zoom = 1 without whitespace gaps
+  const isRotated90or270 = rotation === 90 || rotation === 270;
+  const naturalW = naturalSize?.width || 1200;
+  const naturalH = naturalSize?.height || 1600;
+  const effectiveW = isRotated90or270 ? naturalH : naturalW;
+  const effectiveH = isRotated90or270 ? naturalW : naturalH;
+
+  const baseFitScale = naturalSize
+    ? Math.max(cropBox.width / effectiveW, cropBox.height / effectiveH)
+    : 1;
+  const displayedW = naturalW * baseFitScale;
+  const displayedH = naturalH * baseFitScale;
+
+  // Clamp pan so the image CANNOT be dragged beyond the crop box edge, eliminating accidental whitespace
+  const clampPan = useCallback(
+    (newX: number, newY: number, curZoom: number = zoom, rot: number = rotation) => {
+      const isRot = rot === 90 || rot === 270;
+      const curW = (isRot ? displayedH : displayedW) * curZoom;
+      const curH = (isRot ? displayedW : displayedH) * curZoom;
+      const maxX = Math.max(0, (curW - cropBox.width) / 2);
+      const maxY = Math.max(0, (curH - cropBox.height) / 2);
+      return {
+        x: Math.min(Math.max(newX, -maxX), maxX),
+        y: Math.min(Math.max(newY, -maxY), maxY),
+      };
+    },
+    [displayedW, displayedH, cropBox.width, cropBox.height, zoom, rotation]
+  );
+
+  // Handle Touch Controls (Pan & Pinch-to-zoom for Android / iOS)
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.touches[0].clientX - pan.x,
+        y: e.touches[0].clientY - pan.y,
+      });
+    } else if (e.touches.length === 2) {
+      setIsDragging(false);
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      setLastTouchDist(dist);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 1 && isDragging) {
+      const rawX = e.touches[0].clientX - dragStart.x;
+      const rawY = e.touches[0].clientY - dragStart.y;
+      setPan(clampPan(rawX, rawY));
+    } else if (e.touches.length === 2 && lastTouchDist !== null) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const factor = dist / lastTouchDist;
+      const targetZoom = Math.min(Math.max(zoom * factor, 1), 4);
+      setZoom(targetZoom);
+      setPan((prev) => clampPan(prev.x, prev.y, targetZoom));
+      setLastTouchDist(dist);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    setLastTouchDist(null);
+  };
+
+  // Handle Mouse Controls (Pan & Wheel-zoom for Desktop)
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - pan.x,
+      y: e.clientY - pan.y,
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const rawX = e.clientX - dragStart.x;
+    const rawY = e.clientY - dragStart.y;
+    setPan(clampPan(rawX, rawY));
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const delta = e.deltaY * -0.0015;
+    const targetZoom = Math.min(Math.max(zoom + delta, 1), 4);
+    setZoom(targetZoom);
+    setPan((prev) => clampPan(prev.x, prev.y, targetZoom));
+  };
+
+  // Rotate 90 degrees clockwise
+  const handleRotate = () => {
+    const nextRot = (rotation + 90) % 360;
+    setRotation(nextRot);
+    setPan({ x: 0, y: 0 }); // Recenter image after rotate
+  };
+
+  // Reset adjustments
+  const handleReset = () => {
+    setRotation(0);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+
   // Export cropped & rotated image onto HTML5 Canvas
   const handleConfirmCrop = useCallback(() => {
     const img = imageRef.current;
@@ -175,18 +217,6 @@ export default function ImageCropperModal({
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, outputWidth, outputHeight);
 
-    // Calculate displayed base dimensions
-    const isRotated90or270 = rotation === 90 || rotation === 270;
-    const naturalW = img.naturalWidth;
-    const naturalH = img.naturalHeight;
-    const effectiveW = isRotated90or270 ? naturalH : naturalW;
-    const effectiveH = isRotated90or270 ? naturalW : naturalH;
-
-    // Scale image so it naturally fills the crop box at zoom = 1
-    const baseFitScale = Math.max(cropBox.width / effectiveW, cropBox.height / effectiveH);
-    const displayedW = naturalW * baseFitScale;
-    const displayedH = naturalH * baseFitScale;
-
     // Scale from screen crop box to output canvas
     const screenToCanvas = outputWidth / cropBox.width;
 
@@ -194,8 +224,9 @@ export default function ImageCropperModal({
     // 1. Move origin to center of output canvas
     ctx.translate(outputWidth / 2, outputHeight / 2);
 
-    // 2. Apply user pan (scaled to canvas)
-    ctx.translate(pan.x * screenToCanvas, pan.y * screenToCanvas);
+    // 2. Apply user pan (clamped to prevent whitespace gaps)
+    const safePan = clampPan(pan.x, pan.y);
+    ctx.translate(safePan.x * screenToCanvas, safePan.y * screenToCanvas);
 
     // 3. Apply user rotation
     ctx.rotate((rotation * Math.PI) / 180);
@@ -221,7 +252,7 @@ export default function ImageCropperModal({
       'image/jpeg',
       0.9
     );
-  }, [cropBox, rotation, pan, zoom, fileName, onCropComplete, onClose]);
+  }, [cropBox, rotation, pan, zoom, displayedW, displayedH, clampPan, fileName, onCropComplete, onClose]);
 
   if (!isOpen || !imageSrc) return null;
 
@@ -281,12 +312,17 @@ export default function ImageCropperModal({
             src={imageSrc}
             crossOrigin="anonymous"
             alt="Nota to crop"
-            onLoad={() => setImageLoaded(true)}
-            className="max-w-none pointer-events-none"
+            onLoad={(e) => {
+              const el = e.currentTarget;
+              setNaturalSize({ width: el.naturalWidth, height: el.naturalHeight });
+              setImageLoaded(true);
+            }}
+            className="max-w-none pointer-events-none select-none block"
             style={{
-              maxHeight: '65vh',
-              maxWidth: '85vw',
-              objectFit: 'contain',
+              width: naturalSize ? `${displayedW}px` : 'auto',
+              height: naturalSize ? `${displayedH}px` : 'auto',
+              opacity: imageLoaded ? 1 : 0,
+              transition: 'opacity 0.15s ease-in',
             }}
           />
         </div>
@@ -335,7 +371,10 @@ export default function ImageCropperModal({
           <span className="text-[10px] font-bold text-slate-400 mr-1 hidden sm:inline">Format:</span>
           <button
             type="button"
-            onClick={() => setAspectRatio('receipt')}
+            onClick={() => {
+              setAspectRatio('receipt');
+              setPan({ x: 0, y: 0 });
+            }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
               aspectRatio === 'receipt'
                 ? 'bg-orange-500 text-white shadow-sm'
@@ -346,7 +385,10 @@ export default function ImageCropperModal({
           </button>
           <button
             type="button"
-            onClick={() => setAspectRatio('long')}
+            onClick={() => {
+              setAspectRatio('long');
+              setPan({ x: 0, y: 0 });
+            }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
               aspectRatio === 'long'
                 ? 'bg-orange-500 text-white shadow-sm'
@@ -357,7 +399,10 @@ export default function ImageCropperModal({
           </button>
           <button
             type="button"
-            onClick={() => setAspectRatio('square')}
+            onClick={() => {
+              setAspectRatio('square');
+              setPan({ x: 0, y: 0 });
+            }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
               aspectRatio === 'square'
                 ? 'bg-orange-500 text-white shadow-sm'
@@ -368,7 +413,10 @@ export default function ImageCropperModal({
           </button>
           <button
             type="button"
-            onClick={() => setAspectRatio('landscape')}
+            onClick={() => {
+              setAspectRatio('landscape');
+              setPan({ x: 0, y: 0 });
+            }}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
               aspectRatio === 'landscape'
                 ? 'bg-orange-500 text-white shadow-sm'
@@ -396,7 +444,11 @@ export default function ImageCropperModal({
           <div className="flex-1 flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setZoom((prev) => Math.max(prev - 0.2, 0.8))}
+              onClick={() => {
+                const z = Math.max(zoom - 0.2, 1);
+                setZoom(z);
+                setPan((prev) => clampPan(prev.x, prev.y, z));
+              }}
               className="p-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white cursor-pointer"
               title="Perkecil"
             >
@@ -404,17 +456,25 @@ export default function ImageCropperModal({
             </button>
             <input
               type="range"
-              min="0.8"
+              min="1"
               max="3.5"
               step="0.05"
               value={zoom}
-              onChange={(e) => setZoom(parseFloat(e.target.value))}
+              onChange={(e) => {
+                const z = parseFloat(e.target.value);
+                setZoom(z);
+                setPan((prev) => clampPan(prev.x, prev.y, z));
+              }}
               className="w-full accent-orange-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
               title="Zoom"
             />
             <button
               type="button"
-              onClick={() => setZoom((prev) => Math.min(prev + 0.2, 3.5))}
+              onClick={() => {
+                const z = Math.min(zoom + 0.2, 3.5);
+                setZoom(z);
+                setPan((prev) => clampPan(prev.x, prev.y, z));
+              }}
               className="p-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white cursor-pointer"
               title="Perbesar"
             >

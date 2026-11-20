@@ -656,12 +656,12 @@ export default function WordVoucherPreviewModal({
                         {topPhotos.map((url, idx) => (
                           <div
                             key={idx}
-                            className="border-2 border-[#ED7D31] rounded-none aspect-[9/16] overflow-hidden bg-white"
+                            className="border-2 border-[#ED7D31] rounded-none aspect-[9/16] overflow-hidden bg-white flex items-start justify-center"
                           >
                             <img
                               src={url}
                               alt={`Receipt ${startIndex + idx + 1}`}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover object-top block"
                             />
                           </div>
                         ))}
@@ -673,12 +673,12 @@ export default function WordVoucherPreviewModal({
                           {botPhotos.map((url, idx) => (
                             <div
                               key={idx}
-                              className="border-2 border-[#ED7D31] rounded-none aspect-[9/16] overflow-hidden bg-white"
+                              className="border-2 border-[#ED7D31] rounded-none aspect-[9/16] overflow-hidden bg-white flex items-start justify-center"
                             >
                               <img
                                 src={url}
                                 alt={`Receipt ${startIndex + 4 + idx}`}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover object-top block"
                               />
                             </div>
                           ))}

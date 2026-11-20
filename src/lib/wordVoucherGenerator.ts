@@ -14,6 +14,7 @@ import {
   PageBreak,
   Packer,
   ImageRun,
+  VerticalAlign,
 } from 'docx';
 import { ReimbursementRequest, ReimbursementType } from '@/types/database';
 import { parseAccountBlocksFromDescription, normalizeAccount, getCleanDescription, extractMetadataFromDescription } from './formatters';
@@ -178,8 +179,8 @@ export async function fetchImageBuffer(url: string): Promise<LoadedImageData | n
 export function fitImageDimensions(
   origW: number,
   origH: number,
-  maxW: number = 195,
-  maxH: number = 290
+  maxW: number = 206,
+  maxH: number = 306
 ): { width: number; height: number } {
   if (!origW || !origH) return { width: maxW, height: maxH };
   const ratio = Math.min(maxW / origW, maxH / origH, 1);
@@ -1332,14 +1333,16 @@ export async function generateReimbursementDocx(
       : 0;
 
   const makeFrameCell = (imgData: LoadedImageData) => {
-    const fit = fitImageDimensions(imgData.width, imgData.height, 195, 290);
+    const fit = fitImageDimensions(imgData.width, imgData.height, 206, 306);
     return new TableCell({
       width: { size: 3100, type: WidthType.DXA },
       borders: orangeFrameBorder,
-      margins: { top: 80, bottom: 80, left: 60, right: 60 },
+      margins: { top: 0, bottom: 0, left: 0, right: 0 },
+      verticalAlign: VerticalAlign.TOP,
       children: [
         new Paragraph({
           alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 0 },
           children: [
             new ImageRun({
               data: imgData.data,
