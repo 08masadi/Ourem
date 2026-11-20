@@ -545,6 +545,23 @@ html.light .custom-scrollbar {
     border-radius: 0 !important;
   }
 
+  .table-header-orange,
+  .table-header-orange th,
+  .table-header-orange td,
+  th.table-header-orange,
+  td.table-header-orange {
+    background-color: #ED7D31 !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .table-header-orange *,
+  th.table-header-orange *,
+  td.table-header-orange * {
+    color: #ffffff !important;
+  }
+
   .word-preview-page-1 {
     min-height: 0 !important;
     height: auto !important;

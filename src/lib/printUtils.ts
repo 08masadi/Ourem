@@ -110,6 +110,21 @@ export function printWordDocument(element: HTMLElement | null, documentTitle: st
               padding: 0 !important;
               background: #ffffff !important;
             }
+            .table-header-orange,
+            .table-header-orange th,
+            .table-header-orange td,
+            th.table-header-orange,
+            td.table-header-orange {
+              background-color: #ED7D31 !important;
+              color: #ffffff !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .table-header-orange *,
+            th.table-header-orange *,
+            td.table-header-orange * {
+              color: #ffffff !important;
+            }
             .printable-word-doc {
               position: static !important;
               padding: 0 !important;
@@ -192,6 +207,21 @@ export function printWordDocument(element: HTMLElement | null, documentTitle: st
                 padding-top: 0 !important;
                 margin-top: 0 !important;
                 border-top: none !important;
+              }
+              .table-header-orange,
+              .table-header-orange th,
+              .table-header-orange td,
+              th.table-header-orange,
+              td.table-header-orange {
+                background-color: #ED7D31 !important;
+                color: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              .table-header-orange *,
+              th.table-header-orange *,
+              td.table-header-orange * {
+                color: #ffffff !important;
               }
               .no-print {
                 display: none !important;

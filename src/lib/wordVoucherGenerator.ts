@@ -593,7 +593,7 @@ export async function generateReimbursementDocx(
                     children: [
                       new TableCell({
                         width: { size: 3600, type: WidthType.DXA },
-                        shading: { fill: 'B95318' },
+                        shading: { fill: 'ED7D31' },
                         borders: thinGrayBorder,
                         margins: { top: 30, bottom: 30, left: 60, right: 60 },
                         children: [
@@ -640,7 +640,7 @@ export async function generateReimbursementDocx(
                     children: [
                       new TableCell({
                         width: { size: 3600, type: WidthType.DXA },
-                        shading: { fill: 'B95318' },
+                        shading: { fill: 'ED7D31' },
                         borders: thinGrayBorder,
                         margins: { top: 30, bottom: 30, left: 60, right: 60 },
                         children: [
@@ -926,7 +926,7 @@ export async function generateReimbursementDocx(
       ].map((col) => {
         return new TableCell({
           width: { size: col.width, type: WidthType.DXA },
-          shading: { fill: 'B95318' },
+          shading: { fill: 'ED7D31' },
           borders: thinGrayBorder,
           margins: { top: 40, bottom: 40, left: 80, right: 80 },
           children: [

@@ -383,22 +383,28 @@ export default function WordVoucherPreviewModal({
                   <table className="border-collapse text-[11pt] w-[38%] text-center">
                     <tbody>
                       <tr>
-                        <td className="bg-[#B95318] text-white font-bold py-1 px-2 border border-gray-400 text-[11pt]">
+                        <td
+                          className="table-header-orange bg-[#ED7D31] text-white font-bold py-1 px-2 border border-gray-400 text-[11pt]"
+                          style={{ backgroundColor: '#ED7D31', color: '#ffffff' }}
+                        >
                           Request Date
                         </td>
                       </tr>
                       <tr>
-                        <td className="py-1 px-2 border border-gray-400 font-semibold bg-white">
+                        <td className="py-1 px-2 border border-gray-400 font-semibold bg-white text-black">
                           {requestDateFormatted}
                         </td>
                       </tr>
                       <tr>
-                        <td className="bg-[#B95318] text-white font-bold py-1 px-2 border border-gray-400 text-[11pt]">
+                        <td
+                          className="table-header-orange bg-[#ED7D31] text-white font-bold py-1 px-2 border border-gray-400 text-[11pt]"
+                          style={{ backgroundColor: '#ED7D31', color: '#ffffff' }}
+                        >
                           RF Number
                         </td>
                       </tr>
                       <tr>
-                        <td className="py-1 px-2 border border-gray-400 font-mono font-bold bg-white">
+                        <td className="py-1 px-2 border border-gray-400 font-mono font-bold bg-white text-black">
                           {rfNumberFormatted}
                         </td>
                       </tr>
@@ -486,14 +492,38 @@ export default function WordVoucherPreviewModal({
                   </h2>
                   <table className="w-full border-collapse text-[11pt]">
                     <thead>
-                      <tr className="bg-[#B95318] text-white font-bold text-center">
-                        <th className="py-1 px-1.5 border border-gray-400 w-[6%]">ITEM</th>
-                        <th className="py-1 px-1.5 border border-gray-400 w-[14%]">DATE</th>
-                        <th className="py-1 px-2 border border-gray-400 w-[48%] text-left">
+                      <tr
+                        className="table-header-orange bg-[#ED7D31] text-white font-bold text-center"
+                        style={{ backgroundColor: '#ED7D31', color: '#ffffff' }}
+                      >
+                        <th
+                          className="py-1 px-1.5 border border-gray-400 w-[6%] text-white font-bold text-center"
+                          style={{ backgroundColor: '#ED7D31', color: '#ffffff' }}
+                        >
+                          ITEM
+                        </th>
+                        <th
+                          className="py-1 px-1.5 border border-gray-400 w-[14%] text-white font-bold text-center"
+                          style={{ backgroundColor: '#ED7D31', color: '#ffffff' }}
+                        >
+                          DATE
+                        </th>
+                        <th
+                          className="py-1 px-2 border border-gray-400 w-[48%] text-left text-white font-bold"
+                          style={{ backgroundColor: '#ED7D31', color: '#ffffff' }}
+                        >
                           DESCRIPTION
                         </th>
-                        <th className="py-1 px-1.5 border border-gray-400 w-[14%]">RECEIPT</th>
-                        <th className="py-1 px-2 border border-gray-400 w-[18%] text-right">
+                        <th
+                          className="py-1 px-1.5 border border-gray-400 w-[14%] text-white font-bold text-center"
+                          style={{ backgroundColor: '#ED7D31', color: '#ffffff' }}
+                        >
+                          RECEIPT
+                        </th>
+                        <th
+                          className="py-1 px-2 border border-gray-400 w-[18%] text-right text-white font-bold"
+                          style={{ backgroundColor: '#ED7D31', color: '#ffffff' }}
+                        >
                           COST
                         </th>
                       </tr>
