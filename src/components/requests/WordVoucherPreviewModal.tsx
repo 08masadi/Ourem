@@ -652,7 +652,7 @@ export default function WordVoucherPreviewModal({
                         {topPhotos.map((url, idx) => (
                           <div
                             key={idx}
-                            className="border-2 border-[#ED7D31] rounded-none h-[230px] overflow-hidden bg-white"
+                            className="border-2 border-[#ED7D31] rounded-none aspect-[9/16] overflow-hidden bg-white"
                           >
                             <img
                               src={url}
@@ -669,7 +669,7 @@ export default function WordVoucherPreviewModal({
                           {botPhotos.map((url, idx) => (
                             <div
                               key={idx}
-                              className="border-2 border-[#ED7D31] rounded-none h-[230px] overflow-hidden bg-white"
+                              className="border-2 border-[#ED7D31] rounded-none aspect-[9/16] overflow-hidden bg-white"
                             >
                               <img
                                 src={url}
