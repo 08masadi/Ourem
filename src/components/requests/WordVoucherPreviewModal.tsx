@@ -404,7 +404,7 @@ export default function WordVoucherPreviewModal({
                         </td>
                       </tr>
                       <tr>
-                        <td className="py-1 px-2 border border-gray-400 font-mono font-bold bg-white text-black">
+                        <td className="py-1 px-2 border border-gray-400 font-bold bg-white text-black">
                           {rfNumberFormatted}
                         </td>
                       </tr>
@@ -439,7 +439,7 @@ export default function WordVoucherPreviewModal({
                           <td className="py-1 pr-2 font-normal text-gray-700 text-right">
                             :
                           </td>
-                          <td className="py-1 px-2 border border-gray-400 font-mono bg-white">
+                          <td className="py-1 px-2 border border-gray-400 bg-white">
                             {requesterId}
                           </td>
                         </tr>
@@ -545,7 +545,7 @@ export default function WordVoucherPreviewModal({
                             <td className="border border-gray-400 text-center py-0.5 px-1">
                               {item ? item.receipt : ''}
                             </td>
-                            <td className="border border-gray-400 text-right py-0.5 px-2 font-mono">
+                            <td className="border border-gray-400 text-right py-0.5 px-2">
                               {item && item.cost > 0
                                 ? formatCurrencyNumber(item.cost)
                                 : ''}
@@ -561,13 +561,13 @@ export default function WordVoucherPreviewModal({
                         <td className="text-center py-1 px-1.5 border border-gray-400 bg-[#F8CBAD]">
                           IDR
                         </td>
-                        <td className="text-right py-1 px-2 border border-gray-400 bg-[#F8CBAD] font-mono">
+                        <td className="text-right py-1 px-2 border border-gray-400 bg-[#F8CBAD]">
                           {formatCurrencyNumber(totalAmount)}
                         </td>
                       </tr>
                     </tbody>
                   </table>
-                  <div className="text-right text-[10px] italic text-gray-600 mt-1">
+                  <div className="text-right text-[11pt] italic text-gray-600 mt-1">
                     Don't forget to include receipts!
                   </div>
                 </div>
@@ -593,7 +593,7 @@ export default function WordVoucherPreviewModal({
                         </td>
                       </tr>
                       {/* Sub-labels */}
-                      <tr className="text-[9px] text-gray-500">
+                      <tr className="text-[11pt] text-gray-500">
                         <td className="pt-0.5 pb-1 px-1">Approved By (Name)</td>
                         <td className="pt-0.5 pb-1 px-1">Position</td>
                       </tr>
@@ -602,12 +602,12 @@ export default function WordVoucherPreviewModal({
                         <td className="border border-gray-400 py-1 px-2 h-[45px] align-middle">
                           {/* Kotak tanda tangan kosong untuk tanda tangan basah / manual */}
                         </td>
-                        <td className="border border-gray-400 py-1 px-2 h-[45px] align-middle font-mono">
+                        <td className="border border-gray-400 py-1 px-2 h-[45px] align-middle">
                           {paymentDate}
                         </td>
                       </tr>
                       {/* Sub-labels */}
-                      <tr className="text-[9px] text-gray-500">
+                      <tr className="text-[11pt] text-gray-500">
                         <td className="pt-0.5 px-1">Signature</td>
                         <td className="pt-0.5 px-1">Date</td>
                       </tr>
