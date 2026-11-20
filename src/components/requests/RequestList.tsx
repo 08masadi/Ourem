@@ -1474,6 +1474,7 @@ export default function RequestList({
         ) : (
           <EditRequestModal
             request={editRequest}
+            currentRole={currentRole}
             onClose={() => setEditRequest(null)}
             onSuccess={(updated) => {
               setRequests((prev) =>

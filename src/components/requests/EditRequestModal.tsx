@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useTransition, useRef } from 'react';
-import { ReimbursementRequest, ReimbursementType, DEPARTMENT_OPTIONS } from '@/types/database';
+import { ReimbursementRequest, ReimbursementType, DEPARTMENT_OPTIONS, UserRole } from '@/types/database';
 import { updateReimbursement } from '@/actions/requests';
 import {
   AccountBlockData,
@@ -35,6 +35,7 @@ import ImageCropperModal from './ImageCropperModal';
 
 interface EditRequestModalProps {
   request: ReimbursementRequest;
+  currentRole?: UserRole;
   onClose: () => void;
   onSuccess: (updated: ReimbursementRequest) => void;
 }
@@ -54,9 +55,11 @@ interface AccountBlockState {
 
 export default function EditRequestModal({
   request,
+  currentRole,
   onClose,
   onSuccess,
 }: EditRequestModalProps) {
+  const isFinance = currentRole === 'finance';
   const meta = extractMetadataFromDescription(request.description);
 
   const [reimbursementType, setReimbursementType] = useState<ReimbursementType>(
@@ -494,8 +497,8 @@ export default function EditRequestModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Department, Tanggal & RF Number */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Department, Tanggal & RF Number (RF Number & Describe Purpose khusus Finance) */}
+          <div className={`grid grid-cols-1 ${isFinance ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-4`}>
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
                 <Briefcase className="w-3.5 h-3.5 text-orange-400" />
@@ -538,41 +541,45 @@ export default function EditRequestModal({
               />
             </div>
 
+            {isFinance && (
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-orange-400" />
+                  <span>RF Number</span>
+                </label>
+                <input
+                  type="text"
+                  value={rfNumber}
+                  onChange={(e) => setRfNumber(e.target.value)}
+                  placeholder="RF-DDMMYYYY/XXX"
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Describe Purpose (Khusus Akun Finance) */}
+          {isFinance && (
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-orange-400" />
-                <span>RF Number</span>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Describe Purpose</span>
+                </span>
+                <span className="text-[10px] text-slate-500 font-normal">
+                  (Otomatis terhubung ke Describe Purpose Cetak Word)
+                </span>
               </label>
               <input
                 type="text"
-                value={rfNumber}
-                onChange={(e) => setRfNumber(e.target.value)}
-                placeholder="RF-DDMMYYYY/XXX"
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+                name="describe_purpose"
+                value={describePurpose}
+                onChange={(e) => setDescribePurpose(e.target.value)}
+                placeholder="Contoh: Bensin - Jasa Marga"
+                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
-          </div>
-
-          {/* Describe Purpose */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-orange-400" />
-                <span>Describe Purpose</span>
-              </span>
-              <span className="text-[10px] text-slate-500 font-normal">
-                (Otomatis terhubung ke Describe Purpose Cetak Word)
-              </span>
-            </label>
-            <input
-              type="text"
-              name="describe_purpose"
-              value={describePurpose}
-              onChange={(e) => setDescribePurpose(e.target.value)}
-              placeholder="Contoh: Bensin - Jasa Marga"
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </div>
+          )}
 
           {/* LIST KOLOM / CARD ACCOUNT */}
           <div className="space-y-4">
