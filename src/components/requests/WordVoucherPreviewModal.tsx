@@ -17,7 +17,7 @@ import {
   getCleanDescription,
   extractMetadataFromDescription,
 } from '@/lib/formatters';
-import { printVoucherDocument } from '@/lib/printUtils';
+import { printWordDocument } from '@/lib/printUtils';
 
 interface WordVoucherPreviewModalProps {
   request: ReimbursementRequest;
@@ -36,6 +36,13 @@ export default function WordVoucherPreviewModal({
 }: WordVoucherPreviewModalProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.add('has-word-modal-open');
+    return () => {
+      document.body.classList.remove('has-word-modal-open');
+    };
+  }, []);
 
   const targetRequests =
     sameDateRequests && sameDateRequests.length > 0 ? sameDateRequests : [request];
@@ -231,7 +238,7 @@ export default function WordVoucherPreviewModal({
     allReceiptUrls.length > 0 ? Math.ceil(allReceiptUrls.length / receiptsPerPage) : 0;
 
   const handlePrint = () => {
-    printVoucherDocument(printRef.current, `Reimbursement-${rfNumberFormatted}`);
+    printWordDocument(printRef.current, `Reimbursement-${rfNumberFormatted}`);
   };
 
   const handleDownloadDocx = async () => {
@@ -309,11 +316,19 @@ export default function WordVoucherPreviewModal({
         <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
           <div
             ref={printRef}
-            className="bg-white text-black p-6 sm:p-10 rounded-2xl shadow-lg mx-auto max-w-[210mm] text-[11pt] leading-normal font-sans"
+            className="printable-word-doc bg-white text-black p-6 sm:p-10 print:p-0 print:shadow-none print:rounded-none rounded-2xl shadow-lg mx-auto max-w-[210mm] text-[11pt] leading-normal font-sans"
             style={{ fontFamily: 'Arial, sans-serif', fontSize: '11pt' }}
           >
             {/* ================= PAGE 1 ================= */}
-            <div className="min-h-[297mm] flex flex-col justify-between">
+            <div
+              className="min-h-[297mm] print:min-h-0 print:h-auto flex flex-col justify-between"
+              style={{
+                pageBreakAfter: allReceiptUrls.length > 0 ? 'always' : 'auto',
+                breakAfter: allReceiptUrls.length > 0 ? 'page' : 'auto',
+                pageBreakInside: 'avoid',
+                breakInside: 'avoid',
+              }}
+            >
               <div>
                 {/* Header Title */}
                 <h1 className="text-2xl font-black text-[#E65100] tracking-tight">
@@ -588,8 +603,13 @@ export default function WordVoucherPreviewModal({
                 return (
                   <div
                     key={pIdx}
-                    className="min-h-[297mm] pt-10 border-t border-dashed border-gray-300 mt-10 print:border-0 print:pt-0"
-                    style={{ pageBreakBefore: 'always' }}
+                    className="min-h-[297mm] print:min-h-0 print:h-auto pt-10 border-t border-dashed border-gray-300 mt-10 print:border-0 print:pt-0 print:mt-0"
+                    style={{
+                      pageBreakBefore: 'always',
+                      breakBefore: 'page',
+                      pageBreakInside: 'avoid',
+                      breakInside: 'avoid',
+                    }}
                   >
                     <h2 className="text-2xl font-black text-[#E65100] tracking-tight mb-4">
                       {pIdx === 0 ? 'Receipts' : `Receipts (Hal. ${pIdx + 1})`}

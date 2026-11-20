@@ -505,6 +505,46 @@ html.light .custom-scrollbar {
     visibility: visible !important;
   }
 
+  /* Show Word Reimbursement Form document and its contents */
+  .printable-word-doc,
+  .printable-word-doc * {
+    visibility: visible !important;
+  }
+
+  /* When Word Reimbursement Form Modal is open and printed */
+  body.has-word-modal-open {
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  body.has-word-modal-open html {
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  body.has-word-modal-open .printable-word-doc {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+
   .printable-sheet {
     position: fixed !important;
     left: 0 !important;
