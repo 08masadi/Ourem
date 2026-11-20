@@ -1,6 +1,7 @@
 import { getEmployeeRequests } from '@/actions/requests';
 import { getCurrentUserProfile } from '@/actions/auth';
 import RequestList from '@/components/requests/RequestList';
+import EmployeeMetricsCards from '@/components/requests/EmployeeMetricsCards';
 import { extractOvertimeFromDescription } from '@/lib/formatters';
 import { Clock, CheckCircle2, Wallet, Layers } from 'lucide-react';
 import Link from 'next/link';
@@ -108,63 +109,7 @@ export default async function EmployeeDashboardPage() {
       </div>
 
       {/* Metrics Cards: Category breakdown (Petty Cash, Voucher, Lembur) & Telah Disetujui */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Kolom 1: Petty Cash */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-medium">Petty Cash</span>
-            <Wallet className="w-4 h-4 text-orange-400" />
-          </div>
-          <div className="text-base sm:text-lg font-bold text-white font-mono">
-            {formatRupiah(unpaidPettyCashNominal)}
-          </div>
-          <div className="text-[11px] text-orange-400/80 mt-1">
-            {unpaidPettyCashRequests.length} pengajuan belum cair
-          </div>
-        </div>
-
-        {/* Kolom 2: Voucher Reimbursement */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-medium">Voucher Reimbursement</span>
-            <span className="text-[11px] font-black tracking-tight text-amber-400 border border-amber-500/40 px-1 py-0.5 rounded bg-amber-500/10 font-mono">
-              RP
-            </span>
-          </div>
-          <div className="text-base sm:text-lg font-bold text-white font-mono">
-            {formatRupiah(unpaidVoucherNominal)}
-          </div>
-          <div className="text-[11px] text-amber-400/80 mt-1">
-            {unpaidVoucherRequests.length} pengajuan belum cair
-          </div>
-        </div>
-
-        {/* Kolom 3: Lembur (Di sisi kiri Telah Disetujui) */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-medium">Lembur</span>
-            <Clock className="w-4 h-4 text-orange-400" />
-          </div>
-          <div className="text-base sm:text-lg font-bold text-white font-mono">
-            {formatRupiah(unpaidOvertimeNominal)}
-          </div>
-          <div className="text-[11px] text-orange-400/80 mt-1">
-            {unpaidOvertimeRequests.length} pengajuan belum cair
-          </div>
-        </div>
-
-        {/* Kolom 4: Telah Disetujui (Di sisi paling kanan) */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-medium">Telah Disetujui</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="text-base sm:text-lg font-bold text-emerald-400">
-            {approvedCount} transaksi
-          </div>
-          <div className="text-[11px] text-slate-500 mt-1">Siap dicairkan finance</div>
-        </div>
-      </div>
+      <EmployeeMetricsCards requests={requests} />
 
       {/* Interactive Request List with Type Filter, Checkbox Batching, & PDF Export */}
       <RequestList
