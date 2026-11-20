@@ -73,12 +73,21 @@ export default function PushNotificationSubscriber() {
   }, []);
 
   const handleEnablePush = async () => {
-    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+    if (typeof window === 'undefined') return;
 
     try {
       setIsSubscribing(true);
-      const perm = await Notification.requestPermission();
-      setPermission(perm);
+
+      // Jika berjalan di dalam aplikasi Android APK, trigger request permission native
+      try {
+        (window as any).AndroidApp?.requestNotificationPermission?.();
+      } catch {}
+
+      let perm: NotificationPermission = 'default';
+      if ('Notification' in window) {
+        perm = await Notification.requestPermission();
+        setPermission(perm);
+      }
 
       if (perm === 'granted') {
         const registration = await navigator.serviceWorker.ready;
