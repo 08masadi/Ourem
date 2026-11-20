@@ -31,11 +31,13 @@ export default function Sidebar({ role }: SidebarProps) {
 
   const directorLinks = [
     { href: '/director', label: 'Approval Pengajuan', icon: CheckSquare },
+    { href: '/employee/new', label: 'Ajukan Reimbursement', icon: PlusCircle },
     { href: '/profile', label: 'Profil Saya', icon: User },
   ];
 
   const financeLinks = [
     { href: '/finance', label: 'Pencairan Dana (Paid)', icon: CreditCard },
+    { href: '/employee/new', label: 'Ajukan Reimbursement', icon: PlusCircle },
     { href: '/profile', label: 'Profil Saya', icon: User },
   ];
 

@@ -890,10 +890,12 @@ export async function getRequesterProfileInfo(userId: string): Promise<{
     }
 
     // 2. Directory fallback for seeded employees
-    const nameLower = (full_name || '').toLowerCase();
+    const isGeneric = (n?: string | null) => !n || ['employee', 'karyawan', 'staff'].includes(n.trim().toLowerCase());
+    let nameLower = (full_name || '').toLowerCase();
     const emailLower = (email || '').toLowerCase();
-    if (nameLower.includes('miskadi') || emailLower.includes('miskadi')) {
-      full_name = full_name || 'Miskadi';
+
+    if (nameLower.includes('miskadi') || emailLower.includes('miskadi') || isGeneric(full_name)) {
+      full_name = isGeneric(full_name) ? 'Miskadi' : full_name || 'Miskadi';
       email = email || 'miskadi@ouffice.co.id';
       phone = phone || '085710002923';
       employee_id = employee_id || 'CSK-007';

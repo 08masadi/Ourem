@@ -498,7 +498,8 @@ export default function RequestForm() {
         if (!response.ok || res?.error) {
           setError(res?.error || 'Gagal mengirim pengajuan. Silakan coba sesaat lagi.');
         } else {
-          window.location.href = '/employee?success=created_reimbursement';
+          const backUrl = userProfile?.role === 'director' ? '/director' : userProfile?.role === 'finance' ? '/finance' : '/employee';
+          window.location.href = `${backUrl}?success=created_reimbursement`;
         }
       } catch (err: any) {
         console.error('Submission error:', err);
@@ -1022,7 +1023,7 @@ export default function RequestForm() {
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-slate-800">
           <Link
-            href="/employee"
+            href={userProfile?.role === 'director' ? '/director' : userProfile?.role === 'finance' ? '/finance' : '/employee'}
             className="px-5 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition cursor-pointer"
           >
             Batal

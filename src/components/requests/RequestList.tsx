@@ -122,6 +122,32 @@ export default function RequestList({
     setRequests(initialRequests);
   }, [initialRequests]);
 
+  const getRequesterDisplayName = (item?: ReimbursementRequest | null) => {
+    if (!item) return 'Miskadi';
+    const rawProfileName = item.profiles?.full_name?.trim();
+    const meta = extractMetadataFromDescription(item.description);
+    const ov = extractOvertimeFromDescription(item.description);
+    const metaName = meta.full_name?.trim();
+    const ovName = ov?.nama_karyawan?.trim();
+    const anyName = (item as any).nama_karyawan?.trim();
+
+    const isGeneric = (n?: string | null) =>
+      !n || ['employee', 'karyawan', 'staff'].includes(n.toLowerCase());
+
+    if (rawProfileName && !isGeneric(rawProfileName)) return rawProfileName;
+    if (metaName && !isGeneric(metaName)) return metaName;
+    if (ovName && !isGeneric(ovName)) return ovName;
+    if (anyName && !isGeneric(anyName)) return anyName;
+
+    const email = (item.profiles?.email || meta.email || '').toLowerCase();
+    const phone = (item.profiles as any)?.phone || meta.phone || '';
+    const empId = (item.profiles as any)?.employee_id || meta.employee_id || '';
+    if (email.includes('miskadi') || phone.includes('085710002923') || empId.includes('CSK-007')) return 'Miskadi';
+    if (email.includes('bryan') || phone.includes('3991') || empId.includes('CSK-003')) return 'Bryanda Yudhistira';
+
+    return rawProfileName || metaName || 'Miskadi';
+  };
+
   const handleCloseDetail = () => {
     setSelectedRequest(null);
     if (typeof window !== 'undefined' && window.location.search.includes('requestId')) {
@@ -229,8 +255,7 @@ export default function RequestList({
       req.title.toLowerCase().includes(search.toLowerCase()) ||
       req.category.toLowerCase().includes(search.toLowerCase()) ||
       (req.customer && req.customer.toLowerCase().includes(search.toLowerCase())) ||
-      (req.profiles?.full_name &&
-        req.profiles.full_name.toLowerCase().includes(search.toLowerCase()));
+      getRequesterDisplayName(req).toLowerCase().includes(search.toLowerCase());
 
     return matchesStatus && matchesType && matchesPayment && matchesSearch;
   });
@@ -415,22 +440,17 @@ export default function RequestList({
         return;
       }
     } else if (currentRole === 'finance') {
-      // Pada akun Finance, HANYA setujui pengajuan petty cash & voucher (Form Lembur disetujui oleh Director)
+      // Pada akun Finance, bisa menyetujui pengajuan petty cash, voucher, maupun Form Lembur yang Menunggu Approval
       targetIds = requests
         .filter(
           (r) =>
             selectedIds.includes(r.id) &&
-            r.status === 'Menunggu Approval' &&
-            !(
-              r.reimbursement_type === 'Lembur' ||
-              r.account === 'Lembur' ||
-              r.title?.startsWith('Form Lembur')
-            )
+            r.status === 'Menunggu Approval'
         )
         .map((r) => r.id);
 
       if (targetIds.length === 0) {
-        alert('Khusus pengajuan Form Lembur, persetujuan dilakukan oleh akun Director.');
+        alert('Tidak ada pengajuan terpilih yang berstatus "Menunggu Approval".');
         return;
       }
     } else {
@@ -701,7 +721,7 @@ export default function RequestList({
           : formatDateIndo(req.request_date),
         tipeHari: ov?.tipe_hari || 'hari kerja',
         lokasiLembur: ov?.lokasi_lembur || 'Kantor',
-        namaKaryawan: ov?.nama_karyawan || req.profiles?.full_name || 'Staff',
+        namaKaryawan: ov?.nama_karyawan || getRequesterDisplayName(req),
         perusahaan: ov?.perusahaan || req.customer || 'PT. CITRA SARI KENCANA',
         namaPekerjaan: ov?.nama_pekerjaan || req.title.replace('Form Lembur - ', ''),
         jamLembur: ov?.jam_lembur || '-',
@@ -1396,11 +1416,9 @@ export default function RequestList({
                       <span>• {formatDateIndo(req.request_date)}</span>
 
                       {/* Pengaju & Department */}
-                      {req.profiles?.full_name && (
-                        <span>
-                          • {req.profiles.full_name} ({req.department || 'Staff OPS'})
-                        </span>
-                      )}
+                      <span>
+                        • {getRequesterDisplayName(req)} ({req.department || req.profiles?.department || 'Staff OPS'})
+                      </span>
                     </div>
 
                     {/* Judul Pengajuan (Customer di samping kategori pada Petty Cash & Voucher dihilangkan) */}
@@ -1609,7 +1627,7 @@ export default function RequestList({
                   <div>
                     <span className="text-slate-400">Pengaju:</span>
                     <p className="text-white font-semibold">
-                      {selectedRequest.profiles?.full_name || 'Staff'}
+                      {getRequesterDisplayName(selectedRequest)}
                     </p>
                   </div>
                 </div>
@@ -1617,7 +1635,7 @@ export default function RequestList({
                 <div>
                   <span className="text-slate-400">Pengaju:</span>
                   <p className="text-white font-semibold">
-                    {selectedRequest.profiles?.full_name || 'Staff'}
+                    {getRequesterDisplayName(selectedRequest)}
                   </p>
                 </div>
               )}
@@ -1839,44 +1857,73 @@ export default function RequestList({
                   (selectedRequest.reimbursement_type === 'Lembur' ||
                     selectedRequest.account === 'Lembur' ||
                     selectedRequest.title?.startsWith('Form Lembur')) && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleApprove(selectedRequest.id);
-                        setSelectedRequest((prev) =>
-                          prev ? { ...prev, status: 'Disetujui', rejection_reason: null } : null
-                        );
-                      }}
-                      disabled={isPending}
-                      className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
-                      title="Setujui Form Lembur"
-                    >
-                      <CheckCircle2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRejectModalReq(selectedRequest);
+                          setRejectReason('');
+                        }}
+                        disabled={isPending}
+                        className="p-2.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
+                        title="Tolak Form Lembur"
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleApprove(selectedRequest.id);
+                          setSelectedRequest((prev) =>
+                            prev ? { ...prev, status: 'Disetujui', rejection_reason: null } : null
+                          );
+                        }}
+                        disabled={isPending}
+                        className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
+                        title="Setujui Form Lembur"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                      </button>
+                    </div>
                 )}
 
-                {/* Finance Approval Actions - KHUSUS PETTY CASH & VOUCHER */}
+                {/* Finance Approval Actions - BISA SETUJUI SEMUA TERMASUK FORM LEMBUR */}
                 {currentRole === 'finance' &&
-                  selectedRequest.status === 'Menunggu Approval' &&
-                  !(
-                    selectedRequest.reimbursement_type === 'Lembur' ||
-                    selectedRequest.account === 'Lembur' ||
-                    selectedRequest.title?.startsWith('Form Lembur')
-                  ) && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleApprove(selectedRequest.id);
-                        setSelectedRequest((prev) =>
-                          prev ? { ...prev, status: 'Disetujui', rejection_reason: null } : null
-                        );
-                      }}
-                      disabled={isPending}
-                      className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
-                      title="Setujui Pengajuan"
-                    >
-                      <CheckCircle2 className="w-4 h-4" />
-                    </button>
+                  selectedRequest.status === 'Menunggu Approval' && (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRejectModalReq(selectedRequest);
+                          setRejectReason('');
+                        }}
+                        disabled={isPending}
+                        className="p-2.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
+                        title="Tolak Pengajuan"
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleApprove(selectedRequest.id);
+                          setSelectedRequest((prev) =>
+                            prev ? { ...prev, status: 'Disetujui', rejection_reason: null } : null
+                          );
+                        }}
+                        disabled={isPending}
+                        className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
+                        title={
+                          selectedRequest.reimbursement_type === 'Lembur' ||
+                          selectedRequest.account === 'Lembur' ||
+                          selectedRequest.title?.startsWith('Form Lembur')
+                            ? 'Setujui Form Lembur'
+                            : 'Setujui Pengajuan'
+                        }
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                      </button>
+                    </div>
                 )}
 
                 {/* Finance Payment Action - SEMUA TIPE KLAIM YANG DISETUJUI & BELUM CAIR */}

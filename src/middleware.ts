@@ -48,7 +48,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(targetDashboard, request.url));
     }
 
-    if (pathname.startsWith('/employee') && role !== 'employee') {
+    // Allow all roles (employee, director, finance) to access /employee/new for reimbursement creation
+    if (pathname.startsWith('/employee') && !pathname.startsWith('/employee/new') && role !== 'employee') {
       const targetDashboard = role === 'director' ? '/director' : '/finance';
       return NextResponse.redirect(new URL(targetDashboard, request.url));
     }

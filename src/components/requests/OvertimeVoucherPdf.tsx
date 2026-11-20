@@ -230,15 +230,30 @@ export default function OvertimeVoucherPdf({ data, onClose }: OvertimeVoucherPdf
                   <div className="flex-1 font-bold" style={{ color: '#000000' }}>{data.jamLembur}</div>
                 </div>
 
-                {/* Uraian Pekerjaan Row */}
+                {/* Uraian Pekerjaan & Amount Row */}
                 <div
-                  className="flex px-2.5 py-1 border-b border-black min-h-[38pt]"
+                  className="flex border-b border-black min-h-[38pt]"
                   style={{ lineHeight: '1.25', fontSize: '9pt' }}
                 >
-                  <div className="w-[110px] shrink-0 font-semibold" style={{ color: '#000000' }}>Uraian Pekerjaan</div>
-                  <div className="w-[14px] shrink-0 text-center font-bold" style={{ color: '#000000' }}>:</div>
-                  <div className="flex-1 font-medium whitespace-pre-line leading-snug" style={{ color: '#000000' }}>
-                    {data.uraianPekerjaan || '(Belum ada uraian pekerjaan)'}
+                  {/* Sisi Kiri: Uraian Pekerjaan (Sejajar dengan Prepared By & Approved By) */}
+                  <div className="w-2/3 border-r border-black flex px-2.5 py-1">
+                    <div className="w-[110px] shrink-0 font-semibold" style={{ color: '#000000' }}>Uraian Pekerjaan</div>
+                    <div className="w-[14px] shrink-0 text-center font-bold" style={{ color: '#000000' }}>:</div>
+                    <div className="flex-1 font-medium whitespace-pre-line leading-snug" style={{ color: '#000000' }}>
+                      {data.uraianPekerjaan || '(Belum ada uraian pekerjaan)'}
+                    </div>
+                  </div>
+
+                  {/* Sisi Kanan: Kotak Amount (Sejajar dengan Paid By) */}
+                  <div className="w-1/3 flex flex-col justify-center items-center p-2 text-center bg-white">
+                    <div className="font-semibold text-[8.5pt]" style={{ color: '#000000' }}>
+                      Amount :
+                    </div>
+                    <div className="text-[11pt] font-black tracking-tight mt-1" style={{ color: '#000000' }}>
+                      {data.nominal && data.nominal > 0
+                        ? `Rp ${Number(data.nominal).toLocaleString('id-ID')}`
+                        : 'Rp 0'}
+                    </div>
                   </div>
                 </div>
 

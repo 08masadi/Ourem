@@ -21,11 +21,13 @@ export default function BottomNav({ role }: BottomNavProps) {
 
   const directorLinks = [
     { href: '/director', label: 'Approval', icon: CheckSquare },
+    { href: '/employee/new', label: 'Ajukan', icon: PlusCircle },
     { href: '/profile', label: 'Profil', icon: User },
   ];
 
   const financeLinks = [
     { href: '/finance', label: 'Pencairan', icon: CreditCard },
+    { href: '/employee/new', label: 'Ajukan', icon: PlusCircle },
     { href: '/profile', label: 'Profil', icon: User },
   ];
 

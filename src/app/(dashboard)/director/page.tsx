@@ -3,7 +3,8 @@ import { getCurrentUserProfile } from '@/actions/auth';
 import RequestList from '@/components/requests/RequestList';
 import BannerAvatar from '@/components/layout/BannerAvatar';
 import { extractOvertimeFromDescription } from '@/lib/formatters';
-import { CheckSquare, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import Link from 'next/link';
+import { CheckSquare, Clock, CheckCircle2, XCircle, PlusCircle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -59,12 +60,23 @@ export default async function DirectorDashboardPage() {
           </h1>
         </div>
 
-        <BannerAvatar
-          avatarUrl={profile?.avatar_url}
-          fullName={profile?.full_name}
-          email={profile?.email}
-          role={profile?.role}
-        />
+        <div className="flex items-center gap-3">
+          <Link
+            href="/employee/new"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition shadow-md shrink-0 cursor-pointer"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span className="hidden sm:inline">Buat Pengajuan</span>
+            <span className="sm:hidden">Ajukan</span>
+          </Link>
+
+          <BannerAvatar
+            avatarUrl={profile?.avatar_url}
+            fullName={profile?.full_name}
+            email={profile?.email}
+            role={profile?.role}
+          />
+        </div>
       </div>
 
       {/* Metrics Cards */}
