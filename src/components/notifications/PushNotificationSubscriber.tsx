@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { subscribeToPushNotifications } from '@/actions/requests';
+import { createClient } from '@/lib/supabase/client';
 import { Bell, BellRing, CheckCircle2, X } from 'lucide-react';
 
 const VAPID_PUBLIC_KEY =
@@ -28,7 +29,35 @@ export default function PushNotificationSubscriber() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Periksa dukungan Service Worker & Notification API
+    // 1. Sync user session ke Android Native layer (agar background worker tahu userId & role)
+    const syncUser = async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          const role = (user.user_metadata?.role as string) || 'employee';
+          const email = user.email || '';
+          if ((window as any).AndroidApp?.syncUserSession) {
+            (window as any).AndroidApp.syncUserSession(user.id, role, email);
+          }
+        }
+      } catch (err) {
+        console.error('Error syncing user session to Android:', err);
+      }
+    };
+    syncUser();
+
+    // 2. Jika di Android APK, pastikan izin notifikasi native dipicu
+    try {
+      if ((window as any).AndroidApp?.requestNotificationPermission) {
+        (window as any).AndroidApp.requestNotificationPermission();
+      }
+    } catch {}
+
+    // 3. Periksa dukungan Web Push (untuk Browser Chrome / Desktop)
     if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
       setPermission('unsupported');
       return;
