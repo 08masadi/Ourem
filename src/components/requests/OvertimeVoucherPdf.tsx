@@ -106,25 +106,36 @@ export default function OvertimeVoucherPdf({ data, onClose }: OvertimeVoucherPdf
           >
             {/* Main Content */}
             <div>
-              {/* Header: Logo and Company Info */}
-              <div className="flex items-center gap-3.5 pb-2">
-                <div className="shrink-0">
+              {/* Header: Logo, Company Info, and Citra Sari Kencana Logo */}
+              <div className="flex items-center justify-between gap-3.5 pb-2">
+                <div className="flex items-center gap-3.5">
+                  <div className="shrink-0">
+                    <img
+                      src="/ouffice-logo.png"
+                      alt="Ouffice.co.id"
+                      className="h-10 sm:h-11 w-auto object-contain"
+                    />
+                  </div>
+                  <div className="leading-tight" style={{ fontFamily: "'Calibri', sans-serif" }}>
+                    <div className="text-sm sm:text-base font-black tracking-normal uppercase" style={{ color: '#000000' }}>
+                      PT. CITRA SARI KENCANA
+                    </div>
+                    <div className="text-[9pt] font-semibold leading-snug" style={{ color: '#000000' }}>
+                      Jl. Rambutan No.4, Manggarai Selatan, Tebet, Jakarta Selatan 12860
+                    </div>
+                    <div className="text-[9pt] font-semibold leading-snug" style={{ color: '#000000' }}>
+                      Phone. [021] 835 1388
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Brand Logo Citra Sari Kencana */}
+                <div className="shrink-0 flex items-center justify-end">
                   <img
-                    src="/ouffice-logo.png"
-                    alt="Ouffice.co.id"
+                    src="/csk-logo.png"
+                    alt="Citra Sari Kencana"
                     className="h-10 sm:h-11 w-auto object-contain"
                   />
-                </div>
-                <div className="leading-tight" style={{ fontFamily: "'Calibri', sans-serif" }}>
-                  <div className="text-sm sm:text-base font-black tracking-normal uppercase" style={{ color: '#000000' }}>
-                    PT. CITRA SARI KENCANA
-                  </div>
-                  <div className="text-[9pt] font-semibold leading-snug" style={{ color: '#000000' }}>
-                    Jl. Rambutan No.4, Manggarai Selatan, Tebet, Jakarta Selatan 12860
-                  </div>
-                  <div className="text-[9pt] font-semibold leading-snug" style={{ color: '#000000' }}>
-                    Phone. [021] 835 1388
-                  </div>
                 </div>
               </div>
 
@@ -245,11 +256,11 @@ export default function OvertimeVoucherPdf({ data, onClose }: OvertimeVoucherPdf
                   </div>
 
                   {/* Sisi Kanan: Kotak Amount (Sejajar dengan Paid By) */}
-                  <div className="w-1/3 flex flex-col justify-center items-center p-2 text-center bg-white">
-                    <div className="font-semibold text-[8.5pt]" style={{ color: '#000000' }}>
+                  <div className="w-1/3 flex flex-col justify-between p-1.5 bg-white">
+                    <div className="font-semibold text-[8.5pt] text-left" style={{ color: '#000000' }}>
                       Amount :
                     </div>
-                    <div className="text-[11pt] font-black tracking-tight mt-1" style={{ color: '#000000' }}>
+                    <div className="flex-1 flex items-center justify-center font-black text-[12pt] tracking-tight my-auto text-center" style={{ color: '#000000' }}>
                       {data.nominal && data.nominal > 0
                         ? `Rp ${Number(data.nominal).toLocaleString('id-ID')}`
                         : 'Rp 0'}

@@ -55,6 +55,8 @@ export default function WordVoucherPreviewModal({
     description: string;
     receipt: string;
     cost: number;
+    isFirstInGroup: boolean;
+    groupSpan: number;
   }> = [];
 
   let runningItem = 1;
@@ -78,6 +80,11 @@ export default function WordVoucherPreviewModal({
           ? block.entries
           : [{ customer: reqItem.customer || '', description: reqItem.title }];
 
+      const groupSpan = entries.length;
+      const blockDate = formatDateSlash(
+        entries[0]?.receipt_date || (block as any).receipt_date || reqItem.request_date
+      );
+
       entries.forEach((entry, eIdx) => {
         const cleanDesc = getCleanDescription(entry.description);
         const itemDesc =
@@ -89,10 +96,12 @@ export default function WordVoucherPreviewModal({
 
         itemizedList.push({
           itemNum: runningItem++,
-          date: formatDateSlash(entry.receipt_date || reqItem.request_date),
+          date: blockDate,
           description: itemDesc,
           receipt: 'Attached',
-          cost: eIdx === 0 ? blockAmount : 0,
+          cost: blockAmount,
+          isFirstInGroup: eIdx === 0,
+          groupSpan: groupSpan,
         });
       });
     });
@@ -535,25 +544,61 @@ export default function WordVoucherPreviewModal({
                     <tbody>
                       {Array.from({ length: totalItemCount }).map((_, idx) => {
                         const item = itemizedList[idx];
+                        if (!item) {
+                          return (
+                            <tr key={idx} className="h-[22px]">
+                              <td className="border border-gray-400 text-center py-0.5 px-1 font-semibold text-gray-700">
+                                {idx + 1}
+                              </td>
+                              <td className="border border-gray-400 text-center py-0.5 px-1"></td>
+                              <td className="border border-gray-400 py-0.5 px-2 text-left"></td>
+                              <td className="border border-gray-400 text-center py-0.5 px-1"></td>
+                              <td className="border border-gray-400 text-right py-0.5 px-2"></td>
+                            </tr>
+                          );
+                        }
+
                         return (
                           <tr key={idx} className="h-[22px]">
+                            {/* ITEM: Always rendered */}
                             <td className="border border-gray-400 text-center py-0.5 px-1 font-semibold text-gray-700">
                               {idx + 1}
                             </td>
-                            <td className="border border-gray-400 text-center py-0.5 px-1">
-                              {item ? item.date : ''}
-                            </td>
+
+                            {/* DATE: Merged per input block */}
+                            {item.isFirstInGroup && (
+                              <td
+                                rowSpan={item.groupSpan}
+                                className="border border-gray-400 text-center py-0.5 px-1 align-middle"
+                              >
+                                {item.date}
+                              </td>
+                            )}
+
+                            {/* DESCRIPTION: Per row */}
                             <td className="border border-gray-400 py-0.5 px-2 text-left">
-                              {item ? item.description : ''}
+                              {item.description}
                             </td>
-                            <td className="border border-gray-400 text-center py-0.5 px-1">
-                              {item ? item.receipt : ''}
-                            </td>
-                            <td className="border border-gray-400 text-right py-0.5 px-2">
-                              {item && item.cost > 0
-                                ? formatCurrencyNumber(item.cost)
-                                : ''}
-                            </td>
+
+                            {/* RECEIPT: Merged per input block */}
+                            {item.isFirstInGroup && (
+                              <td
+                                rowSpan={item.groupSpan}
+                                className="border border-gray-400 text-center py-0.5 px-1 align-middle"
+                              >
+                                {item.receipt}
+                              </td>
+                            )}
+
+                            {/* COST: Merged per input block */}
+                            {item.isFirstInGroup && (
+                              <td
+                                rowSpan={item.groupSpan}
+                                className="border border-gray-400 text-right py-0.5 px-2 align-middle font-medium"
+                              >
+                                {item.cost > 0 ? formatCurrencyNumber(item.cost) : ''}
+                              </td>
+                            )}
                           </tr>
                         );
                       })}

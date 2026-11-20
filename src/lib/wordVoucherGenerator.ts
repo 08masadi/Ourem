@@ -15,6 +15,7 @@ import {
   Packer,
   ImageRun,
   VerticalAlign,
+  VerticalMergeType,
 } from 'docx';
 import { ReimbursementRequest, ReimbursementType } from '@/types/database';
 import { parseAccountBlocksFromDescription, normalizeAccount, getCleanDescription, extractMetadataFromDescription } from './formatters';
@@ -209,6 +210,8 @@ export async function generateReimbursementDocx(
     description: string;
     receipt: string;
     cost: number;
+    isFirstInGroup: boolean;
+    groupSpan: number;
   }> = [];
 
   let runningItem = 1;
@@ -232,6 +235,11 @@ export async function generateReimbursementDocx(
           ? block.entries
           : [{ customer: reqItem.customer || '', description: reqItem.title }];
 
+      const groupSpan = entries.length;
+      const blockDate = formatDateSlash(
+        entries[0]?.receipt_date || (block as any).receipt_date || reqItem.request_date
+      );
+
       entries.forEach((entry, eIdx) => {
         const cleanDesc = getCleanDescription(entry.description);
         const itemDesc =
@@ -243,10 +251,12 @@ export async function generateReimbursementDocx(
 
         itemizedList.push({
           itemNum: runningItem++,
-          date: formatDateSlash(entry.receipt_date || reqItem.request_date),
+          date: blockDate,
           description: itemDesc,
           receipt: 'Attached',
-          cost: eIdx === 0 ? blockAmount : 0,
+          cost: blockAmount,
+          isFirstInGroup: eIdx === 0,
+          groupSpan: groupSpan,
         });
       });
     });
@@ -959,6 +969,11 @@ export async function generateReimbursementDocx(
 
   for (let i = 0; i < totalItemCount; i++) {
     const item = itemizedList[i];
+    const isMergedGroup = item && item.groupSpan > 1;
+    const vMerge = isMergedGroup
+      ? (item.isFirstInGroup ? VerticalMergeType.RESTART : VerticalMergeType.CONTINUE)
+      : undefined;
+
     itemizedRows.push(
       new TableRow({
         height: { value: 300, rule: HeightRule.ATLEAST },
@@ -968,6 +983,7 @@ export async function generateReimbursementDocx(
             width: { size: 700, type: WidthType.DXA },
             borders: thinGrayBorder,
             margins: { top: 30, bottom: 30, left: 60, right: 60 },
+            verticalAlign: VerticalAlign.CENTER,
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
@@ -986,12 +1002,14 @@ export async function generateReimbursementDocx(
             width: { size: 1400, type: WidthType.DXA },
             borders: thinGrayBorder,
             margins: { top: 30, bottom: 30, left: 60, right: 60 },
+            verticalAlign: VerticalAlign.CENTER,
+            verticalMerge: vMerge,
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
                 children: [
                   new TextRun({
-                    text: item ? item.date : '',
+                    text: item && item.isFirstInGroup ? item.date : '',
                     size: 22,
                     font: 'Arial',
                   }),
@@ -1004,6 +1022,7 @@ export async function generateReimbursementDocx(
             width: { size: 4700, type: WidthType.DXA },
             borders: thinGrayBorder,
             margins: { top: 30, bottom: 30, left: 80, right: 80 },
+            verticalAlign: VerticalAlign.CENTER,
             children: [
               new Paragraph({
                 children: [
@@ -1021,12 +1040,14 @@ export async function generateReimbursementDocx(
             width: { size: 1400, type: WidthType.DXA },
             borders: thinGrayBorder,
             margins: { top: 30, bottom: 30, left: 60, right: 60 },
+            verticalAlign: VerticalAlign.CENTER,
+            verticalMerge: vMerge,
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
                 children: [
                   new TextRun({
-                    text: item ? item.receipt : '',
+                    text: item && item.isFirstInGroup ? item.receipt : '',
                     size: 22,
                     font: 'Arial',
                   }),
@@ -1039,12 +1060,17 @@ export async function generateReimbursementDocx(
             width: { size: 1800, type: WidthType.DXA },
             borders: thinGrayBorder,
             margins: { top: 30, bottom: 30, left: 60, right: 60 },
+            verticalAlign: VerticalAlign.CENTER,
+            verticalMerge: vMerge,
             children: [
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
                 children: [
                   new TextRun({
-                    text: item && item.cost > 0 ? formatCurrencyNumber(item.cost) : '',
+                    text:
+                      item && item.isFirstInGroup && item.cost > 0
+                        ? formatCurrencyNumber(item.cost)
+                        : '',
                     size: 22,
                     font: 'Arial',
                   }),
