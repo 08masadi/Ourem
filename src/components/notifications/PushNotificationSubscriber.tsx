@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { subscribeToPushNotifications } from '@/actions/requests';
 import { createClient } from '@/lib/supabase/client';
 import { Bell, BellRing, CheckCircle2, X } from 'lucide-react';
@@ -21,6 +22,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function PushNotificationSubscriber() {
+  const pathname = usePathname();
   const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>('default');
   const [showPrompt, setShowPrompt] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
@@ -29,15 +31,17 @@ export default function PushNotificationSubscriber() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    const supabase = createClient();
+
     // 1. Sync user session ke Android Native layer (agar background worker tahu userId & role)
     const syncUser = async () => {
       try {
-        const supabase = createClient();
         const {
-          data: { user },
-        } = await supabase.auth.getUser();
+          data: { session },
+        } = await supabase.auth.getSession();
 
-        if (user) {
+        if (session && session.user) {
+          const user = session.user;
           const role = (user.user_metadata?.role as string) || 'employee';
           const email = user.email || '';
           if ((window as any).AndroidApp?.syncUserSession) {
@@ -48,9 +52,24 @@ export default function PushNotificationSubscriber() {
         console.error('Error syncing user session to Android:', err);
       }
     };
+
     syncUser();
 
-    // 2. Jika di Android APK, pastikan izin notifikasi native dipicu
+    // Dengar event perubahan login / logout
+    const {
+      data: { subscription: authListener },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && session.user) {
+        const user = session.user;
+        const role = (user.user_metadata?.role as string) || 'employee';
+        const email = user.email || '';
+        if ((window as any).AndroidApp?.syncUserSession) {
+          (window as any).AndroidApp.syncUserSession(user.id, role, email);
+        }
+      }
+    });
+
+    // 2. Jika di Android APK, minta izin notifikasi jika belum aktif
     try {
       if ((window as any).AndroidApp?.requestNotificationPermission) {
         (window as any).AndroidApp.requestNotificationPermission();
@@ -60,7 +79,9 @@ export default function PushNotificationSubscriber() {
     // 3. Periksa dukungan Web Push (untuk Browser Chrome / Desktop)
     if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
       setPermission('unsupported');
-      return;
+      return () => {
+        authListener?.unsubscribe();
+      };
     }
 
     const currentPerm = Notification.permission;
@@ -99,7 +120,11 @@ export default function PushNotificationSubscriber() {
       .catch((err) => {
         console.error('Service worker registration failed:', err);
       });
-  }, []);
+
+    return () => {
+      authListener?.unsubscribe();
+    };
+  }, [pathname]);
 
   const handleEnablePush = async () => {
     if (typeof window === 'undefined') return;

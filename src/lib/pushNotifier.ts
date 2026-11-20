@@ -110,11 +110,65 @@ export async function saveSubscriptionToStorage(
   }
 }
 
+export interface AppQueuedNotification {
+  id: string;
+  title: string;
+  message: string;
+  url: string;
+  createdAt: string;
+}
+
+export async function recordAppNotification(
+  target: { userId?: string; role?: string },
+  payload: PushPayload
+) {
+  try {
+    const supabase = await createClient();
+    const fileName = target.userId ? `user-${target.userId}.json` : `role-${target.role}.json`;
+    const filePath = `app-notifications/${fileName}`;
+
+    let notifications: AppQueuedNotification[] = [];
+    try {
+      const { data: fileData } = await supabase.storage.from('receipts').download(filePath);
+      if (fileData) {
+        const text = await fileData.text();
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) notifications = parsed;
+      }
+    } catch {}
+
+    const newNotif: AppQueuedNotification = {
+      id: payload.tag || `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      title: payload.title,
+      message: payload.body,
+      url: payload.url || '/',
+      createdAt: new Date().toISOString(),
+    };
+
+    // Filter duplikat dan simpan hingga 30 notifikasi terbaru
+    notifications = [newNotif, ...notifications.filter((n) => n.id !== newNotif.id)].slice(0, 30);
+
+    await supabase.storage
+      .from('receipts')
+      .upload(filePath, Buffer.from(JSON.stringify(notifications, null, 2)), {
+        contentType: 'application/json',
+        upsert: true,
+        cacheControl: '0',
+      });
+  } catch (err) {
+    console.error('Error recording app notification:', err);
+  }
+}
+
 /**
  * Mengirim notifikasi push ke satu pengguna (semua device Android/PWA miliknya)
  */
 export async function sendPushToUser(userId: string, payload: PushPayload) {
   try {
+    // 1. Simpan ke antrean notifikasi aplikasi Android
+    await recordAppNotification({ userId }, payload);
+
+    // 2. Kirim Web Push (jika ada browser/device yang terdaftar)
     const supabase = await createClient();
     const filePath = `push-subscriptions/${userId}.json`;
 
@@ -184,6 +238,10 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
  */
 export async function sendPushToRole(targetRole: string, payload: PushPayload) {
   try {
+    // 1. Simpan ke antrean notifikasi role aplikasi Android (Finance / Director)
+    await recordAppNotification({ role: targetRole }, payload);
+
+    // 2. Kirim Web Push ke semua device role tersebut
     const supabase = await createClient();
     const { data: files } = await supabase.storage
       .from('receipts')
