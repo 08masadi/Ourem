@@ -19,6 +19,11 @@ import {
 } from '@/lib/formatters';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import {
+  saveSubscriptionToStorage,
+  sendPushToUser,
+  sendPushToRole,
+} from '@/lib/pushNotifier';
 
 export async function createReimbursement(prevState: any, formData: FormData) {
   const supabase = await createClient();
@@ -171,6 +176,22 @@ export async function createReimbursement(prevState: any, formData: FormData) {
     return { error: `Gagal menyimpan pengajuan: ${insertError.message}` };
   }
 
+  // Kirim push notification ke akun Director dan Finance
+  try {
+    const creatorName = userProfile?.full_name || 'Karyawan';
+    const notifBody = `${creatorName} mengajukan ${reimbursement_type} (${account}) sebesar Rp ${amount.toLocaleString('id-ID')}.`;
+    sendPushToRole('director', {
+      title: 'Pengajuan Reimbursement Baru',
+      body: notifBody,
+      url: '/director',
+    }).catch(() => {});
+    sendPushToRole('finance', {
+      title: 'Pengajuan Reimbursement Baru',
+      body: notifBody,
+      url: '/finance',
+    }).catch(() => {});
+  } catch {}
+
   revalidatePath('/employee');
   revalidatePath('/director');
   revalidatePath('/finance');
@@ -287,6 +308,16 @@ export async function createOvertimeRequest(prevState: any, formData: FormData) 
     console.error('Error insert overtime request:', insertError);
     return { error: `Gagal membuat pengajuan lembur: ${insertError.message}` };
   }
+
+  // Kirim push notification form lembur ke Direktur
+  try {
+    const creatorName = userProfile?.full_name || 'Karyawan';
+    sendPushToRole('director', {
+      title: 'Form Lembur Baru Masuk',
+      body: `${creatorName} mengajukan Form Lembur untuk tanggal ${tanggal_lembur}.`,
+      url: '/director',
+    }).catch(() => {});
+  } catch {}
 
   revalidatePath('/employee');
   revalidatePath('/director');
@@ -908,6 +939,38 @@ export async function updateDirectorStatus(
     return { error: error.message };
   }
 
+  // Kirim push notification ke pemohon & finance
+  try {
+    const { data: reqData } = await supabase
+      .from('reimbursement_requests')
+      .select('user_id, title, reimbursement_type, amount, account')
+      .eq('id', requestId)
+      .single();
+
+    if (reqData && reqData.user_id) {
+      const typeText = reqData.title || reqData.reimbursement_type || 'Reimbursement';
+      if (status === 'Disetujui') {
+        sendPushToUser(reqData.user_id, {
+          title: 'Pengajuan Disetujui! 🎉',
+          body: `Pengajuan ${typeText} Anda telah disetujui dan menunggu pencairan oleh Finance.`,
+          url: `/employee?requestId=${requestId}`,
+        }).catch(() => {});
+
+        sendPushToRole('finance', {
+          title: 'Klaim Disetujui & Siap Dicairkan',
+          body: `Pengajuan ${typeText} telah disetujui Direktur dan siap diproses pembayaran.`,
+          url: `/finance?requestId=${requestId}`,
+        }).catch(() => {});
+      } else if (status === 'Ditolak') {
+        sendPushToUser(reqData.user_id, {
+          title: 'Pengajuan Ditolak',
+          body: `Pengajuan ${typeText} ditolak. Alasan: ${rejectionReason || 'Tidak memenuhi kualifikasi'}.`,
+          url: `/employee?requestId=${requestId}`,
+        }).catch(() => {});
+      }
+    }
+  } catch {}
+
   revalidatePath('/director');
   revalidatePath('/employee');
   revalidatePath('/finance');
@@ -939,6 +1002,26 @@ export async function updateFinancePayment(
 
   if (error) {
     return { error: error.message };
+  }
+
+  // Kirim push notification ke pemohon saat dicairkan (PAID)
+  if (paymentStatus === 'Paid') {
+    try {
+      const { data: reqData } = await supabase
+        .from('reimbursement_requests')
+        .select('user_id, title, reimbursement_type, amount, account')
+        .eq('id', requestId)
+        .single();
+
+      if (reqData && reqData.user_id) {
+        const typeText = reqData.title || reqData.reimbursement_type || 'Reimbursement';
+        sendPushToUser(reqData.user_id, {
+          title: 'Dana Telah Dicairkan (PAID) 💰',
+          body: `Dana klaim ${typeText} telah berhasil ditransfer oleh Finance ke rekening Anda.`,
+          url: `/employee?requestId=${requestId}`,
+        }).catch(() => {});
+      }
+    } catch {}
   }
 
   revalidatePath('/finance');
@@ -1078,6 +1161,41 @@ export async function updateBatchDirectorStatus(
     return { error: error.message };
   }
 
+  // Kirim push notification ke pemohon & finance
+  try {
+    const { data: batchReqs } = await supabase
+      .from('reimbursement_requests')
+      .select('id, user_id, title, reimbursement_type')
+      .in('id', requestIds);
+
+    if (batchReqs && batchReqs.length > 0) {
+      for (const reqItem of batchReqs) {
+        if (!reqItem.user_id) continue;
+        const typeText = reqItem.title || reqItem.reimbursement_type || 'Reimbursement';
+        if (status === 'Disetujui') {
+          sendPushToUser(reqItem.user_id, {
+            title: 'Pengajuan Disetujui! 🎉',
+            body: `Pengajuan ${typeText} Anda telah disetujui dan menunggu pencairan oleh Finance.`,
+            url: `/employee?requestId=${reqItem.id}`,
+          }).catch(() => {});
+        } else if (status === 'Ditolak') {
+          sendPushToUser(reqItem.user_id, {
+            title: 'Pengajuan Ditolak',
+            body: `Pengajuan ${typeText} ditolak. Alasan: ${rejectionReason || 'Tidak memenuhi kualifikasi'}.`,
+            url: `/employee?requestId=${reqItem.id}`,
+          }).catch(() => {});
+        }
+      }
+      if (status === 'Disetujui') {
+        sendPushToRole('finance', {
+          title: 'Klaim Disetujui & Siap Dicairkan',
+          body: `${batchReqs.length} pengajuan telah disetujui Direktur dan siap dicairkan.`,
+          url: '/finance',
+        }).catch(() => {});
+      }
+    }
+  } catch {}
+
   revalidatePath('/director');
   revalidatePath('/employee');
   revalidatePath('/finance');
@@ -1113,6 +1231,28 @@ export async function updateBatchFinancePayment(
 
   if (error) {
     return { error: error.message };
+  }
+
+  // Kirim push notification ke pemohon saat dicairkan
+  if (paymentStatus === 'Paid') {
+    try {
+      const { data: batchReqs } = await supabase
+        .from('reimbursement_requests')
+        .select('id, user_id, title, reimbursement_type')
+        .in('id', requestIds);
+
+      if (batchReqs && batchReqs.length > 0) {
+        for (const reqItem of batchReqs) {
+          if (!reqItem.user_id) continue;
+          const typeText = reqItem.title || reqItem.reimbursement_type || 'Reimbursement';
+          sendPushToUser(reqItem.user_id, {
+            title: 'Dana Telah Dicairkan (PAID) 💰',
+            body: `Dana klaim ${typeText} telah berhasil ditransfer oleh Finance ke rekening Anda.`,
+            url: `/employee?requestId=${reqItem.id}`,
+          }).catch(() => {});
+        }
+      }
+    } catch {}
   }
 
   revalidatePath('/director');
@@ -1483,4 +1623,19 @@ export async function clearAllNotificationsAction(ids: string[]) {
     data: { deleted_notifications: merged },
   });
   return { success: true };
+}
+
+// Server action: Simpan subscription push notification dari perangkat Android / browser
+export async function subscribeToPushNotifications(subscription: any, userAgent?: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
+
+  const profile = await getCurrentUserProfile();
+  const role = profile?.role || 'employee';
+
+  const ok = await saveSubscriptionToStorage(user.id, role, subscription, userAgent);
+  return { success: ok };
 }

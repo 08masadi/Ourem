@@ -5,6 +5,7 @@ import BottomNav from '@/components/layout/BottomNav';
 import NotificationBell from '@/components/layout/NotificationBell';
 import DynamicIslandSuccess from '@/components/ui/DynamicIslandSuccess';
 import SuccessUrlWatcher from '@/components/ui/SuccessUrlWatcher';
+import PushNotificationSubscriber from '@/components/notifications/PushNotificationSubscriber';
 import { LogOut } from 'lucide-react';
 import Link from 'next/link';
 
@@ -125,6 +126,7 @@ export default async function DashboardLayout({
         {/* Global Dynamic Island Success Alert & URL Watcher */}
         <DynamicIslandSuccess />
         <SuccessUrlWatcher />
+        <PushNotificationSubscriber />
       </div>
     </div>
   );
