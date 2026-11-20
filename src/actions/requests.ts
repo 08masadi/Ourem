@@ -25,306 +25,374 @@ import {
   sendPushToRole,
 } from '@/lib/pushNotifier';
 
-export async function createReimbursement(prevState: any, formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'Anda harus login untuk membuat pengajuan.' };
-  }
-
-  const title = formData.get('title') as string;
-  const reimbursement_type = (formData.get('reimbursement_type') as ReimbursementType) || 'Petty Cash';
-  const customer = (formData.get('customer') as string) || '';
-  const account = (formData.get('account') as string) || (formData.get('category') as string) || 'Bensin';
-  const department = (formData.get('department') as string) || 'Staff OPS';
-  const rf_number = (formData.get('rf_number') as string) || '';
-  const describe_purpose = (formData.get('describe_purpose') as string) || '';
-  let signature_url = (formData.get('signature_url') as string) || '';
-
-  const userProfile = await getCurrentUserProfile();
-  // If no signature_url provided in form, use user's profile signature
-  if (!signature_url) {
-    signature_url = userProfile?.signature_url || '';
-  }
-  const amountStr = formData.get('amount') as string;
-  const request_date = (formData.get('request_date') as string) || new Date().toISOString().split('T')[0];
-  const description = formData.get('description') as string;
-  const receipt_file = formData.get('receipt_file') as File | null;
-  let receipt_url = (formData.get('receipt_url') as string) || '';
-
-  // Map sub-accounts (Bensin, Parkir, Tol, Makan, Kopi, Rokok, Material) to valid CHECK constraint values in database:
-  let category: ReimbursementCategory = 'Operasional Lainnya';
-  if (['Bensin', 'Parkir', 'Tol', 'Transport', 'Transport Lainnya'].includes(account)) {
-    category = 'Transport';
-  } else if (['Makan', 'Kopi', 'Rokok', 'Konsumsi', 'Makan & Konsumsi', 'Konsumsi Lainnya'].includes(account)) {
-    category = 'Makan & Konsumsi';
-  } else if (['Material', 'Alat Tulis Kantor', 'Alat Tulis Kantor (ATK)', 'Sparepart & Perlengkapan'].includes(account)) {
-    category = 'Alat Tulis Kantor';
-  } else if (account === 'Hotel & Penginapan') {
-    category = 'Hotel & Penginapan';
-  } else if (account === 'Medis & Kesehatan') {
-    category = 'Medis & Kesehatan';
-  } else {
-    category = 'Operasional Lainnya';
-  }
-
-  if (!title || !amountStr) {
-    return { error: 'Judul/keterangan dan nominal wajib diisi.' };
-  }
-
-  // Parse numeric amount
-  const cleanedAmount = amountStr.replace(/[^0-9]/g, '');
-  const amount = Number(cleanedAmount);
-
-  if (isNaN(amount) || amount <= 0) {
-    return { error: 'Nominal harus berupa angka valid lebih dari 0.' };
-  }
-
-  // Handle receipt file upload if present (single or multiple block files)
-  const blockCount = Number(formData.get('block_count') || 1);
-  for (let i = 0; i < blockCount; i++) {
-    const file = formData.get(`receipt_file_${i}`) as File | null;
-    if (file && file.size > 0 && file.name) {
-      try {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}-${Date.now()}-${i}.${fileExt}`;
-        const filePath = `receipts/${fileName}`;
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('receipts')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false,
-          });
-
-        if (!uploadError && uploadData) {
-          const { data: publicUrlData } = supabase.storage
-            .from('receipts')
-            .getPublicUrl(filePath);
-          if (!receipt_url) receipt_url = publicUrlData.publicUrl;
-        }
-      } catch {
-        // ignore
-      }
+export async function createReimbursement(arg1: any, arg2?: any) {
+  try {
+    const formData: FormData = (arg1 instanceof FormData ? arg1 : arg2) as FormData;
+    if (!formData) {
+      return { error: 'Form data pengajuan tidak valid.' };
     }
-  }
 
-  if (!receipt_url && receipt_file && receipt_file.size > 0 && receipt_file.name) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { error: 'Anda harus login untuk membuat pengajuan.' };
+    }
+
+    const title = (formData.get('title') as string) || '';
+    const reimbursement_type = (formData.get('reimbursement_type') as ReimbursementType) || 'Petty Cash';
+    const customer = (formData.get('customer') as string) || '';
+    const account = (formData.get('account') as string) || (formData.get('category') as string) || 'Bensin';
+    const department = (formData.get('department') as string) || 'Staff OPS';
+    const rf_number = (formData.get('rf_number') as string) || '';
+    const describe_purpose = (formData.get('describe_purpose') as string) || '';
+    let signature_url = (formData.get('signature_url') as string) || '';
+
+    let userProfile = null;
     try {
-      const fileExt = receipt_file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `receipts/${fileName}`;
+      userProfile = await getCurrentUserProfile();
+    } catch {}
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('receipts')
-        .upload(filePath, receipt_file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (!uploadError && uploadData) {
-        const { data: publicUrlData } = supabase.storage
-          .from('receipts')
-          .getPublicUrl(filePath);
-        receipt_url = publicUrlData.publicUrl;
-      }
-    } catch {
-      // If storage bucket isn't setup yet, ignore
+    // If no signature_url provided in form, use user's profile signature
+    if (!signature_url) {
+      signature_url = userProfile?.signature_url || '';
     }
-  }
+    const amountStr = (formData.get('amount') as string) || '0';
+    const request_date = (formData.get('request_date') as string) || new Date().toISOString().split('T')[0];
+    const description = (formData.get('description') as string) || '';
+    const receipt_file = formData.get('receipt_file') as File | null;
+    let receipt_url = (formData.get('receipt_url') as string) || '';
 
-  const insertPayload: any = {
-    user_id: user.id,
-    title,
-    category,
-    amount,
-    request_date,
-    description,
-    receipt_url: receipt_url || null,
-    status: 'Menunggu Approval',
-    payment_status: 'Unpaid',
-    reimbursement_type,
-    customer: customer || null,
-    account: account || null,
-    department: department || 'Staff OPS',
-    signature_url: signature_url || null,
-  };
+    // Map sub-accounts (Bensin, Parkir, Tol, Makan, Kopi, Rokok, Material) to valid CHECK constraint values in database:
+    let category: ReimbursementCategory = 'Operasional Lainnya';
+    if (['Bensin', 'Parkir', 'Tol', 'Transport', 'Transport Lainnya'].includes(account)) {
+      category = 'Transport';
+    } else if (['Makan', 'Kopi', 'Rokok', 'Konsumsi', 'Makan & Konsumsi', 'Konsumsi Lainnya'].includes(account)) {
+      category = 'Makan & Konsumsi';
+    } else if (['Material', 'Alat Tulis Kantor', 'Alat Tulis Kantor (ATK)', 'Sparepart & Perlengkapan'].includes(account)) {
+      category = 'Alat Tulis Kantor';
+    } else if (account === 'Hotel & Penginapan') {
+      category = 'Hotel & Penginapan';
+    } else if (account === 'Medis & Kesehatan') {
+      category = 'Medis & Kesehatan';
+    } else {
+      category = 'Operasional Lainnya';
+    }
 
-  // Attempt insert with fallback if columns not yet migrated
-  let { error: insertError } = await supabase
-    .from('reimbursement_requests')
-    .insert(insertPayload);
+    if (!title || !amountStr) {
+      return { error: 'Judul/keterangan dan nominal wajib diisi.' };
+    }
 
-  if (insertError && (insertError.message.includes('column') || insertError.code === '42703')) {
-    // Retry without newly added columns in case migration hasn't run yet
-    delete insertPayload.reimbursement_type;
-    delete insertPayload.customer;
-    delete insertPayload.account;
-    delete insertPayload.department;
-    delete insertPayload.signature_url;
+    // Parse numeric amount
+    const cleanedAmount = amountStr.replace(/[^0-9]/g, '');
+    const amount = Number(cleanedAmount);
 
-    const retry = await supabase
+    if (isNaN(amount) || amount <= 0) {
+      return { error: 'Nominal harus berupa angka valid lebih dari 0.' };
+    }
+
+    // Handle receipt file upload if present (single or multiple block files)
+    const blockCount = Number(formData.get('block_count') || 1);
+    for (let i = 0; i < blockCount; i++) {
+      const file = formData.get(`receipt_file_${i}`) as File | null;
+      const isFile =
+        file &&
+        typeof file === 'object' &&
+        'size' in file &&
+        typeof (file as any).size === 'number' &&
+        (file as any).size > 0;
+
+      if (isFile) {
+        try {
+          const rawName = (file as any).name || 'nota.jpg';
+          const fileExt = rawName.includes('.') ? rawName.split('.').pop() || 'jpg' : 'jpg';
+          const fileName = `${user.id}-${Date.now()}-${i}.${fileExt}`;
+          const filePath = `receipts/${fileName}`;
+          const buffer = Buffer.from(await file.arrayBuffer());
+
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('receipts')
+            .upload(filePath, buffer, {
+              contentType: (file as any).type || 'image/jpeg',
+              cacheControl: '3600',
+              upsert: false,
+            });
+
+          if (!uploadError && uploadData) {
+            const { data: publicUrlData } = supabase.storage
+              .from('receipts')
+              .getPublicUrl(filePath);
+            if (!receipt_url) receipt_url = publicUrlData.publicUrl;
+          }
+        } catch (uploadErr) {
+          console.error('File block upload error:', uploadErr);
+        }
+      }
+    }
+
+    if (!receipt_url && receipt_file) {
+      const isFile =
+        typeof receipt_file === 'object' &&
+        'size' in receipt_file &&
+        typeof (receipt_file as any).size === 'number' &&
+        (receipt_file as any).size > 0;
+
+      if (isFile) {
+        try {
+          const rawName = (receipt_file as any).name || 'nota.jpg';
+          const fileExt = rawName.includes('.') ? rawName.split('.').pop() || 'jpg' : 'jpg';
+          const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+          const filePath = `receipts/${fileName}`;
+          const buffer = Buffer.from(await receipt_file.arrayBuffer());
+
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('receipts')
+            .upload(filePath, buffer, {
+              contentType: (receipt_file as any).type || 'image/jpeg',
+              cacheControl: '3600',
+              upsert: false,
+            });
+
+          if (!uploadError && uploadData) {
+            const { data: publicUrlData } = supabase.storage
+              .from('receipts')
+              .getPublicUrl(filePath);
+            receipt_url = publicUrlData.publicUrl;
+          }
+        } catch (uploadErr) {
+          console.error('Receipt fallback upload error:', uploadErr);
+        }
+      }
+    }
+
+    const insertPayload: any = {
+      user_id: user.id,
+      title,
+      category,
+      amount,
+      request_date,
+      description,
+      receipt_url: receipt_url || null,
+      status: 'Menunggu Approval',
+      payment_status: 'Unpaid',
+      reimbursement_type,
+      customer: customer || null,
+      account: account || null,
+      department: department || 'Staff OPS',
+      signature_url: signature_url || null,
+    };
+
+    // Attempt insert with fallback if columns not yet migrated
+    let { error: insertError } = await supabase
       .from('reimbursement_requests')
       .insert(insertPayload);
-    insertError = retry.error;
+
+    if (
+      insertError &&
+      (insertError.message?.toLowerCase().includes('column') ||
+        insertError.code === '42703' ||
+        insertError.code === 'PGRST204')
+    ) {
+      // Retry without newly added columns in case migration hasn't run yet
+      delete insertPayload.reimbursement_type;
+      delete insertPayload.customer;
+      delete insertPayload.account;
+      delete insertPayload.department;
+      delete insertPayload.signature_url;
+
+      const retry = await supabase
+        .from('reimbursement_requests')
+        .insert(insertPayload);
+      insertError = retry.error;
+    }
+
+    if (insertError) {
+      console.error('Database insert error:', insertError);
+      return { error: `Gagal menyimpan pengajuan: ${insertError.message}` };
+    }
+
+    // Kirim push notification ke akun Director dan Finance
+    try {
+      const creatorName = userProfile?.full_name || 'Karyawan';
+      const notifBody = `${creatorName} mengajukan ${reimbursement_type} (${account}) sebesar Rp ${amount.toLocaleString('id-ID')}.`;
+      await Promise.allSettled([
+        sendPushToRole('director', {
+          title: 'Pengajuan Reimbursement Baru',
+          body: notifBody,
+          url: '/director',
+        }),
+        sendPushToRole('finance', {
+          title: 'Pengajuan Reimbursement Baru',
+          body: notifBody,
+          url: '/finance',
+        }),
+      ]);
+    } catch (notifErr) {
+      console.error('Push notification failed:', notifErr);
+    }
+
+    try {
+      revalidatePath('/employee');
+      revalidatePath('/director');
+      revalidatePath('/finance');
+    } catch {}
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('CRITICAL ERROR in createReimbursement:', err);
+    return { error: err?.message || 'Terjadi kesalahan sistem saat memproses pengajuan.' };
   }
-
-  if (insertError) {
-    return { error: `Gagal menyimpan pengajuan: ${insertError.message}` };
-  }
-
-  // Kirim push notification ke akun Director dan Finance
-  try {
-    const creatorName = userProfile?.full_name || 'Karyawan';
-    const notifBody = `${creatorName} mengajukan ${reimbursement_type} (${account}) sebesar Rp ${amount.toLocaleString('id-ID')}.`;
-    await Promise.allSettled([
-      sendPushToRole('director', {
-        title: 'Pengajuan Reimbursement Baru',
-        body: notifBody,
-        url: '/director',
-      }),
-      sendPushToRole('finance', {
-        title: 'Pengajuan Reimbursement Baru',
-        body: notifBody,
-        url: '/finance',
-      }),
-    ]);
-  } catch {}
-
-  revalidatePath('/employee');
-  revalidatePath('/director');
-  revalidatePath('/finance');
-  return { success: true };
 }
 
-export async function createOvertimeRequest(prevState: any, formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'Anda harus login untuk membuat pengajuan lembur.' };
-  }
-
-  const tanggal_lembur =
-    (formData.get('tanggal_lembur') as string) || new Date().toISOString().split('T')[0];
-  const tipe_hari =
-    ((formData.get('tipe_hari') as string) === 'hari libur' ? 'hari libur' : 'hari kerja') as
-      | 'hari kerja'
-      | 'hari libur';
-  const lokasi_lembur = (formData.get('lokasi_lembur') as string) || '';
-  const nama_karyawan = (formData.get('nama_karyawan') as string) || '';
-  const perusahaan = (formData.get('perusahaan') as string) || '';
-  const nama_pekerjaan = (formData.get('nama_pekerjaan') as string) || '';
-  const jam_lembur = (formData.get('jam_lembur') as string) || '';
-  const uraian_pekerjaan = (formData.get('uraian_pekerjaan') as string) || '';
-  const nominalStr = (formData.get('nominal') as string) || '0';
-  const department = (formData.get('department') as string) || 'Staff OPS';
-
-  if (!nama_pekerjaan || !jam_lembur || !uraian_pekerjaan) {
-    return { error: 'Nama pekerjaan, jam lembur, dan uraian pekerjaan wajib diisi.' };
-  }
-
-  const cleanedNominal = nominalStr.replace(/[^0-9]/g, '');
-  const rawNominal = Number(cleanedNominal) || 0;
-  // Supabase constraint: amount NUMERIC NOT NULL CHECK (amount > 0).
-  // If nominal is 0 or empty, use 1 as a placeholder so the DB check constraint passes.
-  const dbAmount = rawNominal > 0 ? rawNominal : 1;
-
-  // Profile signature
-  const userProfile = await getCurrentUserProfile();
-  const signature_url = userProfile?.signature_url || '';
-  const finalNamaKaryawan = nama_karyawan || userProfile?.full_name || 'Karyawan';
-
-  const overtimeData: OvertimeData = {
-    tanggal_lembur,
-    tipe_hari,
-    lokasi_lembur,
-    nama_karyawan: finalNamaKaryawan,
-    perusahaan,
-    nama_pekerjaan,
-    jam_lembur,
-    uraian_pekerjaan,
-    nominal: rawNominal,
-  };
-
-  const description = formatOvertimeToDescription(overtimeData, {
-    department,
-    signature_url,
-  });
-
-  const title = `Form Lembur - ${nama_pekerjaan}`;
-  const category: ReimbursementCategory = 'Operasional Lainnya';
-
-  const insertPayload: any = {
-    user_id: user.id,
-    title,
-    category,
-    amount: dbAmount,
-    request_date: tanggal_lembur,
-    description,
-    status: 'Menunggu Approval',
-    payment_status: 'Unpaid',
-    reimbursement_type: 'Lembur',
-    customer: perusahaan,
-    account: 'Lembur',
-    department,
-    signature_url: signature_url || null,
-  };
-
-  let { error: insertError } = await supabase
-    .from('reimbursement_requests')
-    .insert(insertPayload);
-
-  // If check constraint on reimbursement_type ('Petty Cash', 'Voucher') triggers
-  if (
-    insertError &&
-    (insertError.message.includes('reimbursement_type') ||
-      insertError.message.includes('check constraint'))
-  ) {
-    insertPayload.reimbursement_type = 'Petty Cash';
-    const retryType = await supabase
-      .from('reimbursement_requests')
-      .insert(insertPayload);
-    insertError = retryType.error;
-  }
-
-  if (insertError && (insertError.message.includes('column') || insertError.code === '42703')) {
-    delete insertPayload.reimbursement_type;
-    delete insertPayload.customer;
-    delete insertPayload.account;
-    delete insertPayload.department;
-    delete insertPayload.signature_url;
-
-    const retry = await supabase
-      .from('reimbursement_requests')
-      .insert(insertPayload);
-    insertError = retry.error;
-  }
-
-  if (insertError) {
-    console.error('Error insert overtime request:', insertError);
-    return { error: `Gagal membuat pengajuan lembur: ${insertError.message}` };
-  }
-
-  // Kirim push notification form lembur ke Direktur
+export async function createOvertimeRequest(arg1: any, arg2?: any) {
   try {
-    const creatorName = userProfile?.full_name || 'Karyawan';
-    await sendPushToRole('director', {
-      title: 'Form Lembur Baru Masuk',
-      body: `${creatorName} mengajukan Form Lembur untuk tanggal ${tanggal_lembur}.`,
-      url: '/director',
-    });
-  } catch {}
+    const formData: FormData = (arg1 instanceof FormData ? arg1 : arg2) as FormData;
+    if (!formData) {
+      return { error: 'Form data lembur tidak valid.' };
+    }
 
-  revalidatePath('/employee');
-  revalidatePath('/director');
-  revalidatePath('/finance');
-  return { success: true };
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { error: 'Anda harus login untuk membuat pengajuan lembur.' };
+    }
+
+    const tanggal_lembur =
+      (formData.get('tanggal_lembur') as string) || new Date().toISOString().split('T')[0];
+    const tipe_hari =
+      ((formData.get('tipe_hari') as string) === 'hari libur' ? 'hari libur' : 'hari kerja') as
+        | 'hari kerja'
+        | 'hari libur';
+    const lokasi_lembur = (formData.get('lokasi_lembur') as string) || '';
+    const nama_karyawan = (formData.get('nama_karyawan') as string) || '';
+    const perusahaan = (formData.get('perusahaan') as string) || '';
+    const nama_pekerjaan = (formData.get('nama_pekerjaan') as string) || '';
+    const jam_lembur = (formData.get('jam_lembur') as string) || '';
+    const uraian_pekerjaan = (formData.get('uraian_pekerjaan') as string) || '';
+    const nominalStr = (formData.get('nominal') as string) || '0';
+    const department = (formData.get('department') as string) || 'Staff OPS';
+
+    if (!nama_pekerjaan || !jam_lembur || !uraian_pekerjaan) {
+      return { error: 'Nama pekerjaan, jam lembur, dan uraian pekerjaan wajib diisi.' };
+    }
+
+    const cleanedNominal = nominalStr.replace(/[^0-9]/g, '');
+    const rawNominal = Number(cleanedNominal) || 0;
+    // Supabase constraint: amount NUMERIC NOT NULL CHECK (amount > 0).
+    // If nominal is 0 or empty, use 1 as a placeholder so the DB check constraint passes.
+    const dbAmount = rawNominal > 0 ? rawNominal : 1;
+
+    // Profile signature
+    let userProfile = null;
+    try {
+      userProfile = await getCurrentUserProfile();
+    } catch {}
+
+    const signature_url = userProfile?.signature_url || '';
+    const finalNamaKaryawan = nama_karyawan || userProfile?.full_name || 'Karyawan';
+
+    const overtimeData: OvertimeData = {
+      tanggal_lembur,
+      tipe_hari,
+      lokasi_lembur,
+      nama_karyawan: finalNamaKaryawan,
+      perusahaan,
+      nama_pekerjaan,
+      jam_lembur,
+      uraian_pekerjaan,
+      nominal: rawNominal,
+    };
+
+    const description = formatOvertimeToDescription(overtimeData, {
+      department,
+      signature_url,
+    });
+
+    const title = `Form Lembur - ${nama_pekerjaan}`;
+    const category: ReimbursementCategory = 'Operasional Lainnya';
+
+    const insertPayload: any = {
+      user_id: user.id,
+      title,
+      category,
+      amount: dbAmount,
+      request_date: tanggal_lembur,
+      description,
+      status: 'Menunggu Approval',
+      payment_status: 'Unpaid',
+      reimbursement_type: 'Lembur',
+      customer: perusahaan,
+      account: 'Lembur',
+      department,
+      signature_url: signature_url || null,
+    };
+
+    let { error: insertError } = await supabase
+      .from('reimbursement_requests')
+      .insert(insertPayload);
+
+    // If check constraint on reimbursement_type ('Petty Cash', 'Voucher') triggers
+    if (
+      insertError &&
+      (insertError.message.includes('reimbursement_type') ||
+        insertError.message.includes('check constraint'))
+    ) {
+      insertPayload.reimbursement_type = 'Petty Cash';
+      const retryType = await supabase
+        .from('reimbursement_requests')
+        .insert(insertPayload);
+      insertError = retryType.error;
+    }
+
+    if (
+      insertError &&
+      (insertError.message?.toLowerCase().includes('column') ||
+        insertError.code === '42703' ||
+        insertError.code === 'PGRST204')
+    ) {
+      delete insertPayload.reimbursement_type;
+      delete insertPayload.customer;
+      delete insertPayload.account;
+      delete insertPayload.department;
+      delete insertPayload.signature_url;
+
+      const retry = await supabase
+        .from('reimbursement_requests')
+        .insert(insertPayload);
+      insertError = retry.error;
+    }
+
+    if (insertError) {
+      console.error('Error insert overtime request:', insertError);
+      return { error: `Gagal membuat pengajuan lembur: ${insertError.message}` };
+    }
+
+    // Kirim push notification form lembur ke Direktur
+    try {
+      const creatorName = userProfile?.full_name || 'Karyawan';
+      await sendPushToRole('director', {
+        title: 'Form Lembur Baru Masuk',
+        body: `${creatorName} mengajukan Form Lembur untuk tanggal ${tanggal_lembur}.`,
+        url: '/director',
+      });
+    } catch {}
+
+    try {
+      revalidatePath('/employee');
+      revalidatePath('/director');
+      revalidatePath('/finance');
+    } catch {}
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('CRITICAL ERROR in createOvertimeRequest:', err);
+    return { error: err?.message || 'Terjadi kesalahan sistem saat memproses pengajuan lembur.' };
+  }
 }
 
 export async function updateReimbursement(prevState: any, formData: FormData) {

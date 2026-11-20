@@ -95,15 +95,19 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
 
     startTransition(async () => {
       try {
-        const res = await createOvertimeRequest(null, formData);
+        const res = await createOvertimeRequest(formData);
         if (res?.error) {
           setError(res.error);
         } else if (res?.success) {
           window.location.href = '/employee?success=created_overtime';
         }
       } catch (err: any) {
-        if (err?.message && !err.message.includes('NEXT_REDIRECT')) {
-          setError(err?.message || 'Gagal membuat pengajuan lembur.');
+        console.error('Overtime submission error:', err);
+        const msg = err?.message || '';
+        if (msg.includes('441') || msg.includes('Minified React error')) {
+          setError('Gagal memproses pengajuan lembur. Mohon periksa kembali form atau coba sesaat lagi.');
+        } else if (!msg.includes('NEXT_REDIRECT')) {
+          setError(msg || 'Gagal membuat pengajuan lembur.');
         }
       }
     });
