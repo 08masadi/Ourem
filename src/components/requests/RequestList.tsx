@@ -57,6 +57,7 @@ import {
   normalizeAccount,
   parseAccountBlocksFromDescription,
   extractOvertimeFromDescription,
+  extractMetadataFromDescription,
 } from '@/lib/formatters';
 
 interface RequestListProps {
@@ -621,12 +622,6 @@ export default function RequestList({
       const finSig = await getBestFinanceSignature();
       const dirSig = await getBestDirectorSignature();
 
-      const sameDateRequests = requests.filter(
-        (r) =>
-          r.request_date === req.request_date &&
-          (r.reimbursement_type || 'Petty Cash') === (req.reimbursement_type || 'Petty Cash')
-      );
-
       let enrichedReq = req;
       if (req.user_id) {
         try {
@@ -650,9 +645,10 @@ export default function RequestList({
         } catch {}
       }
 
+      // Pastikan HANYA mencetak data dari pengajuan ini sendiri (tidak bocor dari/ke pengajuan lain)
       const blob = await generateReimbursementDocx({
         request: enrichedReq,
-        sameDateRequests: sameDateRequests.length > 0 ? sameDateRequests : [enrichedReq],
+        sameDateRequests: [enrichedReq],
         financeApprover: {
           name: finSig.name || 'Dwi N',
           signature: finSig.signature,
@@ -723,38 +719,58 @@ export default function RequestList({
       return;
     }
 
-    // Otomatis gabungkan semua transaksi di tanggal yang sama untuk user ini
-    const sameDateRequests = requests.filter(
-      (r) =>
-        r.request_date === req.request_date &&
-        (r.reimbursement_type || 'Petty Cash') === (req.reimbursement_type || 'Petty Cash')
-    );
+    // Enrich requester data
+    let enrichedReq = req;
+    if (req.user_id) {
+      try {
+        const extra = await getRequesterProfileInfo(req.user_id);
+        if (extra && extra.full_name) {
+          enrichedReq = {
+            ...req,
+            profiles: {
+              ...req.profiles,
+              full_name: extra.full_name || req.profiles?.full_name,
+              department: extra.department || req.profiles?.department,
+            } as any,
+          };
+        }
+      } catch {}
+    }
 
-    const targetRequests = sameDateRequests.length > 0 ? sameDateRequests : [req];
-    const totalAmount = targetRequests.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
-    const determinedType = req.reimbursement_type || 'Petty Cash';
+    // Pastikan HANYA mencetak pengajuan ini sendiri (jangan campur dengan pengajuan lain / orang lain)
+    const targetRequests = [enrichedReq];
+    const totalAmount = Number(enrichedReq.amount) || 0;
+    const determinedType = enrichedReq.reimbursement_type || 'Petty Cash';
     const finSig = await getBestFinanceSignature();
 
-    const isPaid = req.payment_status === 'Paid' || targetRequests.every((r) => r.payment_status === 'Paid');
-    const paidReq =
-      (req.payment_status === 'Paid' ? req : null) ||
-      targetRequests.find((r) => r.payment_status === 'Paid' && r.payment_action_at) ||
-      targetRequests.find((r) => r.payment_status === 'Paid') ||
-      req;
-    const paidDate = paidReq?.payment_action_at
-      ? formatDateIndo(paidReq.payment_action_at.split('T')[0])
-      : paidReq?.updated_at
-      ? formatDateIndo(paidReq.updated_at.split('T')[0])
-      : formatDateIndo(req.request_date);
+    const isPaid = enrichedReq.payment_status === 'Paid';
+    const paidDate = enrichedReq.payment_action_at
+      ? formatDateIndo(enrichedReq.payment_action_at.split('T')[0])
+      : enrichedReq.updated_at
+      ? formatDateIndo(enrichedReq.updated_at.split('T')[0])
+      : formatDateIndo(enrichedReq.request_date);
+
+    const reqMeta = extractMetadataFromDescription(enrichedReq.description);
+    const requesterName =
+      enrichedReq.profiles?.full_name ||
+      reqMeta.full_name ||
+      (enrichedReq as any).nama_karyawan ||
+      'Staff';
+
+    const requesterDept =
+      enrichedReq.department ||
+      enrichedReq.profiles?.department ||
+      reqMeta.department ||
+      'STAFF OPS';
 
     const printData: ReimbursementVoucherPrintData = {
       type: determinedType,
-      requestedBy: req.profiles?.full_name || 'MISKADI',
-      department: req.department || req.profiles?.department || 'STAFF OPS',
-      date: formatDateIndo(req.request_date),
-      items: formatPrintItems(targetRequests, determinedType),
+      requestedBy: requesterName,
+      department: requesterDept,
+      date: formatDateIndo(enrichedReq.request_date),
+      items: formatPrintItems([enrichedReq], determinedType),
       totalAmount,
-      employeeSignature: getBestSignature(targetRequests),
+      employeeSignature: enrichedReq.signature_url || enrichedReq.profiles?.signature_url || reqMeta.signature_url || null,
       financeSignature: isPaid ? finSig.signature : null,
       financeOfficer: isPaid ? (finSig.name || 'FINANCE DEPT') : 'FINANCE DEPT',
       isPaid,
@@ -2003,16 +2019,11 @@ export default function RequestList({
         />
       )}
 
-      {/* Preview Modal Format MS Word (.docx) & Cetak */}
+      {/* Preview Modal Format MS Word (.docx) & Cetak (Hanya mencetak pengajuan yang dipilih, tidak mencampur pengajuan lain) */}
       {wordPreviewReq && wordApprovers && (
         <WordVoucherPreviewModal
           request={wordPreviewReq}
-          sameDateRequests={requests.filter(
-            (r) =>
-              r.request_date === wordPreviewReq.request_date &&
-              (r.reimbursement_type || 'Petty Cash') ===
-                (wordPreviewReq.reimbursement_type || 'Petty Cash')
-          )}
+          sameDateRequests={[wordPreviewReq]}
           financeApprover={wordApprovers.finSig}
           directorApprover={wordApprovers.dirSig}
           onClose={() => {
