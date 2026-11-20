@@ -36,6 +36,7 @@ interface AccountBlockState {
   id: string;
   account: string;
   amount: string;
+  receipt_date: string;
   receiptFile: File | null;
   receiptPreview: string | null;
   entries: Array<{
@@ -114,6 +115,7 @@ export default function RequestForm() {
       id: 'block-1',
       account: 'Bensin',
       amount: '',
+      receipt_date: new Date().toISOString().split('T')[0],
       receiptFile: null,
       receiptPreview: null,
       entries: [{ customer: '', description: '', receipt_date: new Date().toISOString().split('T')[0] }],
@@ -221,6 +223,7 @@ export default function RequestForm() {
         id: `block-${Date.now()}-${prev.length + 1}`,
         account: defaultAcc,
         amount: '',
+        receipt_date: requestDate,
         receiptFile: null,
         receiptPreview: null,
         entries: [{ customer: '', description: '', receipt_date: requestDate }],
@@ -235,7 +238,7 @@ export default function RequestForm() {
 
   const updateBlockField = (
     blockIndex: number,
-    field: 'account' | 'amount',
+    field: 'account' | 'amount' | 'receipt_date',
     value: string
   ) => {
     setBlocks((prev) =>
@@ -244,6 +247,13 @@ export default function RequestForm() {
         if (field === 'amount') {
           const val = value.replace(/[^0-9]/g, '');
           return { ...b, amount: val };
+        }
+        if (field === 'receipt_date') {
+          return {
+            ...b,
+            receipt_date: value,
+            entries: b.entries.map((e) => ({ ...e, receipt_date: value })),
+          };
         }
         return { ...b, [field]: value };
       })
@@ -270,7 +280,7 @@ export default function RequestForm() {
         if (idx !== blockIndex) return b;
         return {
           ...b,
-          entries: [...b.entries, { customer: '', description: '', receipt_date: requestDate }],
+          entries: [...b.entries, { customer: '', description: '', receipt_date: b.receipt_date || requestDate }],
         };
       })
     );
@@ -390,11 +400,12 @@ export default function RequestForm() {
         const blocksData: AccountBlockData[] = blocks.map((b, idx) => ({
           account: b.account,
           amount: Number(b.amount) || 0,
+          receipt_date: b.receipt_date || requestDate,
           receipt_url: uploadedBlockUrls[idx] || undefined,
           entries: b.entries.map((e) => ({
             customer: e.customer.trim(),
             description: e.description.trim(),
-            receipt_date: e.receipt_date || requestDate,
+            receipt_date: b.receipt_date || e.receipt_date || requestDate,
           })),
         }));
 
@@ -724,42 +735,21 @@ export default function RequestForm() {
                       #{entryIndex + 1}
                     </span>
 
-                    {/* Customer & Tanggal Nota Input */}
-                    <div className="w-full sm:w-5/12 space-y-2">
-                      <div>
-                        <label className="block text-[10px] font-semibold text-slate-400 mb-1">
-                          Customer / Klien / Project
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={entry.customer}
-                          onChange={(e) =>
-                            updateCustomerEntry(blockIndex, entryIndex, 'customer', e.target.value)
-                          }
-                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-semibold text-slate-400 mb-1 flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-orange-400" />
-                          <span>Tanggal Nota</span>
-                        </label>
-                        <input
-                          type="date"
-                          value={entry.receipt_date || requestDate}
-                          onChange={(e) =>
-                            updateCustomerEntry(blockIndex, entryIndex, 'receipt_date', e.target.value)
-                          }
-                          onClick={(e) => {
-                            try {
-                              e.currentTarget.showPicker?.();
-                            } catch {}
-                          }}
-                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
-                          style={{ colorScheme: 'dark' }}
-                        />
-                      </div>
+                    {/* Customer Input */}
+                    <div className="w-full sm:w-5/12">
+                      <label className="block text-[10px] font-semibold text-slate-400 mb-1">
+                        Customer / Klien / Project
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={entry.customer}
+                        onChange={(e) =>
+                          updateCustomerEntry(blockIndex, entryIndex, 'customer', e.target.value)
+                        }
+                        placeholder="Contoh: KPU RI Imbon"
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
                     </div>
 
                     {/* Description Textarea (Tanpa Bullet) */}
@@ -769,13 +759,14 @@ export default function RequestForm() {
                         <span>Description (Keterangan)</span>
                       </label>
                       <textarea
-                        rows={4}
+                        rows={2}
                         required
                         value={entry.description}
                         onChange={(e) =>
                           updateCustomerEntry(blockIndex, entryIndex, 'description', e.target.value)
                         }
-                        className="w-full flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed min-h-[88px]"
+                        placeholder="Keterangan transaksi..."
+                        className="w-full flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed min-h-[50px]"
                       />
                     </div>
 
@@ -807,10 +798,10 @@ export default function RequestForm() {
                 </div>
               </div>
 
-              {/* 3. NOMINAL & FOTO NOTA DI DALAM KOLOM INI (SIMETRIS) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-800/80">
-                {/* Nominal Input Column */}
-                <div className="flex flex-col justify-between">
+              {/* 3. NOMINAL, TANGGAL NOTA, & FOTO NOTA (3 KOLOM SEJAJAR: KIRI, TENGAH, KANAN) */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-3 border-t border-slate-800/80">
+                {/* Kolom 1: Nominal Amount (Kiri) */}
+                <div className="flex flex-col justify-between sm:col-span-5">
                   <div>
                     <div className="flex items-center justify-between mb-1.5 h-5">
                       <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
@@ -825,6 +816,7 @@ export default function RequestForm() {
                       required
                       value={block.amount ? Number(block.amount).toLocaleString('id-ID') : ''}
                       onChange={(e) => updateBlockField(blockIndex, 'amount', e.target.value)}
+                      placeholder="0"
                       className="w-full h-11 px-3.5 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -842,26 +834,54 @@ export default function RequestForm() {
                   </div>
                 </div>
 
-                {/* Upload Foto Nota / Kwitansi (Simetris dengan Kolom Nominal) */}
-                <div className="flex flex-col justify-between">
+                {/* Kolom 2: Tanggal Nota (Tengah) */}
+                <div className="flex flex-col justify-between sm:col-span-4">
                   <div>
                     <div className="flex items-center justify-between mb-1.5 h-5">
                       <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                        <Camera className="w-3.5 h-3.5 text-orange-400" />
-                        <span>Foto Bukti Nota / Kwitansi</span>
+                        <Calendar className="w-3.5 h-3.5 text-orange-400" />
+                        <span>Tanggal Nota</span>
+                      </label>
+                    </div>
+                    <input
+                      type="date"
+                      required
+                      value={block.receipt_date || requestDate}
+                      onChange={(e) => updateBlockField(blockIndex, 'receipt_date', e.target.value)}
+                      onClick={(e) => {
+                        try {
+                          e.currentTarget.showPicker?.();
+                        } catch {}
+                      }}
+                      className="w-full h-11 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer font-medium"
+                      style={{ colorScheme: 'dark' }}
+                    />
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-1.5 flex items-center justify-between h-5">
+                    <span>Tgl Transaksi Nota</span>
+                  </div>
+                </div>
+
+                {/* Kolom 3: Foto Bukti Nota / Kwitansi (Kanan - Ikon Kamera Diperkecil) */}
+                <div className="flex flex-col justify-between sm:col-span-3">
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5 h-5">
+                      <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5 truncate" title="Foto Bukti Nota">
+                        <Camera className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                        <span className="truncate">Foto Nota</span>
                       </label>
                       <button
                         type="button"
                         onClick={() => galleryInputRefs.current[blockIndex]?.click()}
-                        className="text-[11px] text-slate-400 hover:text-orange-400 flex items-center gap-1 transition cursor-pointer"
+                        className="text-[10px] text-slate-400 hover:text-orange-400 flex items-center gap-1 transition cursor-pointer shrink-0 ml-1"
                         title="Pilih gambar dari galeri HP atau dokumen PDF"
                       >
                         <ImageIcon className="w-3 h-3" />
-                        <span>Pilih dari Galeri</span>
+                        <span>Galeri</span>
                       </button>
                     </div>
 
-                    {/* Hidden Camera Input (Membuka Kamera Android Belakang Langsung) */}
+                    {/* Hidden Camera Input (Membuka Kamera Belakang Langsung) */}
                     <input
                       ref={(el) => {
                         cameraInputRefs.current[blockIndex] = el;
@@ -895,8 +915,8 @@ export default function RequestForm() {
                     />
 
                     {block.receiptPreview ? (
-                      <div className="w-full h-11 bg-slate-900 border border-slate-700/80 rounded-xl px-2.5 flex items-center justify-between gap-2 shadow-sm">
-                        <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-full h-11 bg-slate-900 border border-slate-700/80 rounded-xl px-2 flex items-center justify-between gap-1 shadow-sm">
+                        <div className="flex items-center gap-1.5 min-w-0">
                           <img
                             src={block.receiptPreview}
                             alt="Preview Nota"
@@ -905,32 +925,23 @@ export default function RequestForm() {
                             title="Klik untuk atur posisi & crop ulang"
                           />
                           <div className="min-w-0">
-                            <div className="text-xs font-bold text-white truncate max-w-[100px] sm:max-w-[140px] md:max-w-[180px]">
+                            <div className="text-[11px] font-bold text-white truncate max-w-[60px] sm:max-w-[70px]">
                               {block.receiptFile?.name || 'Foto Nota'}
                             </div>
-                            <div className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                              <span>✓ Siap Dikirim</span>
+                            <div className="text-[9px] text-emerald-400 font-semibold truncate">
+                              ✓ Siap
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1 shrink-0">
+                        <div className="flex items-center gap-0.5 shrink-0">
                           <button
                             type="button"
                             onClick={() => handleReCrop(blockIndex)}
-                            className="px-2 py-1 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
+                            className="p-1 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg text-xs font-semibold transition cursor-pointer"
                             title="Atur posisi & crop ulang foto ini"
                           >
                             <Crop className="w-3 h-3" />
-                            <span className="hidden sm:inline">Crop</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => cameraInputRefs.current[blockIndex]?.click()}
-                            className="p-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs transition cursor-pointer"
-                            title="Buka kamera untuk foto ulang"
-                          >
-                            <Camera className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
@@ -944,26 +955,29 @@ export default function RequestForm() {
                             className="p-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 rounded-lg text-xs transition cursor-pointer"
                             title="Hapus foto"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
                       </div>
                     ) : (
                       <div
                         onClick={() => cameraInputRefs.current[blockIndex]?.click()}
-                        className="w-full h-11 border-2 border-dashed border-orange-500/40 hover:border-orange-500 bg-slate-900/60 hover:bg-orange-500/5 rounded-xl px-4 text-center cursor-pointer transition flex items-center justify-center group shadow-sm"
-                        title="Buka Kamera Foto Nota"
+                        className="w-full h-11 border-2 border-dashed border-orange-500/40 hover:border-orange-500 bg-slate-900/60 hover:bg-orange-500/5 rounded-xl px-2 text-center cursor-pointer transition flex items-center justify-center gap-1.5 group shadow-sm"
+                        title="Klik untuk Buka Kamera Langsung"
                       >
-                        <div className="w-7 h-7 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 group-hover:scale-110 group-hover:bg-orange-500/20 transition shrink-0">
-                          <Camera className="w-3.5 h-3.5" />
+                        <div className="w-6 h-6 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 group-hover:scale-110 group-hover:bg-orange-500/20 transition shrink-0">
+                          <Camera className="w-3 h-3" />
                         </div>
+                        <span className="text-[11px] font-semibold text-orange-400 group-hover:text-orange-300">
+                          Kamera
+                        </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="text-[11px] text-slate-500 mt-1.5 flex items-center justify-between h-5">
-                    <span>{block.receiptPreview ? '✓ Foto Nota Terlampir' : 'Kamera / Galeri'}</span>
-                    <span>{block.receiptPreview ? 'Siap Dikirim' : 'Maks. 10MB'}</span>
+                  <div className="text-[10px] text-slate-500 mt-1.5 flex items-center justify-between h-5">
+                    <span>{block.receiptPreview ? '✓ Terlampir' : 'Kamera'}</span>
+                    <span>{block.receiptPreview ? 'Siap' : 'Maks 10MB'}</span>
                   </div>
                 </div>
               </div>

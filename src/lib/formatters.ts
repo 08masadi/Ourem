@@ -11,6 +11,7 @@ export interface CustomerDescriptionEntry {
 export interface AccountBlockData {
   account: string;
   amount: number;
+  receipt_date?: string;
   receipt_url?: string;
   entries: Array<{
     customer: string;
@@ -209,15 +210,16 @@ export function parseAccountBlocksFromDescription(
         return parsed.blocks.map((b: any) => ({
           account: b.account || fallbackAccount || 'Bensin',
           amount: Number(b.amount) || 0,
+          receipt_date: b.receipt_date || b.entries?.[0]?.receipt_date || undefined,
           receipt_url: b.receipt_url || fallbackReceiptUrl || undefined,
           entries:
             Array.isArray(b.entries) && b.entries.length > 0
               ? b.entries.map((e: any) => ({
                   customer: e.customer || '',
                   description: getCleanDescription(e.description) || '',
-                  receipt_date: e.receipt_date || undefined,
+                  receipt_date: e.receipt_date || b.receipt_date || undefined,
                 }))
-              : [{ customer: '', description: '', receipt_date: undefined }],
+              : [{ customer: '', description: '', receipt_date: b.receipt_date || undefined }],
         }));
       }
 
