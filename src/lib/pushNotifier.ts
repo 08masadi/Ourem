@@ -1,5 +1,16 @@
 import { setVapidDetails, sendNotification, type PushSubscription } from 'web-push';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+
+function cleanUrl(url?: string): string {
+  if (!url) return '';
+  return url.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+}
+
+function getStorageClient() {
+  const url = cleanUrl(process.env.NEXT_PUBLIC_SUPABASE_URL) || 'https://placeholder.supabase.co';
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+  return createSupabaseClient(url, key);
+}
 
 const VAPID_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
@@ -51,7 +62,7 @@ export async function saveSubscriptionToStorage(
   userAgent?: string
 ): Promise<boolean> {
   try {
-    const supabase = await createClient();
+    const supabase = getStorageClient();
     const filePath = `push-subscriptions/${userId}.json`;
 
     let existingData: UserSubscriptionFile = {
@@ -123,7 +134,7 @@ export async function recordAppNotification(
   payload: PushPayload
 ) {
   try {
-    const supabase = await createClient();
+    const supabase = getStorageClient();
     const fileName = target.userId ? `user-${target.userId}.json` : `role-${target.role}.json`;
     const filePath = `app-notifications/${fileName}`;
 
@@ -169,7 +180,7 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
     await recordAppNotification({ userId }, payload);
 
     // 2. Kirim Web Push (jika ada browser/device yang terdaftar)
-    const supabase = await createClient();
+    const supabase = getStorageClient();
     const filePath = `push-subscriptions/${userId}.json`;
 
     const { data: fileData, error } = await supabase.storage
@@ -242,7 +253,7 @@ export async function sendPushToRole(targetRole: string, payload: PushPayload) {
     await recordAppNotification({ role: targetRole }, payload);
 
     // 2. Kirim Web Push ke semua device role tersebut
-    const supabase = await createClient();
+    const supabase = getStorageClient();
     const { data: files } = await supabase.storage
       .from('receipts')
       .list('push-subscriptions');

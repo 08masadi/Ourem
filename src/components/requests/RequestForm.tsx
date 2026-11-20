@@ -374,6 +374,8 @@ export default function RequestForm() {
         const res = await createReimbursement(null, formData);
         if (res?.error) {
           setError(res.error);
+        } else if (res?.success) {
+          window.location.href = '/employee?success=created_reimbursement';
         }
       } catch (err: any) {
         if (err?.message && !err.message.includes('NEXT_REDIRECT')) {

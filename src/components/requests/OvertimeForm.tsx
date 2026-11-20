@@ -94,9 +94,17 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
     formData.set('department', department);
 
     startTransition(async () => {
-      const res = await createOvertimeRequest(null, formData);
-      if (res?.error) {
-        setError(res.error);
+      try {
+        const res = await createOvertimeRequest(null, formData);
+        if (res?.error) {
+          setError(res.error);
+        } else if (res?.success) {
+          window.location.href = '/employee?success=created_overtime';
+        }
+      } catch (err: any) {
+        if (err?.message && !err.message.includes('NEXT_REDIRECT')) {
+          setError(err?.message || 'Gagal membuat pengajuan lembur.');
+        }
       }
     });
   };

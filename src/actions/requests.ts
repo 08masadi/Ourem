@@ -158,7 +158,7 @@ export async function createReimbursement(prevState: any, formData: FormData) {
     .from('reimbursement_requests')
     .insert(insertPayload);
 
-  if (insertError && insertError.message.includes('column')) {
+  if (insertError && (insertError.message.includes('column') || insertError.code === '42703')) {
     // Retry without newly added columns in case migration hasn't run yet
     delete insertPayload.reimbursement_type;
     delete insertPayload.customer;
@@ -180,22 +180,24 @@ export async function createReimbursement(prevState: any, formData: FormData) {
   try {
     const creatorName = userProfile?.full_name || 'Karyawan';
     const notifBody = `${creatorName} mengajukan ${reimbursement_type} (${account}) sebesar Rp ${amount.toLocaleString('id-ID')}.`;
-    sendPushToRole('director', {
-      title: 'Pengajuan Reimbursement Baru',
-      body: notifBody,
-      url: '/director',
-    }).catch(() => {});
-    sendPushToRole('finance', {
-      title: 'Pengajuan Reimbursement Baru',
-      body: notifBody,
-      url: '/finance',
-    }).catch(() => {});
+    await Promise.allSettled([
+      sendPushToRole('director', {
+        title: 'Pengajuan Reimbursement Baru',
+        body: notifBody,
+        url: '/director',
+      }),
+      sendPushToRole('finance', {
+        title: 'Pengajuan Reimbursement Baru',
+        body: notifBody,
+        url: '/finance',
+      }),
+    ]);
   } catch {}
 
   revalidatePath('/employee');
   revalidatePath('/director');
   revalidatePath('/finance');
-  redirect('/employee?success=created_reimbursement');
+  return { success: true };
 }
 
 export async function createOvertimeRequest(prevState: any, formData: FormData) {
@@ -291,7 +293,7 @@ export async function createOvertimeRequest(prevState: any, formData: FormData) 
     insertError = retryType.error;
   }
 
-  if (insertError && insertError.message.includes('column')) {
+  if (insertError && (insertError.message.includes('column') || insertError.code === '42703')) {
     delete insertPayload.reimbursement_type;
     delete insertPayload.customer;
     delete insertPayload.account;
@@ -312,17 +314,17 @@ export async function createOvertimeRequest(prevState: any, formData: FormData) 
   // Kirim push notification form lembur ke Direktur
   try {
     const creatorName = userProfile?.full_name || 'Karyawan';
-    sendPushToRole('director', {
+    await sendPushToRole('director', {
       title: 'Form Lembur Baru Masuk',
       body: `${creatorName} mengajukan Form Lembur untuk tanggal ${tanggal_lembur}.`,
       url: '/director',
-    }).catch(() => {});
+    });
   } catch {}
 
   revalidatePath('/employee');
   revalidatePath('/director');
   revalidatePath('/finance');
-  redirect('/employee?success=created_overtime');
+  return { success: true };
 }
 
 export async function updateReimbursement(prevState: any, formData: FormData) {

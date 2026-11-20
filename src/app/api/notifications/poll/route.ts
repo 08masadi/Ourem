@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { getUserNotifications } from '@/actions/requests';
 
 export const dynamic = 'force-dynamic';
+
+function cleanUrl(url?: string): string {
+  if (!url) return '';
+  return url.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+}
 
 export async function GET(request: Request) {
   try {
@@ -10,7 +15,9 @@ export async function GET(request: Request) {
     const userId = searchParams.get('userId');
     const role = searchParams.get('role');
 
-    const supabase = await createClient();
+    const supabaseUrl = cleanUrl(process.env.NEXT_PUBLIC_SUPABASE_URL) || 'https://placeholder.supabase.co';
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+    const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
     const combined: any[] = [];
     const seenIds = new Set<string>();
 
