@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect, useRef } from 'react';
+import { createClient as createBrowserClient } from '@/lib/supabase/client';
 import { createReimbursement } from '@/actions/requests';
 import { getCurrentUserProfile } from '@/actions/auth';
 import { ReimbursementType, UserProfile, DEPARTMENT_OPTIONS } from '@/types/database';
@@ -44,6 +45,59 @@ interface AccountBlockState {
   }>;
 }
 
+async function compressImageFile(file: File, maxWidth = 1200, quality = 0.82): Promise<File> {
+  if (!file.type.startsWith('image/')) {
+    return file;
+  }
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxWidth) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxWidth) / height);
+            height = maxWidth;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              resolve(file);
+              return;
+            }
+            const cleanName = file.name.replace(/\.[^/.]+$/, '') + '.jpg';
+            resolve(new File([blob], cleanName, { type: 'image/jpeg', lastModified: Date.now() }));
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function RequestForm() {
   const [reimbursementType, setReimbursementType] = useState<ReimbursementType>('Petty Cash');
   const [department, setDepartment] = useState<string>('Staff OPS');
@@ -67,6 +121,7 @@ export default function RequestForm() {
   ]);
 
   const [error, setError] = useState<string | null>(null);
+  const [submittingStatus, setSubmittingStatus] = useState<string>('');
   const [isPending, startTransition] = useTransition();
 
   // Input refs for direct camera vs gallery
@@ -286,105 +341,159 @@ export default function RequestForm() {
       }
     }
 
-    // Prepare structured AccountBlockData
-    const blocksData: AccountBlockData[] = blocks.map((b) => ({
-      account: b.account,
-      amount: Number(b.amount) || 0,
-      entries: b.entries.map((e) => ({
-        customer: e.customer.trim(),
-        description: e.description.trim(),
-        receipt_date: e.receipt_date || requestDate,
-      })),
-    }));
-
-    const sigToSend =
-      userProfile?.signature_url ||
-      (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_signature') : '') ||
-      '';
-
-    const primaryAccount = blocks[0]?.account || (reimbursementType === 'Petty Cash' ? 'Bensin' : 'Material');
-    const primaryCustomer = blocks
-      .flatMap((b) => b.entries.map((e) => e.customer.trim()))
-      .filter(Boolean)
-      .join(', ');
-
-    const userPhone =
-      userProfile?.phone ||
-      (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_phone') : '') ||
-      (userProfile?.email?.includes('miskadi') || userProfile?.full_name?.toLowerCase().includes('miskadi') ? '085710002923' : '') ||
-      undefined;
-
-    const userEmpId =
-      userProfile?.employee_id ||
-      (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_employee_id') : '') ||
-      (userProfile?.email?.includes('miskadi') || userProfile?.full_name?.toLowerCase().includes('miskadi') ? 'CSK-007' : '') ||
-      undefined;
-
-    const combinedDescription = formatAccountBlocksToDescription(blocksData, {
-      reimbursement_type: reimbursementType,
-      department,
-      account: primaryAccount,
-      customer: primaryCustomer,
-      signature_url: sigToSend,
-      full_name: userProfile?.full_name,
-      email: userProfile?.email,
-      phone: userPhone,
-      employee_id: userEmpId,
-      bank_name: userProfile?.bank_name || undefined,
-      bank_account_number: userProfile?.bank_account_number || undefined,
-      bank_account_holder: userProfile?.bank_account_holder || undefined,
-    });
-
-    const autoTitle = primaryCustomer ? `${primaryAccount} - ${primaryCustomer}` : primaryAccount;
-
-    const formData = new FormData();
-    formData.set('title', autoTitle);
-    formData.set('reimbursement_type', reimbursementType);
-    formData.set('category', primaryAccount);
-    formData.set('account', primaryAccount);
-    formData.set('customer', primaryCustomer);
-    formData.set('department', department);
-    if (userProfile?.full_name) formData.set('nama_karyawan', userProfile.full_name);
-    if (userProfile?.phone) formData.set('phone', userProfile.phone);
-    if (userProfile?.employee_id) formData.set('employee_id', userProfile.employee_id);
-    formData.set('request_date', requestDate);
-    formData.set('description', combinedDescription);
-    formData.set('amount', totalAmount.toString());
-    formData.set('block_count', blocks.length.toString());
-
-    if (sigToSend) {
-      formData.set('signature_url', sigToSend);
-    }
-
-    // Attach receipt files per block
-    blocks.forEach((b, idx) => {
-      if (b.receiptFile) {
-        formData.set(`receipt_file_${idx}`, b.receiptFile);
-      }
-    });
-
-    // Fallback single receipt file
-    const firstReceipt = blocks.find((b) => b.receiptFile)?.receiptFile;
-    if (firstReceipt) {
-      formData.set('receipt_file', firstReceipt);
-    }
-
     startTransition(async () => {
       try {
-        const res = await createReimbursement(formData);
-        if (res?.error) {
-          setError(res.error);
-        } else if (res?.success) {
+        setSubmittingStatus('Mengompres foto nota...');
+
+        // 1. Process and compress receipt files, and attempt direct Supabase storage upload
+        const supabase = createBrowserClient();
+        const uploadedBlockUrls: Record<number, string> = {};
+        const compressedBlockFiles: Record<number, File> = {};
+
+        for (let idx = 0; idx < blocks.length; idx++) {
+          const b = blocks[idx];
+          if (b.receiptFile) {
+            setSubmittingStatus(`Mengompres & mengunggah nota #${idx + 1}...`);
+            try {
+              const compressed = await compressImageFile(b.receiptFile, 1200, 0.82);
+              compressedBlockFiles[idx] = compressed;
+
+              const fileExt = 'jpg';
+              const fileName = `${userProfile?.id || 'emp'}-${Date.now()}-${idx}.${fileExt}`;
+              const filePath = `receipts/${fileName}`;
+
+              const { data: uploadData, error: uploadErr } = await supabase.storage
+                .from('receipts')
+                .upload(filePath, compressed, {
+                  contentType: 'image/jpeg',
+                  cacheControl: '3600',
+                  upsert: false,
+                });
+
+              if (!uploadErr && uploadData) {
+                const { data: publicUrlData } = supabase.storage
+                  .from('receipts')
+                  .getPublicUrl(filePath);
+                if (publicUrlData?.publicUrl) {
+                  uploadedBlockUrls[idx] = publicUrlData.publicUrl;
+                }
+              }
+            } catch (storageErr) {
+              console.warn(`Direct upload failed for block ${idx}, will send to server:`, storageErr);
+            }
+          }
+        }
+
+        setSubmittingStatus('Menyimpan data pengajuan...');
+
+        // Prepare structured AccountBlockData with receipt_url populated
+        const blocksData: AccountBlockData[] = blocks.map((b, idx) => ({
+          account: b.account,
+          amount: Number(b.amount) || 0,
+          receipt_url: uploadedBlockUrls[idx] || undefined,
+          entries: b.entries.map((e) => ({
+            customer: e.customer.trim(),
+            description: e.description.trim(),
+            receipt_date: e.receipt_date || requestDate,
+          })),
+        }));
+
+        const sigToSend =
+          userProfile?.signature_url ||
+          (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_signature') : '') ||
+          '';
+
+        const primaryAccount = blocks[0]?.account || (reimbursementType === 'Petty Cash' ? 'Bensin' : 'Material');
+        const primaryCustomer = blocks
+          .flatMap((b) => b.entries.map((e) => e.customer.trim()))
+          .filter(Boolean)
+          .join(', ');
+
+        const userPhone =
+          userProfile?.phone ||
+          (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_phone') : '') ||
+          (userProfile?.email?.includes('miskadi') || userProfile?.full_name?.toLowerCase().includes('miskadi') ? '085710002923' : '') ||
+          undefined;
+
+        const userEmpId =
+          userProfile?.employee_id ||
+          (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_employee_id') : '') ||
+          (userProfile?.email?.includes('miskadi') || userProfile?.full_name?.toLowerCase().includes('miskadi') ? 'CSK-007' : '') ||
+          undefined;
+
+        const combinedDescription = formatAccountBlocksToDescription(blocksData, {
+          reimbursement_type: reimbursementType,
+          department,
+          account: primaryAccount,
+          customer: primaryCustomer,
+          signature_url: sigToSend,
+          full_name: userProfile?.full_name,
+          email: userProfile?.email,
+          phone: userPhone,
+          employee_id: userEmpId,
+          bank_name: userProfile?.bank_name || undefined,
+          bank_account_number: userProfile?.bank_account_number || undefined,
+          bank_account_holder: userProfile?.bank_account_holder || undefined,
+        });
+
+        const autoTitle = primaryCustomer ? `${primaryAccount} - ${primaryCustomer}` : primaryAccount;
+
+        const formData = new FormData();
+        formData.set('title', autoTitle);
+        formData.set('reimbursement_type', reimbursementType);
+        formData.set('category', primaryAccount);
+        formData.set('account', primaryAccount);
+        formData.set('customer', primaryCustomer);
+        formData.set('department', department);
+        if (userProfile?.full_name) formData.set('nama_karyawan', userProfile.full_name);
+        if (userProfile?.phone) formData.set('phone', userProfile.phone);
+        if (userProfile?.employee_id) formData.set('employee_id', userProfile.employee_id);
+        formData.set('request_date', requestDate);
+        formData.set('description', combinedDescription);
+        formData.set('amount', totalAmount.toString());
+        formData.set('block_count', blocks.length.toString());
+
+        if (sigToSend) {
+          formData.set('signature_url', sigToSend);
+        }
+
+        // Attach receipt URLs (if uploaded) or compressed file fallback
+        blocks.forEach((_, idx) => {
+          if (uploadedBlockUrls[idx]) {
+            formData.set(`receipt_url_${idx}`, uploadedBlockUrls[idx]);
+          } else if (compressedBlockFiles[idx]) {
+            formData.set(`receipt_file_${idx}`, compressedBlockFiles[idx]);
+          }
+        });
+
+        // Set primary receipt_url or file
+        const firstUrl = Object.values(uploadedBlockUrls)[0];
+        if (firstUrl) {
+          formData.set('receipt_url', firstUrl);
+        } else {
+          const firstCompressedFile = Object.values(compressedBlockFiles)[0];
+          if (firstCompressedFile) {
+            formData.set('receipt_file', firstCompressedFile);
+          }
+        }
+
+        const response = await fetch('/api/requests/create', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const res = await response.json().catch(() => null);
+
+        if (!response.ok || res?.error) {
+          setError(res?.error || 'Gagal mengirim pengajuan. Silakan coba sesaat lagi.');
+        } else {
           window.location.href = '/employee?success=created_reimbursement';
         }
       } catch (err: any) {
         console.error('Submission error:', err);
-        const msg = err?.message || '';
-        if (msg.includes('441') || msg.includes('Minified React error')) {
-          setError('Gagal memproses pengajuan. Mohon periksa kembali form atau coba sesaat lagi.');
-        } else if (!msg.includes('NEXT_REDIRECT')) {
-          setError(msg || 'Gagal mengirim pengajuan.');
-        }
+        setError(err?.message || 'Gagal mengirim pengajuan. Periksa koneksi internet Anda.');
+      } finally {
+        setSubmittingStatus('');
       }
     });
   };
@@ -912,7 +1021,7 @@ export default function RequestForm() {
             {isPending ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Menyimpan Pengajuan...</span>
+                <span>{submittingStatus || 'Menyimpan Pengajuan...'}</span>
               </>
             ) : (
               <span>Kirim Pengajuan Reimbursement</span>
