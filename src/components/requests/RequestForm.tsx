@@ -905,7 +905,7 @@ export default function RequestForm() {
                         <button
                           type="button"
                           onClick={() => handleReCrop(blockIndex)}
-                          className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 dark:text-orange-400 border border-slate-200 dark:border-orange-500/30 rounded-lg text-xs transition cursor-pointer"
+                          className="p-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:hover:bg-orange-500/25 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30 rounded-lg text-xs font-semibold transition cursor-pointer bg-clip-padding overflow-hidden shadow-none active:scale-95"
                           title="Crop foto"
                         >
                           <Crop className="w-3.5 h-3.5" />

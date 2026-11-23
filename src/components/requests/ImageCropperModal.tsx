@@ -261,7 +261,7 @@ export default function ImageCropperModal({
       {/* Top Header Bar */}
       <div className="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-white shrink-0 z-20">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/30">
+          <div className="p-1.5 rounded-lg bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30 bg-clip-padding overflow-hidden">
             <Crop className="w-4 h-4" />
           </div>
           <div>

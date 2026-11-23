@@ -124,7 +124,7 @@ export default function EditOvertimeModal({
           {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-5 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400">
+            <div className="w-10 h-10 rounded-2xl bg-orange-50 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/30 flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0 bg-clip-padding overflow-hidden shadow-none">
               <Clock className="w-5 h-5" />
             </div>
             <div>
@@ -346,7 +346,7 @@ export default function EditOvertimeModal({
               <div className="col-span-2">
                 <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-black text-orange-400 border border-orange-500/40 px-1 py-0.2 rounded bg-orange-500/10 font-mono">
+                    <span className="text-[10px] font-black text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/40 px-1 py-0.2 rounded bg-orange-50 dark:bg-orange-500/10 font-mono bg-clip-padding">
                       RP
                     </span>
                     <span>Nominal Kompensasi / Uang Lembur (Rp)</span>

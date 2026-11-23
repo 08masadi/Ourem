@@ -442,7 +442,7 @@ export default function EditRequestModal({
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-orange-500/10 text-orange-400 border border-orange-500/20">
+            <div className="w-10 h-10 rounded-2xl bg-orange-50 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/30 flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0 bg-clip-padding overflow-hidden shadow-none">
               <Building className="w-5 h-5" />
             </div>
             <div>
@@ -610,7 +610,7 @@ export default function EditRequestModal({
                 {/* Header Block */}
                 <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] sm:text-xs font-extrabold px-2.5 py-0.5 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                    <span className="text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-lg bg-orange-50 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30 bg-clip-padding">
                       Account #{blockIndex + 1}
                     </span>
                     <span className="text-xs sm:text-sm font-bold text-slate-300">
@@ -753,11 +753,11 @@ export default function EditRequestModal({
                     <button
                       type="button"
                       onClick={() => addCustomerToBlock(blockIndex)}
-                      className="p-1.5 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                      className="p-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95 bg-clip-padding overflow-hidden"
                       title="Tambah Customer"
                       aria-label="Tambah Customer"
                     >
-                      <Plus className="w-4 h-4 text-orange-400 stroke-[2.5]" />
+                      <Plus className="w-4 h-4 text-orange-600 dark:text-orange-400 stroke-[2.5]" />
                     </button>
                   </div>
                 </div>
@@ -767,7 +767,7 @@ export default function EditRequestModal({
                   {/* Kolom 1: Nominal Input Column */}
                   <div>
                     <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
-                      <span className="text-[10px] font-black text-orange-400 border border-orange-500/40 px-1 py-0.2 rounded bg-orange-500/10 font-mono">
+                      <span className="text-[10px] font-black text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/40 px-1 py-0.2 rounded bg-orange-50 dark:bg-orange-500/10 font-mono bg-clip-padding">
                         RP
                       </span>
                       <span>Nominal Amount (Rp)</span>
@@ -865,7 +865,7 @@ export default function EditRequestModal({
                           <button
                             type="button"
                             onClick={() => handleReCrop(blockIndex)}
-                            className="p-1.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg text-xs font-semibold transition cursor-pointer"
+                            className="p-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:hover:bg-orange-500/25 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30 rounded-lg text-xs font-semibold transition cursor-pointer bg-clip-padding overflow-hidden shadow-none active:scale-95"
                             title="Atur posisi & crop ulang foto ini"
                           >
                             <Crop className="w-4 h-4" />
@@ -913,7 +913,7 @@ export default function EditRequestModal({
               <button
                 type="button"
                 onClick={addAccountBlock}
-                className="p-2.5 sm:p-3 rounded-2xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-dashed border-orange-500/40 hover:border-orange-500 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                className="p-2.5 sm:p-3 rounded-2xl bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 dark:text-orange-400 border border-dashed border-orange-300 dark:border-orange-500/40 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95 bg-clip-padding overflow-hidden"
                 title="Tambah Akun Beban Baru"
                 aria-label="Tambah Akun Beban Baru"
               >
