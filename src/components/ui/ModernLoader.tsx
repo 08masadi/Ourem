@@ -10,7 +10,7 @@ interface ModernLoaderProps {
 
 export default function ModernLoader({
   label = 'Memuat Data...',
-  sublabel = 'Menghubungkan ke server Ourem',
+  sublabel,
   size = 'lg',
   variant = 'page',
 }: ModernLoaderProps) {

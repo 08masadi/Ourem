@@ -300,7 +300,6 @@ export default function ProfilePage() {
         <NeonVortexLoader
           size="xl"
           label="Memuat Profil & Rekening..."
-          sublabel="Sinkronisasi data akun Anda"
         />
       </div>
     );
