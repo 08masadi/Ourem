@@ -5,6 +5,7 @@ import { getCurrentUserProfile, updateProfileBank, uploadAvatarAction, signOutAc
 import { UserProfile, DEPARTMENT_OPTIONS } from '@/types/database';
 import AvatarCropperModal from '@/components/profile/AvatarCropperModal';
 import { triggerSuccessNotification } from '@/components/ui/DynamicIslandSuccess';
+import ModernLoader from '@/components/ui/ModernLoader';
 import {
   User,
   Mail,
@@ -294,8 +295,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+      <div className="w-full max-w-2xl mx-auto py-12 px-4">
+        <ModernLoader label="Memuat Profil & Rekening..." sublabel="Sinkronisasi data akun Anda" />
       </div>
     );
   }

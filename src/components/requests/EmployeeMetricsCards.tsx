@@ -214,13 +214,13 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
                 Petty Cash
               </span>
               <div
-                className={`p-1.5 rounded-xl border transition ${
+                className={`w-7 h-7 rounded-xl border flex items-center justify-center transition ${
                   selectedCategory === 'petty_cash'
-                    ? 'bg-orange-500/20 border-orange-500/40'
-                    : 'bg-orange-500/10 border-orange-500/20 group-hover:bg-orange-500/20'
+                    ? 'bg-orange-100 border-orange-300 text-orange-700 dark:bg-orange-500/25 dark:border-orange-500/50 dark:text-orange-300'
+                    : 'bg-orange-50 border-orange-200 text-orange-600 dark:bg-orange-500/15 dark:border-orange-500/30 dark:text-orange-400 group-hover:bg-orange-100 dark:group-hover:bg-orange-500/25'
                 }`}
               >
-                <Wallet className="w-4 h-4 text-orange-400" />
+                <Wallet className="w-4 h-4" />
               </div>
             </div>
             <div className="text-base sm:text-lg font-bold text-white font-mono tracking-tight">
@@ -260,15 +260,15 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
               >
                 Voucher Reimbursement
               </span>
-              <span
-                className={`text-[11px] font-black tracking-tight border px-1.5 py-0.5 rounded font-mono transition ${
+              <div
+                className={`w-7 h-7 rounded-xl border flex items-center justify-center font-bold text-xs font-mono transition ${
                   selectedCategory === 'voucher'
-                    ? 'text-amber-300 border-amber-500/60 bg-amber-500/20'
-                    : 'text-amber-400 border-amber-500/40 bg-amber-500/10 group-hover:bg-amber-500/20'
+                    ? 'bg-amber-100 border-amber-300 text-amber-800 dark:bg-amber-500/25 dark:border-amber-500/50 dark:text-amber-300'
+                    : 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/15 dark:border-amber-500/30 dark:text-amber-400 group-hover:bg-amber-100 dark:group-hover:bg-amber-500/25'
                 }`}
               >
                 RP
-              </span>
+              </div>
             </div>
             <div className="text-base sm:text-lg font-bold text-white font-mono tracking-tight">
               {formatRupiah(unpaidVoucherNominal)}
@@ -308,13 +308,13 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
                 Lembur
               </span>
               <div
-                className={`p-1.5 rounded-xl border transition ${
+                className={`w-7 h-7 rounded-xl border flex items-center justify-center transition ${
                   selectedCategory === 'lembur'
-                    ? 'bg-orange-500/20 border-orange-500/40'
-                    : 'bg-orange-500/10 border-orange-500/20 group-hover:bg-orange-500/20'
+                    ? 'bg-orange-100 border-orange-300 text-orange-700 dark:bg-orange-500/25 dark:border-orange-500/50 dark:text-orange-300'
+                    : 'bg-orange-50 border-orange-200 text-orange-600 dark:bg-orange-500/15 dark:border-orange-500/30 dark:text-orange-400 group-hover:bg-orange-100 dark:group-hover:bg-orange-500/25'
                 }`}
               >
-                <Clock className="w-4 h-4 text-orange-400" />
+                <Clock className="w-4 h-4" />
               </div>
             </div>
             <div className="text-base sm:text-lg font-bold text-white font-mono tracking-tight">
@@ -355,13 +355,13 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
                 Telah Disetujui
               </span>
               <div
-                className={`p-1.5 rounded-xl border transition ${
+                className={`w-7 h-7 rounded-xl border flex items-center justify-center transition ${
                   selectedCategory === 'approved'
-                    ? 'bg-emerald-500/20 border-emerald-500/40'
-                    : 'bg-emerald-500/10 border-emerald-500/20 group-hover:bg-emerald-500/20'
+                    ? 'bg-emerald-100 border-emerald-300 text-emerald-800 dark:bg-emerald-500/25 dark:border-emerald-500/50 dark:text-emerald-300'
+                    : 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/15 dark:border-emerald-500/30 dark:text-emerald-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/25'
                 }`}
               >
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
             <div className="text-base sm:text-lg font-bold text-emerald-400 tracking-tight">

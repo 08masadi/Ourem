@@ -42,6 +42,7 @@ import {
   Edit3,
   Trash2,
   X,
+  ChevronDown,
 } from 'lucide-react';
 const ReimbursementVoucherPdf = dynamic(() => import('./ReimbursementVoucherPdf'), { ssr: false });
 const OvertimeVoucherPdf = dynamic(() => import('./OvertimeVoucherPdf'), { ssr: false });
@@ -1060,59 +1061,59 @@ export default function RequestList({
       <div className="flex flex-wrap items-center justify-between gap-2.5 bg-slate-900/60 p-2.5 rounded-2xl border border-slate-800">
         <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
           {/* Dropdown Filter Jenis */}
-          <div className="flex-1 min-w-[125px] sm:flex-initial flex items-center gap-1.5 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800 text-xs shadow-sm focus-within:ring-2 focus-within:ring-orange-500 transition">
-            <Layers className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-            <span className="text-slate-400 font-semibold hidden md:inline shrink-0">Jenis:</span>
+          <div className="flex-1 min-w-[130px] sm:flex-initial relative flex items-center bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-800 text-xs shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition">
+            <Layers className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 shrink-0 pointer-events-none" />
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer w-full pr-1 truncate"
+              className="bg-transparent text-slate-800 dark:text-slate-100 font-semibold text-xs focus:outline-none cursor-pointer w-full pl-1.5 pr-4 border-0 p-0 shadow-none appearance-none"
               title="Pilih Jenis Pengajuan"
               aria-label="Filter berdasarkan jenis pengajuan"
             >
-              <option value="Semua" className="bg-slate-900 text-white">Semua Jenis</option>
-              <option value="Petty Cash" className="bg-slate-900 text-white">Petty Cash</option>
-              <option value="Voucher" className="bg-slate-900 text-white">Voucher</option>
-              <option value="Form Lembur" className="bg-slate-900 text-white">Form Lembur</option>
+              <option value="Semua" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Semua Jenis</option>
+              <option value="Petty Cash" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Petty Cash</option>
+              <option value="Voucher" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Voucher</option>
+              <option value="Form Lembur" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Form Lembur</option>
             </select>
+            <ChevronDown className="w-3 h-3 text-slate-400 pointer-events-none absolute right-2.5 shrink-0" />
           </div>
 
           {/* Dropdown Filter Status */}
-          <div className="flex-1 min-w-[125px] sm:flex-initial flex items-center gap-1.5 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800 text-xs shadow-sm focus-within:ring-2 focus-within:ring-orange-500 transition">
-            <Filter className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-            <span className="text-slate-400 font-semibold hidden md:inline shrink-0">Status:</span>
+          <div className="flex-1 min-w-[130px] sm:flex-initial relative flex items-center bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-800 text-xs shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition">
+            <Filter className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 shrink-0 pointer-events-none" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer w-full pr-1 truncate"
+              className="bg-transparent text-slate-800 dark:text-slate-100 font-semibold text-xs focus:outline-none cursor-pointer w-full pl-1.5 pr-4 border-0 p-0 shadow-none appearance-none"
               title="Pilih Status Approval"
               aria-label="Filter berdasarkan status approval"
             >
-              <option value="Semua" className="bg-slate-900 text-white">Semua Status</option>
-              <option value="Menunggu Approval" className="bg-slate-900 text-white">Menunggu Approval</option>
-              <option value="Disetujui" className="bg-slate-900 text-white">Disetujui</option>
+              <option value="Semua" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Semua Status</option>
+              <option value="Menunggu Approval" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Menunggu Approval</option>
+              <option value="Disetujui" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Disetujui</option>
               {currentRole !== 'director' && currentRole !== 'finance' && (
-                <option value="Ditolak" className="bg-slate-900 text-white">Ditolak</option>
+                <option value="Ditolak" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Ditolak</option>
               )}
             </select>
+            <ChevronDown className="w-3 h-3 text-slate-400 pointer-events-none absolute right-2.5 shrink-0" />
           </div>
 
           {/* Dropdown Filter Pembayaran (Khusus Akun Finance) */}
           {currentRole === 'finance' && (
-            <div className="flex-1 min-w-[135px] sm:flex-initial flex items-center gap-1.5 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800 text-xs shadow-sm focus-within:ring-2 focus-within:ring-emerald-500 transition">
-              <CreditCard className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span className="text-slate-400 font-semibold hidden md:inline shrink-0">Pembayaran:</span>
+            <div className="flex-1 min-w-[145px] sm:flex-initial relative flex items-center bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-800 text-xs shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition">
+              <CreditCard className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 pointer-events-none" />
               <select
                 value={paymentFilter}
                 onChange={(e) => setPaymentFilter(e.target.value)}
-                className="bg-transparent text-emerald-400 font-bold text-xs focus:outline-none cursor-pointer w-full pr-1 truncate"
+                className="bg-transparent text-emerald-700 dark:text-emerald-400 font-semibold text-xs focus:outline-none cursor-pointer w-full pl-1.5 pr-4 border-0 p-0 shadow-none appearance-none"
                 title="Pilih Status Pembayaran"
                 aria-label="Filter berdasarkan status pembayaran"
               >
-                <option value="Semua" className="bg-slate-900 text-white">Semua Pembayaran</option>
-                <option value="Unpaid" className="bg-slate-900 text-white">Unpaid (Belum Ditransfer)</option>
-                <option value="Paid" className="bg-slate-900 text-white">Paid (Sudah Ditransfer)</option>
+                <option value="Semua" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Semua Pembayaran</option>
+                <option value="Unpaid" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Unpaid (Belum Ditransfer)</option>
+                <option value="Paid" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Paid (Sudah Ditransfer)</option>
               </select>
+              <ChevronDown className="w-3 h-3 text-slate-400 pointer-events-none absolute right-2.5 shrink-0" />
             </div>
           )}
 

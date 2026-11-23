@@ -284,13 +284,20 @@ html.dark .logo-dark {
     box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.2) !important;
   }
 
-  /* Inputs, Textareas, and Selects */
+  /* Inputs, Textareas, and Selects (exclude transparent filter dropdowns) */
   :root:not(.dark) input:not([type="checkbox"]):not([type="radio"]),
   :root:not(.dark) textarea,
-  :root:not(.dark) select {
+  :root:not(.dark) select:not([class*="bg-transparent"]) {
     background-color: #ffffff !important;
     color: #0f172a !important;
     border-color: #cbd5e1 !important;
+  }
+
+  :root:not(.dark) select[class*="bg-transparent"] {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
   }
 
   :root:not(.dark) input::placeholder,
@@ -429,10 +436,17 @@ html.light .from-emerald-700.to-teal-800 {
 
 html.light input:not([type="checkbox"]):not([type="radio"]),
 html.light textarea,
-html.light select {
+html.light select:not([class*="bg-transparent"]) {
   background-color: #ffffff !important;
   color: #0f172a !important;
   border-color: #cbd5e1 !important;
+}
+
+html.light select[class*="bg-transparent"] {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #0f172a !important;
 }
 
 html.light input::placeholder,
@@ -659,7 +673,16 @@ html.light .custom-scrollbar {
   }
 }
 
-/* Accessibility: Intentional prefers-reduced-motion support */
+/* Shimmer Animation for Modern Buffering and Loading Progress */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
