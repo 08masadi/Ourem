@@ -109,11 +109,20 @@ export default function PushNotificationSubscriber() {
             console.error('Push subscription sync error:', err);
           }
         } else if (currentPerm === 'default') {
-          // Cek apakah user pernah menutup prompt dalam 1 hari terakhir
-          const dismissed = localStorage.getItem('ourem_push_prompt_dismissed');
-          if (!dismissed || Date.now() - Number(dismissed) > 24 * 60 * 60 * 1000) {
-            // Tampilkan banner ramah untuk mengaktifkan notifikasi
-            setShowPrompt(true);
+          // Hanya tampilkan prompt di HP / Mobile / Android APK, jangan tampilkan di desktop
+          const ua = typeof navigator !== 'undefined' ? navigator.userAgent || '' : '';
+          const isMobileDevice =
+            Boolean((window as any).AndroidApp) ||
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) ||
+            window.innerWidth < 768;
+
+          if (isMobileDevice) {
+            // Cek apakah user pernah menutup prompt dalam 1 hari terakhir
+            const dismissed = localStorage.getItem('ourem_push_prompt_dismissed');
+            if (!dismissed || Date.now() - Number(dismissed) > 24 * 60 * 60 * 1000) {
+              // Tampilkan banner ramah untuk mengaktifkan notifikasi
+              setShowPrompt(true);
+            }
           }
         }
       })
@@ -212,9 +221,9 @@ export default function PushNotificationSubscriber() {
         </div>
       )}
 
-      {/* Banner / Floating Card Aktifkan Notifikasi Android (hanya jika belum diizinkan) */}
+      {/* Banner / Floating Card Aktifkan Notifikasi HP (Hanya untuk Mobile/HP, disembunyikan di Desktop) */}
       {showPrompt && (
-        <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[94%] max-w-md bg-slate-900/95 border border-orange-500/40 backdrop-blur-md rounded-2xl p-4 shadow-2xl shadow-orange-950/40 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-[60] w-[94%] max-w-md bg-slate-900/95 border border-orange-500/40 backdrop-blur-md rounded-2xl p-4 shadow-2xl shadow-orange-950/40 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center shrink-0 mt-0.5 animate-pulse">
               <BellRing className="w-5 h-5" />
