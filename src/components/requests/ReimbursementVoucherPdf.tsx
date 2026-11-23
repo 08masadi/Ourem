@@ -63,9 +63,9 @@ export default function ReimbursementVoucherPdf({
     });
   });
 
-  // In A4 Portrait, 12 rows fit perfectly without overflowing to page 2
+  // In A5 Landscape, 6 rows fit perfectly without overflowing to page 2
   const totalItemRows = data.items.length;
-  const minRows = 12;
+  const minRows = 6;
   const emptyRowsCount = Math.max(0, minRows - totalItemRows);
   const emptyRows = Array.from({ length: emptyRowsCount });
 
@@ -75,14 +75,11 @@ export default function ReimbursementVoucherPdf({
   const docTitle = `${data.type} - ${data.requestedBy} (${data.date})`;
 
   const handlePrint = () => {
-    printVoucherDocument(printRef.current, docTitle, { format: 'a4', orientation: 'portrait' });
+    printVoucherDocument(printRef.current, docTitle);
   };
 
   const handleDownloadPdf = async () => {
-    await downloadVoucherPdf(printRef.current, docFileName, setIsExporting, {
-      format: 'a4',
-      orientation: 'portrait',
-    });
+    await downloadVoucherPdf(printRef.current, docFileName, setIsExporting);
   };
 
   return (
@@ -92,10 +89,10 @@ export default function ReimbursementVoucherPdf({
         <div className="print-control-bar no-print flex items-center justify-between pb-3 border-b border-slate-800 mb-3 shrink-0">
           <div>
             <h2 className="text-base sm:text-lg font-bold text-white">
-              Preview Cetak Voucher Reimbursement (A4 Portrait)
+              Preview Cetak Voucher Reimbursement (A5 Landscape)
             </h2>
             <p className="text-xs text-slate-400">
-              Format resmi PT. Citra Sari Kencana & Ouffice.co.id &bull; Ukuran A4 Portrait
+              Format resmi PT. Citra Sari Kencana & Ouffice.co.id &bull; Ukuran A5 Landscape
             </p>
           </div>
 
@@ -141,15 +138,16 @@ export default function ReimbursementVoucherPdf({
 
         {/* Scrollable Document Container */}
         <div className="print-sheet-wrapper overflow-auto flex-1 flex justify-center p-2 sm:p-4 bg-slate-950/70 rounded-2xl border border-slate-800">
-          {/* Printable Sheet formatted specifically for A4 Portrait (210mm x 297mm ratio) */}
+          {/* Printable Sheet formatted specifically for A5 Landscape (210mm x 148mm ratio) */}
           <div
             ref={printRef}
-            className="printable-sheet reimbursement-voucher-a4 bg-white text-black p-5 sm:p-8 shadow-2xl relative flex flex-col justify-between"
+            className="printable-sheet bg-white text-black p-4 shadow-2xl relative flex flex-col justify-between"
             style={{
               width: '100%',
-              maxWidth: '720px',
-              minHeight: '980px',
-              aspectRatio: '210 / 297',
+              maxWidth: '780px',
+              height: '500px',
+              maxHeight: '500px',
+              aspectRatio: '210 / 148',
               border: '2px solid #1E3A8A',
               fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
               backgroundColor: '#ffffff',
@@ -277,23 +275,23 @@ export default function ReimbursementVoucherPdf({
                     className="w-full border-collapse"
                     style={{
                       fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif",
-                      fontSize: '10pt',
+                      fontSize: '9.5pt',
                     }}
                   >
                     <thead>
                       <tr
                         style={{
                           backgroundColor: '#EA580C',
-                          height: '20pt',
-                          lineHeight: '20pt',
+                          height: '16pt',
+                          lineHeight: '16pt',
                           fontFamily: "'Calibri', sans-serif",
-                          fontSize: '10pt',
+                          fontSize: '9.5pt',
                         }}
                         className="text-white text-center font-extrabold"
                       >
                         <th
                           style={{
-                            height: '20pt',
+                            height: '16pt',
                             padding: '0 4px',
                             verticalAlign: 'middle',
                             color: '#ffffff',
@@ -304,7 +302,7 @@ export default function ReimbursementVoucherPdf({
                         </th>
                         <th
                           style={{
-                            height: '20pt',
+                            height: '16pt',
                             padding: '0 4px',
                             verticalAlign: 'middle',
                             color: '#ffffff',
@@ -315,7 +313,7 @@ export default function ReimbursementVoucherPdf({
                         </th>
                         <th
                           style={{
-                            height: '20pt',
+                            height: '16pt',
                             padding: '0 4px',
                             verticalAlign: 'middle',
                             color: '#ffffff',
@@ -326,7 +324,7 @@ export default function ReimbursementVoucherPdf({
                         </th>
                         <th
                           style={{
-                            height: '20pt',
+                            height: '16pt',
                             padding: '0 4px',
                             verticalAlign: 'middle',
                             color: '#ffffff',
@@ -337,7 +335,7 @@ export default function ReimbursementVoucherPdf({
                         </th>
                         <th
                           style={{
-                            height: '20pt',
+                            height: '16pt',
                             padding: '0 4px',
                             verticalAlign: 'middle',
                             color: '#ffffff',
@@ -351,7 +349,7 @@ export default function ReimbursementVoucherPdf({
                     <tbody
                       style={{
                         fontFamily: "'Calibri', sans-serif",
-                        fontSize: '10pt',
+                        fontSize: '9.5pt',
                         color: '#000000',
                       }}
                     >
@@ -362,9 +360,9 @@ export default function ReimbursementVoucherPdf({
                             key={`grp-${groupIdx}-item-${itemIdx}`}
                             className="border-b border-[#EA580C]"
                             style={{
-                              height: '18pt',
-                              minHeight: '18pt',
-                              lineHeight: '18pt',
+                              height: '14.5pt',
+                              minHeight: '14.5pt',
+                              lineHeight: '14.5pt',
                             }}
                           >
                             {/* Tanggal Nota Column (Merged per Account Group) */}
@@ -373,7 +371,7 @@ export default function ReimbursementVoucherPdf({
                                 rowSpan={group.items.length}
                                 className="border-r border-[#EA580C] text-center font-bold"
                                 style={{
-                                  height: `${group.items.length * 18}pt`,
+                                  height: `${group.items.length * 14.5}pt`,
                                   verticalAlign: 'middle',
                                   padding: '0 4px',
                                   color: '#000000',
@@ -390,7 +388,7 @@ export default function ReimbursementVoucherPdf({
                                 rowSpan={group.items.length}
                                 className="border-r border-[#EA580C] text-center font-bold"
                                 style={{
-                                  height: `${group.items.length * 18}pt`,
+                                  height: `${group.items.length * 14.5}pt`,
                                   verticalAlign: 'middle',
                                   padding: '0 4px',
                                   color: '#000000',
@@ -405,8 +403,8 @@ export default function ReimbursementVoucherPdf({
                             <td
                               className="border-r border-[#EA580C] text-center font-bold"
                               style={{
-                                height: '18pt',
-                                lineHeight: '18pt',
+                                height: '14.5pt',
+                                lineHeight: '14.5pt',
                                 verticalAlign: 'middle',
                                 padding: '0 4px',
                                 color: '#000000',
@@ -419,10 +417,10 @@ export default function ReimbursementVoucherPdf({
                             <td
                               className="border-r border-[#EA580C] text-left whitespace-pre-line"
                               style={{
-                                minHeight: '18pt',
+                                minHeight: '14.5pt',
                                 verticalAlign: 'middle',
-                                padding: '2px 6px',
-                                lineHeight: '1.25',
+                                padding: '1px 6px',
+                                lineHeight: '1.2',
                                 color: '#000000',
                                 fontWeight: 500,
                               }}
@@ -436,7 +434,7 @@ export default function ReimbursementVoucherPdf({
                                 rowSpan={group.items.length}
                                 className="text-right font-bold"
                                 style={{
-                                  height: `${group.items.length * 18}pt`,
+                                  height: `${group.items.length * 14.5}pt`,
                                   verticalAlign: 'middle',
                                   padding: '0 8px 0 4px',
                                   color: '#000000',
@@ -455,29 +453,29 @@ export default function ReimbursementVoucherPdf({
                           key={`empty-${idx}`}
                           className="border-b border-[#EA580C]"
                           style={{
-                            height: '18pt',
-                            lineHeight: '18pt',
+                            height: '14.5pt',
+                            lineHeight: '14.5pt',
                           }}
                         >
                           <td
                             className="border-r border-[#EA580C]"
-                            style={{ height: '18pt', padding: '0 4px' }}
+                            style={{ height: '14.5pt', padding: '0 4px' }}
                           ></td>
                           <td
                             className="border-r border-[#EA580C]"
-                            style={{ height: '18pt', padding: '0 4px' }}
+                            style={{ height: '14.5pt', padding: '0 4px' }}
                           ></td>
                           <td
                             className="border-r border-[#EA580C]"
-                            style={{ height: '18pt', padding: '0 4px' }}
+                            style={{ height: '14.5pt', padding: '0 4px' }}
                           ></td>
                           <td
                             className="border-r border-[#EA580C]"
-                            style={{ height: '18pt', padding: '0 4px' }}
+                            style={{ height: '14.5pt', padding: '0 4px' }}
                           ></td>
                           <td
                             className="text-right"
-                            style={{ height: '18pt', padding: '0 8px' }}
+                            style={{ height: '14.5pt', padding: '0 8px' }}
                           ></td>
                         </tr>
                       ))}
@@ -486,8 +484,8 @@ export default function ReimbursementVoucherPdf({
                       <tr
                         className="border-t-2 border-[#EA580C]"
                         style={{
-                          height: '20pt',
-                          lineHeight: '20pt',
+                          height: '16pt',
+                          lineHeight: '16pt',
                           fontWeight: 900,
                         }}
                       >
@@ -495,7 +493,7 @@ export default function ReimbursementVoucherPdf({
                           colSpan={4}
                           className="text-center font-bold tracking-wide border-r border-[#EA580C]"
                           style={{
-                            height: '20pt',
+                            height: '16pt',
                             verticalAlign: 'middle',
                             padding: '0 6px',
                             color: '#000000',
@@ -507,7 +505,7 @@ export default function ReimbursementVoucherPdf({
                           className="text-right font-black"
                           style={{
                             backgroundColor: '#FED7AA',
-                            height: '20pt',
+                            height: '16pt',
                             verticalAlign: 'middle',
                             padding: '0 8px 0 6px',
                             color: '#000000',
@@ -523,7 +521,7 @@ export default function ReimbursementVoucherPdf({
 
               {/* Signatures & Stempel Footer */}
               <div
-                className="mt-6 pt-2 flex justify-between items-end relative"
+                className="mt-3 pt-1 flex justify-between items-end relative"
                 style={{ fontFamily: "'Calibri', sans-serif" }}
               >
                 {/* Employee Signature */}

@@ -4,18 +4,11 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * Print an element directly to paper (A4 Portrait or A5 Landscape).
+ * Print an element directly to A5 Landscape.
  * - On Android app: calls Android native PrintManager via JavaScriptInterface.
- * - On Web/Desktop: calls window.print() or dedicated iframe with exact page size.
+ * - On Web/Desktop: calls window.print() instantly without lag, formatted via @media print to 1 sheet.
  */
-export function printVoucherDocument(
-  element: HTMLElement | null,
-  documentTitle: string,
-  options?: {
-    format?: 'a4' | 'a5';
-    orientation?: 'portrait' | 'landscape';
-  }
-) {
+export function printVoucherDocument(element: HTMLElement | null, documentTitle: string) {
   if (typeof window === 'undefined') return;
 
   // 1. Android App: Use native Android PrintManager
@@ -23,104 +16,6 @@ export function printVoucherDocument(
   if (androidApp && typeof androidApp.printDocument === 'function') {
     androidApp.printDocument(documentTitle);
     return;
-  }
-
-  const isA4Portrait =
-    options?.format === 'a4' ||
-    options?.orientation === 'portrait' ||
-    element?.classList.contains('reimbursement-voucher-a4') ||
-    element?.classList.contains('a4-portrait');
-
-  if (isA4Portrait && element) {
-    // Print via dedicated iframe for pure A4 portrait layout with exact colors and zero UI clipping
-    try {
-      const existingIframe = document.getElementById('ourem-a4-voucher-print-iframe');
-      if (existingIframe) {
-        existingIframe.remove();
-      }
-
-      const iframe = document.createElement('iframe');
-      iframe.id = 'ourem-a4-voucher-print-iframe';
-      iframe.style.position = 'fixed';
-      iframe.style.left = '-9999px';
-      iframe.style.top = '-9999px';
-      iframe.style.width = '800px';
-      iframe.style.height = '1130px';
-      iframe.style.border = 'none';
-      iframe.style.opacity = '0';
-      iframe.style.pointerEvents = 'none';
-      document.body.appendChild(iframe);
-
-      const iframeDoc = iframe.contentWindow?.document;
-      if (!iframeDoc) {
-        window.print();
-        return;
-      }
-
-      let stylesHtml = '';
-      document.querySelectorAll('link[rel="stylesheet"], style').forEach((node) => {
-        stylesHtml += node.outerHTML;
-      });
-
-      iframeDoc.open();
-      iframeDoc.write(`
-        <!DOCTYPE html>
-        <html lang="id">
-          <head>
-            <meta charset="utf-8" />
-            <title>${documentTitle}</title>
-            ${stylesHtml}
-            <style>
-              @page {
-                size: A4 portrait !important;
-                margin: 6mm 8mm !important;
-              }
-              * {
-                box-sizing: border-box !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-              }
-              html, body {
-                margin: 0 !important;
-                padding: 0 !important;
-                background: #ffffff !important;
-                color: #000000 !important;
-                width: 100% !important;
-                height: 100% !important;
-                overflow: visible !important;
-                font-family: 'Calibri', 'Segoe UI', Arial, sans-serif !important;
-              }
-              .printable-sheet {
-                position: static !important;
-                width: 100% !important;
-                height: 100% !important;
-                max-width: 100% !important;
-                max-height: 100% !important;
-                margin: 0 !important;
-                box-shadow: none !important;
-                visibility: visible !important;
-              }
-              .printable-sheet * {
-                visibility: visible !important;
-              }
-            </style>
-          </head>
-          <body>
-            ${element.outerHTML}
-          </body>
-        </html>
-      `);
-      iframeDoc.close();
-
-      setTimeout(() => {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-        setTimeout(() => iframe.remove(), 2000);
-      }, 500);
-      return;
-    } catch (err) {
-      console.error('Print iframe error, fallback to window.print():', err);
-    }
   }
 
   // 2. Desktop & Standard Web Browser: Instant native print with @media print
@@ -397,33 +292,20 @@ export function printWordDocument(element: HTMLElement | null, documentTitle: st
 }
 
 /**
- * Download element as PDF (A4 Portrait or A5 Landscape).
+ * Download element as A5 Landscape PDF.
  * - On Android app: saves directly to Download folder and opens PDF viewer.
  * - On Desktop/Web: triggers browser file download.
  */
 export async function downloadVoucherPdf(
   element: HTMLElement | null,
   fileName: string,
-  setLoading?: (loading: boolean) => void,
-  options?: {
-    format?: 'a4' | 'a5';
-    orientation?: 'portrait' | 'landscape';
-  }
+  setLoading?: (loading: boolean) => void
 ) {
   if (!element || typeof window === 'undefined') return;
 
   if (setLoading) setLoading(true);
 
   try {
-    const isA4Portrait =
-      options?.format === 'a4' ||
-      options?.orientation === 'portrait' ||
-      element.classList.contains('reimbursement-voucher-a4') ||
-      element.classList.contains('a4-portrait');
-
-    const format = isA4Portrait ? 'a4' : (options?.format || 'a5');
-    const orientation = isA4Portrait ? 'portrait' : (options?.orientation || 'landscape');
-
     const imgData = await toPng(element, {
       quality: 0.98,
       pixelRatio: 2.2,
@@ -433,14 +315,14 @@ export async function downloadVoucherPdf(
     });
 
     const pdf = new jsPDF({
-      orientation,
+      orientation: 'landscape',
       unit: 'mm',
-      format,
+      format: 'a5', // 210mm x 148mm
       compress: true,
     });
 
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+    const pdfHeight = pdf.internal.pageSize.getHeight(); // 148mm
 
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
 
@@ -455,7 +337,7 @@ export async function downloadVoucherPdf(
     }
   } catch (error) {
     console.error('Gagal generate PDF dengan toPng:', error);
-    printVoucherDocument(element, fileName.replace('.pdf', ''), options);
+    printVoucherDocument(element, fileName.replace('.pdf', ''));
   } finally {
     if (setLoading) setLoading(false);
   }
