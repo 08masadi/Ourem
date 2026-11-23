@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   X,
   ChevronRight,
+  FileText,
 } from 'lucide-react';
 
 interface EmployeeMetricsCardsProps {
@@ -111,7 +112,7 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
     setSelectedCategory((prev) => (prev === cat ? null : cat));
   };
 
-  // Hardening: Keyboard accessibility to close floating modal with Escape key
+  // Hardening & Polish: Keyboard accessibility (Escape key) & Background scroll lock
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -120,8 +121,14 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
     };
     if (selectedCategory) {
       window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
   }, [selectedCategory]);
 
   // Generate daftar baris rekapan per tanggal pengajuan (1 baris per tiket pengajuan)
@@ -191,7 +198,7 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           onClick={() => toggleCategory('petty_cash')}
           aria-expanded={selectedCategory === 'petty_cash'}
           aria-label="Lihat rekapan klaim Petty Cash"
-          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
+          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
             selectedCategory === 'petty_cash'
               ? 'bg-slate-900 border-2 border-orange-500 ring-2 ring-orange-500/40 shadow-xl shadow-orange-950/40 -translate-y-0.5'
               : 'bg-slate-900 border border-slate-800 hover:border-orange-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-orange-950/20'
@@ -238,7 +245,7 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           onClick={() => toggleCategory('voucher')}
           aria-expanded={selectedCategory === 'voucher'}
           aria-label="Lihat rekapan klaim Voucher Reimbursement"
-          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
             selectedCategory === 'voucher'
               ? 'bg-slate-900 border-2 border-amber-500 ring-2 ring-amber-500/40 shadow-xl shadow-amber-950/40 -translate-y-0.5'
               : 'bg-slate-900 border border-slate-800 hover:border-amber-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-950/20'
@@ -285,7 +292,7 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           onClick={() => toggleCategory('lembur')}
           aria-expanded={selectedCategory === 'lembur'}
           aria-label="Lihat rekapan klaim Lembur"
-          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
+          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
             selectedCategory === 'lembur'
               ? 'bg-slate-900 border-2 border-orange-500 ring-2 ring-orange-500/40 shadow-xl shadow-orange-950/40 -translate-y-0.5'
               : 'bg-slate-900 border border-slate-800 hover:border-orange-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-orange-950/20'
@@ -332,7 +339,7 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           onClick={() => toggleCategory('approved')}
           aria-expanded={selectedCategory === 'approved'}
           aria-label="Lihat rekapan klaim Telah Disetujui"
-          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
             selectedCategory === 'approved'
               ? 'bg-slate-900 border-2 border-emerald-500 ring-2 ring-emerald-500/40 shadow-xl shadow-emerald-950/40 -translate-y-0.5'
               : 'bg-slate-900 border border-slate-800 hover:border-emerald-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-950/20'
@@ -393,7 +400,7 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
             <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900 sticky top-0 z-10">
               <div className="flex items-center gap-2.5 flex-wrap">
                 <span id="rekapan-modal-title" className="text-sm sm:text-base font-bold text-white flex items-center gap-2 flex-wrap">
-                  <span>Daftar Rekapan Klaim :</span>
+                  <span>Daftar Rekapan Klaim:</span>
                   <span
                     className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                       selectedCategory === 'petty_cash'
@@ -422,7 +429,7 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
               <button
                 type="button"
                 onClick={() => setSelectedCategory(null)}
-                className="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                 title="Tutup Rekapan (Esc)"
                 aria-label="Tutup Rekapan"
               >
@@ -446,8 +453,15 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
                   <tbody className="divide-y divide-slate-800/60">
                     {rekapanRows.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="py-8 text-center text-slate-400 text-xs">
-                          Tidak ada pengajuan dalam kategori ini.
+                        <td colSpan={5} className="py-12 text-center text-slate-400">
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <div className="w-10 h-10 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-500">
+                              <FileText className="w-5 h-5" />
+                            </div>
+                            <span className="text-xs font-medium text-slate-400">
+                              Tidak ada pengajuan aktif dalam kategori ini.
+                            </span>
+                          </div>
                         </td>
                       </tr>
                     ) : (
@@ -517,7 +531,7 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
                           colSpan={3}
                           className="py-2.5 px-3 sm:px-4 text-slate-300 text-right uppercase tracking-wider text-xs"
                         >
-                          Total Nominal :
+                          Total Nominal:
                         </td>
                         <td className="py-2.5 px-3 sm:px-4 text-right font-mono text-sm font-black text-white whitespace-nowrap">
                           {formatRupiah(totalNominalRekapan)}
@@ -535,12 +549,12 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
             {/* Modal Footer */}
             <div className="px-5 py-3.5 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
               <span className="text-xs text-slate-400 font-mono">
-                Total: <strong className="text-white">{formatRupiah(totalNominalRekapan)}</strong>
+                Total Nominal: <strong className="text-white">{formatRupiah(totalNominalRekapan)}</strong>
               </span>
               <button
                 type="button"
                 onClick={() => setSelectedCategory(null)}
-                className="px-5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition cursor-pointer"
+                className="min-h-[38px] px-6 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-xs font-semibold transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
               >
                 Tutup
               </button>
