@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ReimbursementRequest } from '@/types/database';
 import { extractOvertimeFromDescription } from '@/lib/formatters';
 import {
@@ -111,6 +111,19 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
     setSelectedCategory((prev) => (prev === cat ? null : cat));
   };
 
+  // Hardening: Keyboard accessibility to close floating modal with Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedCategory(null);
+      }
+    };
+    if (selectedCategory) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedCategory]);
+
   // Generate daftar baris rekapan per tanggal pengajuan (1 baris per tiket pengajuan)
   const getRekapanRows = (): RekapanRow[] => {
     if (!selectedCategory) return [];
@@ -176,7 +189,9 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
         <button
           type="button"
           onClick={() => toggleCategory('petty_cash')}
-          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between ${
+          aria-expanded={selectedCategory === 'petty_cash'}
+          aria-label="Lihat rekapan klaim Petty Cash"
+          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
             selectedCategory === 'petty_cash'
               ? 'bg-slate-900 border-2 border-orange-500 ring-2 ring-orange-500/40 shadow-xl shadow-orange-950/40 -translate-y-0.5'
               : 'bg-slate-900 border border-slate-800 hover:border-orange-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-orange-950/20'
@@ -221,7 +236,9 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
         <button
           type="button"
           onClick={() => toggleCategory('voucher')}
-          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between ${
+          aria-expanded={selectedCategory === 'voucher'}
+          aria-label="Lihat rekapan klaim Voucher Reimbursement"
+          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
             selectedCategory === 'voucher'
               ? 'bg-slate-900 border-2 border-amber-500 ring-2 ring-amber-500/40 shadow-xl shadow-amber-950/40 -translate-y-0.5'
               : 'bg-slate-900 border border-slate-800 hover:border-amber-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-950/20'
@@ -266,7 +283,9 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
         <button
           type="button"
           onClick={() => toggleCategory('lembur')}
-          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between ${
+          aria-expanded={selectedCategory === 'lembur'}
+          aria-label="Lihat rekapan klaim Lembur"
+          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
             selectedCategory === 'lembur'
               ? 'bg-slate-900 border-2 border-orange-500 ring-2 ring-orange-500/40 shadow-xl shadow-orange-950/40 -translate-y-0.5'
               : 'bg-slate-900 border border-slate-800 hover:border-orange-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-orange-950/20'
@@ -311,7 +330,9 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
         <button
           type="button"
           onClick={() => toggleCategory('approved')}
-          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between ${
+          aria-expanded={selectedCategory === 'approved'}
+          aria-label="Lihat rekapan klaim Telah Disetujui"
+          className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
             selectedCategory === 'approved'
               ? 'bg-slate-900 border-2 border-emerald-500 ring-2 ring-emerald-500/40 shadow-xl shadow-emerald-950/40 -translate-y-0.5'
               : 'bg-slate-900 border border-slate-800 hover:border-emerald-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-950/20'
@@ -358,6 +379,9 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
       {/* TAMPILAN MENGAMBANG (FLOATING POP-UP MODAL OVERLAY) */}
       {selectedCategory && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="rekapan-modal-title"
           className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
           onClick={() => setSelectedCategory(null)}
         >
@@ -368,7 +392,7 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
             {/* Header Bar Rekapan */}
             <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900 sticky top-0 z-10">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="text-sm sm:text-base font-bold text-white flex items-center gap-2 flex-wrap">
+                <span id="rekapan-modal-title" className="text-sm sm:text-base font-bold text-white flex items-center gap-2 flex-wrap">
                   <span>Daftar Rekapan Klaim :</span>
                   <span
                     className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
@@ -398,10 +422,11 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
               <button
                 type="button"
                 onClick={() => setSelectedCategory(null)}
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0"
-                title="Tutup Rekapan"
+                className="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                title="Tutup Rekapan (Esc)"
+                aria-label="Tutup Rekapan"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 

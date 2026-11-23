@@ -1057,7 +1057,7 @@ export default function RequestList({
       <div className="flex flex-wrap items-center justify-between gap-2.5 bg-slate-900/60 p-2.5 rounded-2xl border border-slate-800">
         <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
           {/* Dropdown Filter Jenis */}
-          <div className="flex-1 min-w-[125px] sm:flex-initial flex items-center gap-1.5 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800 text-xs shadow-sm">
+          <div className="flex-1 min-w-[125px] sm:flex-initial flex items-center gap-1.5 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800 text-xs shadow-sm focus-within:ring-2 focus-within:ring-orange-500 transition">
             <Layers className="w-3.5 h-3.5 text-orange-400 shrink-0" />
             <span className="text-slate-400 font-semibold hidden md:inline shrink-0">Jenis:</span>
             <select
@@ -1065,6 +1065,7 @@ export default function RequestList({
               onChange={(e) => setTypeFilter(e.target.value)}
               className="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer w-full pr-1 truncate"
               title="Pilih Jenis Pengajuan"
+              aria-label="Filter berdasarkan jenis pengajuan"
             >
               <option value="Semua" className="bg-slate-900 text-white">Semua Jenis</option>
               <option value="Petty Cash" className="bg-slate-900 text-white">Petty Cash</option>
@@ -1074,7 +1075,7 @@ export default function RequestList({
           </div>
 
           {/* Dropdown Filter Status */}
-          <div className="flex-1 min-w-[125px] sm:flex-initial flex items-center gap-1.5 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800 text-xs shadow-sm">
+          <div className="flex-1 min-w-[125px] sm:flex-initial flex items-center gap-1.5 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800 text-xs shadow-sm focus-within:ring-2 focus-within:ring-orange-500 transition">
             <Filter className="w-3.5 h-3.5 text-orange-400 shrink-0" />
             <span className="text-slate-400 font-semibold hidden md:inline shrink-0">Status:</span>
             <select
@@ -1082,6 +1083,7 @@ export default function RequestList({
               onChange={(e) => setStatusFilter(e.target.value)}
               className="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer w-full pr-1 truncate"
               title="Pilih Status Approval"
+              aria-label="Filter berdasarkan status approval"
             >
               <option value="Semua" className="bg-slate-900 text-white">Semua Status</option>
               <option value="Menunggu Approval" className="bg-slate-900 text-white">Menunggu Approval</option>
@@ -1094,7 +1096,7 @@ export default function RequestList({
 
           {/* Dropdown Filter Pembayaran (Khusus Akun Finance) */}
           {currentRole === 'finance' && (
-            <div className="flex-1 min-w-[135px] sm:flex-initial flex items-center gap-1.5 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800 text-xs shadow-sm">
+            <div className="flex-1 min-w-[135px] sm:flex-initial flex items-center gap-1.5 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800 text-xs shadow-sm focus-within:ring-2 focus-within:ring-emerald-500 transition">
               <CreditCard className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <span className="text-slate-400 font-semibold hidden md:inline shrink-0">Pembayaran:</span>
               <select
@@ -1102,6 +1104,7 @@ export default function RequestList({
                 onChange={(e) => setPaymentFilter(e.target.value)}
                 className="bg-transparent text-emerald-400 font-bold text-xs focus:outline-none cursor-pointer w-full pr-1 truncate"
                 title="Pilih Status Pembayaran"
+                aria-label="Filter berdasarkan status pembayaran"
               >
                 <option value="Semua" className="bg-slate-900 text-white">Semua Pembayaran</option>
                 <option value="Unpaid" className="bg-slate-900 text-white">Unpaid (Belum Ditransfer)</option>
@@ -1353,8 +1356,17 @@ export default function RequestList({
             return (
               <div
                 key={req.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Buka detail pengajuan ${displayTitle}, tanggal ${formatDateIndo(req.request_date)}`}
                 onClick={() => setSelectedRequest(req)}
-                className={`bg-slate-900/90 border rounded-xl sm:rounded-2xl p-3 sm:p-4 transition shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 sm:gap-4 cursor-pointer hover:border-slate-700/80 ${
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedRequest(req);
+                  }
+                }}
+                className={`bg-slate-900/90 border rounded-xl sm:rounded-2xl p-3 sm:p-4 transition shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 sm:gap-4 cursor-pointer hover:border-slate-700/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
                   isSelected
                     ? 'border-orange-500 bg-orange-950/10'
                     : 'border-slate-800 hover:bg-slate-900'
@@ -1365,17 +1377,19 @@ export default function RequestList({
                   {/* Pengajuan yang dananya sudah dicairkan (PAID) tidak bisa dipilih lewat checklist box */}
                   {isPaid ? (
                     <div
-                      className="mt-0.5 text-slate-700 cursor-not-allowed shrink-0 p-0.5"
+                      className="mt-0.5 text-slate-700 cursor-not-allowed shrink-0 p-1.5"
                       title="Pengajuan ini sudah dicairkan (PAID) dan tidak dapat dipilih lagi"
                       onClick={(e) => e.stopPropagation()}
+                      aria-hidden="true"
                     >
                       <Square className="w-4 h-4 text-slate-700/80" />
                     </div>
                   ) : currentRole === 'director' && !isOvertimeReq ? (
                     <div
-                      className="mt-0.5 text-slate-700/50 cursor-not-allowed shrink-0 p-0.5"
+                      className="mt-0.5 text-slate-700/50 cursor-not-allowed shrink-0 p-1.5"
                       title="Persetujuan Petty Cash & Voucher dilakukan oleh Finance"
                       onClick={(e) => e.stopPropagation()}
+                      aria-hidden="true"
                     >
                       <Square className="w-4 h-4 text-slate-700/40" />
                     </div>
@@ -1386,13 +1400,14 @@ export default function RequestList({
                         e.stopPropagation();
                         toggleSelect(req.id);
                       }}
-                      className="mt-0.5 text-slate-400 hover:text-white shrink-0 cursor-pointer p-0.5"
+                      className="mt-0.5 text-slate-400 hover:text-white shrink-0 cursor-pointer p-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 transition"
                       title={isSelected ? 'Batalkan pilihan' : 'Pilih pengajuan ini'}
+                      aria-label={isSelected ? `Batalkan pilihan ${displayTitle}` : `Pilih pengajuan ${displayTitle}`}
                     >
                       {isSelected ? (
                         <CheckSquare2 className="w-4 h-4 text-orange-400" />
                       ) : (
-                        <Square className="w-4 h-4 text-slate-600" />
+                        <Square className="w-4 h-4 text-slate-500" />
                       )}
                     </button>
                   )}

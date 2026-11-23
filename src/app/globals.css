@@ -623,3 +623,25 @@ html.light .custom-scrollbar {
   }
 }
 
+/* Accessibility: Intentional prefers-reduced-motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.15s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-pulse,
+  .animate-spin {
+    animation: none !important;
+  }
+
+  .animate-in {
+    animation-duration: 0.1s !important;
+    transform: none !important;
+  }
+}
+
+
