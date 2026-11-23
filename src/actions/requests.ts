@@ -430,6 +430,27 @@ export async function updateReimbursement(prevState: any, formData: FormData) {
     return { error: 'ID, judul, dan nominal wajib diisi.' };
   }
 
+  // Security Fix (VULN-05): Cegah modifikasi pengajuan yang sudah disetujui atau dicairkan
+  const { data: existingReq } = await supabase
+    .from('reimbursement_requests')
+    .select('id, user_id, status, payment_status')
+    .eq('id', id)
+    .single();
+
+  if (!existingReq) {
+    return { error: 'Pengajuan tidak ditemukan.' };
+  }
+
+  const isPrivilegedUser = userProfile?.role === 'director' || userProfile?.role === 'finance';
+  if (!isPrivilegedUser) {
+    if (existingReq.user_id !== user.id) {
+      return { error: 'Akses Ditolak: Anda tidak dapat mengedit pengajuan milik pengguna lain.' };
+    }
+    if (existingReq.status !== 'Menunggu Approval' || existingReq.payment_status === 'Paid') {
+      return { error: 'Pengajuan yang telah disetujui atau dicairkan tidak dapat diubah kembali.' };
+    }
+  }
+
   const cleanedAmount = amountStr.replace(/[^0-9]/g, '');
   const amount = Number(cleanedAmount);
 
@@ -672,11 +693,24 @@ export async function updateOvertimeRequest(prevState: any, formData: FormData) 
   // Pertahankan signature karyawan pembuat jika sudah ada (misal saat diedit oleh Director)
   const { data: existingReq } = await supabase
     .from('reimbursement_requests')
-    .select('signature_url, profiles:user_id(id, full_name, signature_url)')
+    .select('user_id, status, payment_status, signature_url, profiles:user_id(id, full_name, signature_url)')
     .eq('id', id)
     .single();
 
+  if (!existingReq) {
+    return { error: 'Pengajuan lembur tidak ditemukan.' };
+  }
+
   const userProfile = await getCurrentUserProfile();
+  const isPrivilegedUser = userProfile?.role === 'director' || userProfile?.role === 'finance';
+  if (!isPrivilegedUser) {
+    if (existingReq.user_id !== user.id) {
+      return { error: 'Akses Ditolak: Anda tidak dapat mengedit lembur milik pengguna lain.' };
+    }
+    if (existingReq.status !== 'Menunggu Approval' || existingReq.payment_status === 'Paid') {
+      return { error: 'Pengajuan lembur yang telah disetujui atau dicairkan tidak dapat diubah kembali.' };
+    }
+  }
   const signature_url =
     existingReq?.signature_url ||
     (existingReq?.profiles as any)?.signature_url ||
@@ -1051,6 +1085,17 @@ export async function updateDirectorStatus(
 
   if (!user) return { error: 'Unauthorized' };
 
+  // Security Fix (VULN-01): Verifikasi bahwa user benar-benar memiliki role 'director'
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (userProfile?.role !== 'director') {
+    return { error: 'Akses Ditolak: Hanya akun Direktur yang berhak memberikan persetujuan atau penolakan.' };
+  }
+
   const updatePayload: any = {
     status,
     director_id: user.id,
@@ -1123,6 +1168,17 @@ export async function updateFinancePayment(
 
   if (!user) return { error: 'Unauthorized' };
 
+  // Security Fix (VULN-01): Verifikasi bahwa user benar-benar memiliki role 'finance'
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (userProfile?.role !== 'finance') {
+    return { error: 'Akses Ditolak: Hanya akun Finance yang berhak melakukan pencairan dana.' };
+  }
+
   const { error } = await supabase
     .from('reimbursement_requests')
     .update({
@@ -1172,6 +1228,32 @@ export async function deleteReimbursementRequest(requestId: string) {
 
   if (!user) return { error: 'Unauthorized' };
 
+  // Security Fix (VULN-04): Verifikasi kepemilikan dan status sebelum penghapusan
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  const isPrivileged = userProfile?.role === 'director' || userProfile?.role === 'finance';
+
+  const { data: targetReq } = await supabase
+    .from('reimbursement_requests')
+    .select('id, user_id, status, payment_status')
+    .eq('id', requestId)
+    .single();
+
+  if (!targetReq) return { error: 'Pengajuan tidak ditemukan.' };
+
+  if (!isPrivileged) {
+    if (targetReq.user_id !== user.id) {
+      return { error: 'Akses Ditolak: Anda tidak dapat menghapus pengajuan milik pengguna lain.' };
+    }
+    if (targetReq.status !== 'Menunggu Approval' || targetReq.payment_status === 'Paid') {
+      return { error: 'Pengajuan yang telah disetujui atau dicairkan tidak dapat dihapus.' };
+    }
+  }
+
   let isDeleted = false;
 
   // 1. Coba Hard Delete permanen ke Supabase
@@ -1220,6 +1302,31 @@ export async function deleteBatchReimbursementRequests(requestIds: string[]) {
   if (!user) return { error: 'Unauthorized' };
   if (!requestIds || requestIds.length === 0) return { success: true };
 
+  // Security Fix (VULN-04): Filter target baris agar karyawan hanya bisa menghapus miliknya sendiri yang belum disetujui
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  const isPrivileged = userProfile?.role === 'director' || userProfile?.role === 'finance';
+  let allowedIds = requestIds;
+
+  if (!isPrivileged) {
+    const { data: userOwnedRows } = await supabase
+      .from('reimbursement_requests')
+      .select('id')
+      .in('id', requestIds)
+      .eq('user_id', user.id)
+      .eq('status', 'Menunggu Approval')
+      .neq('payment_status', 'Paid');
+
+    allowedIds = userOwnedRows ? userOwnedRows.map((r) => r.id) : [];
+    if (allowedIds.length === 0) {
+      return { error: 'Tidak ada pengajuan yang memenuhi syarat untuk dihapus.' };
+    }
+  }
+
   let deletedIds = new Set<string>();
 
   // 1. Coba Hard Delete permanen ke Supabase
@@ -1227,7 +1334,7 @@ export async function deleteBatchReimbursementRequests(requestIds: string[]) {
     const { data: deletedRows, error: deleteError } = await supabase
       .from('reimbursement_requests')
       .delete()
-      .in('id', requestIds)
+      .in('id', allowedIds)
       .select('id');
 
     if (!deleteError && Array.isArray(deletedRows)) {
@@ -1238,7 +1345,7 @@ export async function deleteBatchReimbursementRequests(requestIds: string[]) {
   }
 
   // 2. Untuk baris yang belum terhapus oleh RLS, terapkan guaranteed soft-delete
-  const remainingIds = requestIds.filter((id) => !deletedIds.has(id));
+  const remainingIds = allowedIds.filter((id) => !deletedIds.has(id));
   if (remainingIds.length > 0) {
     try {
       await supabase
@@ -1272,6 +1379,17 @@ export async function updateBatchDirectorStatus(
 
   if (!user) return { error: 'Unauthorized' };
   if (!requestIds || requestIds.length === 0) return { success: true };
+
+  // Security Fix (VULN-01): Verifikasi bahwa user benar-benar memiliki role 'director'
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (userProfile?.role !== 'director') {
+    return { error: 'Akses Ditolak: Hanya akun Direktur yang berhak memberikan persetujuan batch.' };
+  }
 
   const updatePayload: any = {
     status,
@@ -1348,6 +1466,17 @@ export async function updateBatchFinancePayment(
 
   if (!user) return { error: 'Unauthorized' };
   if (!requestIds || requestIds.length === 0) return { success: true };
+
+  // Security Fix (VULN-01): Verifikasi bahwa user benar-benar memiliki role 'finance'
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (userProfile?.role !== 'finance') {
+    return { error: 'Akses Ditolak: Hanya akun Finance yang berhak melakukan pencairan batch.' };
+  }
 
   const updatePayload: any = {
     payment_status: paymentStatus,

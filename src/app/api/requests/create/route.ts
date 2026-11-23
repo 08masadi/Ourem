@@ -119,8 +119,19 @@ export async function POST(request: Request) {
 
       if (isFile) {
         try {
-          const rawName = (file as any).name || 'nota.jpg';
-          const fileExt = rawName.includes('.') ? rawName.split('.').pop() || 'jpg' : 'jpg';
+          // Security Fix (VULN-08): Whitelist ekstensi & batasi ukuran maksimal 10MB
+          if ((file as any).size > 10 * 1024 * 1024) {
+            console.warn(`File block ${i} ditolak: Ukuran melebihi batas 10MB`);
+            continue;
+          }
+
+          const rawName = ((file as any).name || 'nota.jpg').toLowerCase();
+          let fileExt = rawName.includes('.') ? rawName.split('.').pop() || 'jpg' : 'jpg';
+          const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
+          if (!ALLOWED_EXTENSIONS.includes(fileExt)) {
+            fileExt = 'jpg';
+          }
+
           const fileName = `${user.id}-${Date.now()}-${i}.${fileExt}`;
           const filePath = `receipts/${fileName}`;
           const buffer = Buffer.from(await file.arrayBuffer());
@@ -128,7 +139,7 @@ export async function POST(request: Request) {
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('receipts')
             .upload(filePath, buffer, {
-              contentType: (file as any).type || 'image/jpeg',
+              contentType: (file as any).type?.includes('svg') ? 'image/jpeg' : (file as any).type || 'image/jpeg',
               cacheControl: '3600',
               upsert: false,
             });
@@ -159,26 +170,36 @@ export async function POST(request: Request) {
 
       if (isFile) {
         try {
-          const rawName = (singleReceipt as any).name || 'nota.jpg';
-          const fileExt = rawName.includes('.') ? rawName.split('.').pop() || 'jpg' : 'jpg';
-          const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-          const filePath = `receipts/${fileName}`;
-          const buffer = Buffer.from(await singleReceipt.arrayBuffer());
+          // Security Fix (VULN-08): Whitelist ekstensi & batasi ukuran maksimal 10MB
+          if ((singleReceipt as any).size > 10 * 1024 * 1024) {
+            console.warn('Single receipt file ditolak: Ukuran melebihi batas 10MB');
+          } else {
+            const rawName = ((singleReceipt as any).name || 'nota.jpg').toLowerCase();
+            let fileExt = rawName.includes('.') ? rawName.split('.').pop() || 'jpg' : 'jpg';
+            const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
+            if (!ALLOWED_EXTENSIONS.includes(fileExt)) {
+              fileExt = 'jpg';
+            }
 
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('receipts')
-            .upload(filePath, buffer, {
-              contentType: (singleReceipt as any).type || 'image/jpeg',
-              cacheControl: '3600',
-              upsert: false,
-            });
+            const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+            const filePath = `receipts/${fileName}`;
+            const buffer = Buffer.from(await singleReceipt.arrayBuffer());
 
-          if (!uploadError && uploadData) {
-            const { data: publicUrlData } = supabase.storage
+            const { data: uploadData, error: uploadError } = await supabase.storage
               .from('receipts')
-              .getPublicUrl(filePath);
-            receipt_url = publicUrlData.publicUrl;
-            if (!uploadedBlockUrls[0]) uploadedBlockUrls[0] = receipt_url;
+              .upload(filePath, buffer, {
+                contentType: (singleReceipt as any).type?.includes('svg') ? 'image/jpeg' : (singleReceipt as any).type || 'image/jpeg',
+                cacheControl: '3600',
+                upsert: false,
+              });
+
+            if (!uploadError && uploadData) {
+              const { data: publicUrlData } = supabase.storage
+                .from('receipts')
+                .getPublicUrl(filePath);
+              receipt_url = publicUrlData.publicUrl;
+              if (!uploadedBlockUrls[0]) uploadedBlockUrls[0] = receipt_url;
+            }
           }
         } catch (uploadErr) {
           console.error('Single receipt upload error in API route:', uploadErr);

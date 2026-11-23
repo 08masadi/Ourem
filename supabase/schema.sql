@@ -124,7 +124,7 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 4. ROW LEVEL SECURITY (RLS) & POLICIES
+-- 4. ROW LEVEL SECURITY (RLS) & POLICIES (HARDENED)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reimbursement_requests ENABLE ROW LEVEL SECURITY;
 
@@ -132,13 +132,20 @@ DROP POLICY IF EXISTS "Allow authenticated read profiles" ON public.profiles;
 CREATE POLICY "Allow authenticated read profiles" ON public.profiles
   FOR SELECT TO authenticated USING (true);
 
+-- Security Fix (VULN-02): Cegah eskalasi role oleh user sendiri
 DROP POLICY IF EXISTS "Allow users update own profile" ON public.profiles;
 CREATE POLICY "Allow users update own profile" ON public.profiles
-  FOR UPDATE TO authenticated USING (auth.uid() = id);
+  FOR UPDATE TO authenticated
+  USING (auth.uid() = id)
+  WITH CHECK (
+    auth.uid() = id AND
+    role = (SELECT p.role FROM public.profiles p WHERE p.id = auth.uid())
+  );
 
 DROP POLICY IF EXISTS "Allow insert profile" ON public.profiles;
 CREATE POLICY "Allow insert profile" ON public.profiles
-  FOR INSERT WITH CHECK (true);
+  FOR INSERT TO authenticated
+  WITH CHECK (auth.uid() = id);
 
 DROP POLICY IF EXISTS "Allow read requests" ON public.reimbursement_requests;
 CREATE POLICY "Allow read requests" ON public.reimbursement_requests
@@ -156,21 +163,29 @@ CREATE POLICY "Allow insert requests" ON public.reimbursement_requests
   FOR INSERT TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
+-- Security Fix (VULN-01 & VULN-05): Karyawan hanya boleh update pengajuannya saat belum disetujui/dibayar
 DROP POLICY IF EXISTS "Allow update requests" ON public.reimbursement_requests;
 CREATE POLICY "Allow update requests" ON public.reimbursement_requests
   FOR UPDATE TO authenticated
   USING (
-    user_id = auth.uid() OR
+    (user_id = auth.uid() AND status = 'Menunggu Approval' AND payment_status = 'Unpaid') OR
     EXISTS (
       SELECT 1 FROM public.profiles
       WHERE profiles.id = auth.uid() AND profiles.role IN ('director', 'finance')
     )
   );
 
+-- Security Fix (VULN-04): Hanya pemilik pengajuan yang belum disetujui atau Direktur/Finance yang boleh menghapus
 DROP POLICY IF EXISTS "Allow delete requests" ON public.reimbursement_requests;
 CREATE POLICY "Allow delete requests" ON public.reimbursement_requests
   FOR DELETE TO authenticated
-  USING (true);
+  USING (
+    (user_id = auth.uid() AND status = 'Menunggu Approval' AND payment_status = 'Unpaid') OR
+    EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE profiles.id = auth.uid() AND profiles.role IN ('director', 'finance')
+    )
+  );
 
 -- 5. BUCKET STORAGE UNTUK BUKTI NOTA / KWITANSI
 INSERT INTO storage.buckets (id, name, public)

@@ -12,18 +12,22 @@ function getStorageClient() {
   return createSupabaseClient(url, key);
 }
 
-const VAPID_PUBLIC_KEY =
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
-  'BFjdw5B__5724ShiRwAyNrzhp_B0Ob0UAtD9YZJQ5QYvoZvC7KmaNUTVZNR3F4AzNUZTLWi88SB-nDtC2e_2aHk';
-const VAPID_PRIVATE_KEY =
-  process.env.VAPID_PRIVATE_KEY || 'VAQ9yWjZ7F4243vVuPEicm3MvjxkNH2WSxyejfFd8KQ';
-const VAPID_SUBJECT =
-  process.env.VAPID_SUBJECT || 'mailto:admin@ouffice.co.id';
+// Security Fix (VULN-09): Hapus hardcoded VAPID Private Key dari source code.
+// Kunci VAPID wajib disuplai melalui environment variables (.env.local atau Vercel Environment).
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:admin@ouffice.co.id';
 
-try {
-  setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
-} catch (err) {
-  console.error('Failed to initialize web-push VAPID details:', err);
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+  try {
+    setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+  } catch (err) {
+    console.error('Failed to initialize web-push VAPID details:', err);
+  }
+} else {
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('VAPID_PUBLIC_KEY atau VAPID_PRIVATE_KEY belum disetel di environment variables.');
+  }
 }
 
 export interface PushPayload {
@@ -179,6 +183,8 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
     // 1. Simpan ke antrean notifikasi aplikasi Android
     await recordAppNotification({ userId }, payload);
 
+    if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return;
+
     // 2. Kirim Web Push (jika ada browser/device yang terdaftar)
     const supabase = getStorageClient();
     const filePath = `push-subscriptions/${userId}.json`;
@@ -251,6 +257,8 @@ export async function sendPushToRole(targetRole: string, payload: PushPayload) {
   try {
     // 1. Simpan ke antrean notifikasi role aplikasi Android (Finance / Director)
     await recordAppNotification({ role: targetRole }, payload);
+
+    if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return;
 
     // 2. Kirim Web Push ke semua device role tersebut
     const supabase = getStorageClient();

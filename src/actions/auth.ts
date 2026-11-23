@@ -65,16 +65,13 @@ export async function signUp(prevState: any, formData: FormData) {
   const rawEmail = formData.get('email') as string;
   const password = formData.get('password') as string;
   const full_name = (formData.get('full_name') as string || '').trim();
-  const role = (formData.get('role') as UserRole) || 'employee';
+  // Security Fix (VULN-02): Cegah eskalasi hak akses saat pendaftaran akun baru.
+  // Semua pendaftaran baru selalu diatur ke role 'employee'.
+  // Role 'director' atau 'finance' hanya boleh diberikan oleh Administrator di panel Supabase.
+  const role: UserRole = 'employee';
   let department = (formData.get('department') as string || '').trim();
   if (!department) {
-    if (role === 'director') {
-      department = 'Director';
-    } else if (role === 'finance') {
-      department = 'Finance';
-    } else {
-      department = 'Staff OPS';
-    }
+    department = 'Staff OPS';
   }
 
   const origin = (formData.get('origin') as string) || 'https://ourem.vercel.app';
@@ -98,7 +95,7 @@ export async function signUp(prevState: any, formData: FormData) {
 
   const supabase = await createClient();
 
-  const targetPath = role === 'director' ? '/director' : role === 'finance' ? '/finance' : '/employee';
+  const targetPath = '/employee';
 
   const { data, error } = await supabase.auth.signUp({
     email,
