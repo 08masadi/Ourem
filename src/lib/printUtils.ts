@@ -68,13 +68,24 @@ export function printWordDocument(element: HTMLElement | null, documentTitle: st
       stylesHtml += node.outerHTML;
     });
 
+    const safeTitle = (documentTitle || 'Voucher').replace(/[<>&"']/g, (c) => {
+      switch (c) {
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '&': return '&amp;';
+        case '"': return '&quot;';
+        case "'": return '&#39;';
+        default: return c;
+      }
+    });
+
     iframeDoc.open();
     iframeDoc.write(`
       <!DOCTYPE html>
       <html lang="id">
         <head>
           <meta charset="utf-8" />
-          <title>${documentTitle}</title>
+          <title>${safeTitle}</title>
           ${stylesHtml}
           <style>
             @page {

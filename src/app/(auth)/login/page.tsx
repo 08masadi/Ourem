@@ -293,40 +293,12 @@ function LoginContent() {
                     <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                       Peran / Role Akun
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleRoleChange('employee')}
-                        className={`py-2 px-2.5 rounded-xl border text-[11px] font-bold text-center transition cursor-pointer ${
-                          role === 'employee'
-                            ? 'bg-orange-500/20 border-orange-500 text-orange-400'
-                            : 'border-slate-800 bg-slate-950/50 text-slate-400 hover:border-slate-700'
-                        }`}
-                      >
-                        Employee
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRoleChange('director')}
-                        className={`py-2 px-2.5 rounded-xl border text-[11px] font-bold text-center transition cursor-pointer ${
-                          role === 'director'
-                            ? 'bg-amber-500/20 border-amber-500 text-amber-400'
-                            : 'border-slate-800 bg-slate-950/50 text-slate-400 hover:border-slate-700'
-                        }`}
-                      >
-                        Director
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRoleChange('finance')}
-                        className={`py-2 px-2.5 rounded-xl border text-[11px] font-bold text-center transition cursor-pointer ${
-                          role === 'finance'
-                            ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
-                            : 'border-slate-800 bg-slate-950/50 text-slate-400 hover:border-slate-700'
-                        }`}
-                      >
-                        Finance
-                      </button>
+                    <div className="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-orange-500" />
+                        <span className="font-bold text-orange-400">Employee (Staff)</span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 font-medium">Role Direktur/Finance diset Admin</span>
                     </div>
                   </div>
 
