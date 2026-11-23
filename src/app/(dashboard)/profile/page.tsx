@@ -393,41 +393,44 @@ export default function ProfilePage() {
               <span>{profile?.email}</span>
             </p>
 
-            <div className="pt-1 flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <span
-                className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${roleBadge.color}`}
-              >
-                <Shield className="w-3 h-3" />
-                <span>{roleBadge.text}</span>
-              </span>
+            <div className="pt-1 flex items-center justify-center sm:justify-start gap-2">
+              {profile?.role && profile.role !== 'employee' && (
+                <span
+                  className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${roleBadge.color}`}
+                >
+                  <Shield className="w-3 h-3" />
+                  <span>{roleBadge.text}</span>
+                </span>
+              )}
 
-              {profile?.department && profile.role !== 'director' && profile.role !== 'finance' && (
-                <span className="text-[11px] font-semibold text-slate-300 bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-700">
+              {profile?.department && (
+                <span className="text-[11px] font-semibold text-slate-300 bg-slate-800 px-3 py-0.5 rounded-full border border-slate-700">
                   {profile.department}
                 </span>
               )}
             </div>
 
-            {/* Tombol aksi foto */}
+            {/* Tombol aksi foto (Icon Saja) */}
             <div className="pt-2 flex items-center justify-center sm:justify-start gap-2">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                title={previewAvatar ? 'Ganti Foto Profil' : 'Pilih Foto Profil'}
+                aria-label={previewAvatar ? 'Ganti Foto Profil' : 'Pilih Foto Profil'}
               >
-                <Upload className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
-                <span>{previewAvatar ? 'Ganti Foto' : 'Pilih Foto'}</span>
+                <Upload className="w-4 h-4 text-slate-600 dark:text-slate-400" />
               </button>
 
               {previewAvatar && (
                 <button
                   type="button"
                   onClick={handleRemoveAvatar}
-                  className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-500/10 dark:text-slate-300 dark:hover:text-rose-400 border border-slate-300 dark:border-slate-700 hover:border-rose-300 text-xs font-semibold transition flex items-center gap-1 cursor-pointer shadow-sm active:scale-95"
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-500/10 dark:text-slate-300 dark:hover:text-rose-400 border border-slate-300 dark:border-slate-700 hover:border-rose-300 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
                   title="Hapus foto profil"
+                  aria-label="Hapus foto profil"
                 >
-                  <Trash2 className="w-3.5 h-3.5 text-slate-500 hover:text-rose-600" />
-                  <span>Hapus</span>
+                  <Trash2 className="w-4 h-4 text-slate-500 hover:text-rose-600" />
                 </button>
               )}
             </div>
@@ -709,6 +712,15 @@ export default function ProfilePage() {
 
             <p className="text-base font-bold text-white">{profile?.full_name || 'Pengguna'}</p>
             <p className="text-xs text-slate-400 mt-0.5">{profile?.email}</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
+              {profile?.role === 'director'
+                ? 'Direktur / Approver'
+                : profile?.role === 'finance'
+                ? 'Finance / Payer'
+                : profile?.department === 'Staff OPS'
+                ? 'Staff Operasional'
+                : profile?.department || 'Staff Operasional'}
+            </p>
           </div>
         </div>
       )}
