@@ -4,7 +4,6 @@ import React, { useState, useRef } from 'react';
 import { ReimbursementRequest } from '@/types/database';
 import {
   extractOvertimeFromDescription,
-  parseAccountBlocksFromDescription,
 } from '@/lib/formatters';
 import {
   Wallet,
@@ -153,74 +152,24 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
         statusType = 'unpaid';
       }
 
-      if (isOvertime) {
-        const ov = extractOvertimeFromDescription(req.description);
-        const tgl = ov?.tanggal_lembur || req.request_date || req.created_at;
-        const acc = ov?.nama_pekerjaan || req.account || 'Lembur';
-        const nom = getRequestNominal(req);
-        rows.push({
-          id: `${req.id}-ov`,
-          tanggal: formatDateIndo(tgl),
-          jenis: 'Lembur',
-          account: acc,
-          nominal: nom,
-          statusText,
-          statusType,
-        });
-      } else {
-        const determinedType = req.reimbursement_type || 'Petty Cash';
-        const blocks = parseAccountBlocksFromDescription(
-          req.description,
-          req.account || req.category,
-          Number(req.amount) || 0,
-          req.customer,
-          req.receipt_url
-        );
+      const ov = isOvertime ? extractOvertimeFromDescription(req.description) : null;
+      // Tampilkan per tanggal pengajuan saja (1 baris per pengajuan)
+      const tglPengajuan = req.request_date || (isOvertime ? ov?.tanggal_lembur : null) || req.created_at;
+      const jenis = isOvertime ? 'Lembur' : (req.reimbursement_type || 'Petty Cash');
+      const acc = isOvertime
+        ? (ov?.nama_pekerjaan || req.account || 'Lembur')
+        : (req.account || req.category || 'Biaya');
+      const nom = getRequestNominal(req);
 
-        // Jika request memiliki banyak sub-rincian account blocks dengan nominal valid
-        const hasValidBlocks =
-          blocks.length > 1 && blocks.some((b) => (Number(b.amount) || 0) > 0);
-
-        if (hasValidBlocks) {
-          blocks.forEach((b, bIdx) => {
-            const tgl =
-              b.receipt_date ||
-              b.entries?.[0]?.receipt_date ||
-              req.request_date ||
-              req.created_at;
-            const acc = b.account || req.account || req.category || 'Biaya';
-            const nom = Number(b.amount) || 0;
-            rows.push({
-              id: `${req.id}-b-${bIdx}`,
-              tanggal: formatDateIndo(tgl),
-              jenis: determinedType,
-              account: acc,
-              nominal: nom,
-              statusText,
-              statusType,
-            });
-          });
-        } else {
-          // 1 Baris tunggal per pengajuan
-          const tgl =
-            blocks[0]?.receipt_date ||
-            blocks[0]?.entries?.[0]?.receipt_date ||
-            req.request_date ||
-            req.created_at;
-          const acc =
-            blocks[0]?.account || req.account || req.category || 'Biaya';
-          const nom = getRequestNominal(req);
-          rows.push({
-            id: `${req.id}`,
-            tanggal: formatDateIndo(tgl),
-            jenis: determinedType,
-            account: acc,
-            nominal: nom,
-            statusText,
-            statusType,
-          });
-        }
-      }
+      rows.push({
+        id: req.id,
+        tanggal: formatDateIndo(tglPengajuan),
+        jenis,
+        account: acc,
+        nominal: nom,
+        statusText,
+        statusType,
+      });
     });
 
     return rows;
