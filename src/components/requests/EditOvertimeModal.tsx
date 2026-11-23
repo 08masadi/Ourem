@@ -157,17 +157,18 @@ export default function EditOvertimeModal({
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 pr-1 space-y-5">
           {/* Section 1: Informasi Waktu & Karyawan */}
-          <div className="space-y-3.5">
+          <div className="space-y-3">
             <h3 className="text-xs font-bold text-orange-400 uppercase tracking-wider flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" />
               <span>1. Informasi Umum & Waktu</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
               {/* Tanggal Lembur */}
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Tanggal Lembur
+                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                  <span className="truncate">Tanggal Lembur</span>
                 </label>
                 <input
                   type="date"
@@ -179,47 +180,47 @@ export default function EditOvertimeModal({
                       e.currentTarget.showPicker?.();
                     } catch {}
                   }}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500 cursor-pointer"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white focus:outline-none focus:border-orange-500 cursor-pointer"
                   style={{ colorScheme: 'dark' }}
                 />
               </div>
 
               {/* Tipe Hari */}
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Tipe Hari
+                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5">
+                  Kategori Hari
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                   <button
                     type="button"
                     onClick={() => setTipeHari('hari kerja')}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border ${
+                    className={`py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1 cursor-pointer border ${
                       tipeHari === 'hari kerja'
                         ? 'bg-orange-500 text-white border-orange-400 shadow-md'
                         : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
                     }`}
                   >
-                    <span>Hari Kerja</span>
+                    <span><span className="hidden sm:inline">Hari </span>Kerja</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setTipeHari('hari libur')}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border ${
+                    className={`py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1 cursor-pointer border ${
                       tipeHari === 'hari libur'
                         ? 'bg-orange-500 text-white border-orange-400 shadow-md'
                         : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
                     }`}
                   >
-                    <span>Hari Libur</span>
+                    <span><span className="hidden sm:inline">Hari </span>Libur</span>
                   </button>
                 </div>
               </div>
 
               {/* Lokasi Lembur */}
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-orange-400" />
-                  <span>Lokasi Lembur</span>
+                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                  <span className="truncate">Lokasi Lembur</span>
                 </label>
                 <input
                   type="text"
@@ -227,28 +228,29 @@ export default function EditOvertimeModal({
                   value={lokasiLembur}
                   onChange={(e) => setLokasiLembur(e.target.value)}
                   placeholder="Masukkan lokasi lembur..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500 placeholder:text-slate-600"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white focus:outline-none focus:border-orange-500 placeholder:text-slate-600"
                 />
               </div>
 
               {/* Jam Lembur */}
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-orange-400" />
-                  <span>Jam Lembur</span>
+                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                  <span className="truncate">Jam Lembur</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={jamLembur}
                   onChange={(e) => setJamLembur(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                  placeholder="Masukkan jam lembur"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white font-mono focus:outline-none focus:border-orange-500"
                 />
               </div>
 
               {/* Nama Karyawan */}
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5">
                   Nama Karyawan
                 </label>
                 <input
@@ -256,15 +258,15 @@ export default function EditOvertimeModal({
                   required
                   value={namaKaryawan}
                   onChange={(e) => setNamaKaryawan(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500 uppercase font-semibold"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white focus:outline-none focus:border-orange-500 uppercase font-semibold"
                 />
               </div>
 
               {/* Department (Terkunci) */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
-                  <span>Department</span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal flex items-center gap-1">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                  <span className="truncate">Department</span>
+                  <span className="text-[10px] sm:text-xs text-slate-400 font-normal flex items-center gap-0.5 shrink-0">
                     <Lock className="w-3 h-3" />
                     Terkunci
                   </span>
@@ -275,9 +277,9 @@ export default function EditOvertimeModal({
                     disabled
                     readOnly
                     value={department}
-                    className="w-full pl-9 pr-4 py-2 bg-slate-100 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90"
+                    className="w-full pl-8 pr-3 py-2.5 sm:pl-9 sm:pr-3.5 sm:py-3 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-slate-200 font-semibold cursor-not-allowed select-none opacity-90 truncate"
                   />
-                  <Briefcase className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Briefcase className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input type="hidden" name="department" value={department} />
                 </div>
               </div>
@@ -285,136 +287,141 @@ export default function EditOvertimeModal({
           </div>
 
           {/* Section 2: Deskripsi Pekerjaan */}
-          <div className="space-y-3.5 pt-3 border-t border-slate-800">
+          <div className="space-y-3 pt-3 border-t border-slate-800">
             <h3 className="text-xs font-bold text-orange-400 uppercase tracking-wider flex items-center gap-1.5">
               <Briefcase className="w-3.5 h-3.5" />
               <span>2. Rincian Pekerjaan</span>
             </h3>
 
-            {/* Perusahaan */}
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
-                <Building2 className="w-3 h-3 text-orange-400" />
-                <span>Perusahaan / Klien</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={perusahaan}
-                onChange={(e) => setPerusahaan(e.target.value)}
-                placeholder="Masukkan nama perusahaan atau klien..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500 placeholder:text-slate-600"
-              />
-            </div>
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+              {/* Perusahaan */}
+              <div>
+                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                  <span className="truncate">Perusahaan / Klien</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={perusahaan}
+                  onChange={(e) => setPerusahaan(e.target.value)}
+                  placeholder="Masukkan nama perusahaan atau klien..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white focus:outline-none focus:border-orange-500 placeholder:text-slate-600"
+                />
+              </div>
 
-            {/* Nama Pekerjaan */}
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
-                Nama Pekerjaan
-              </label>
-              <input
-                type="text"
-                required
-                value={namaPekerjaan}
-                onChange={(e) => setNamaPekerjaan(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
-              />
-            </div>
+              {/* Nama Pekerjaan */}
+              <div>
+                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                  <span className="truncate">Nama Pekerjaan</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={namaPekerjaan}
+                  onChange={(e) => setNamaPekerjaan(e.target.value)}
+                  placeholder="Nama pekerjaan..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white focus:outline-none focus:border-orange-500"
+                />
+              </div>
 
-            {/* Uraian Pekerjaan */}
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
-                <FileText className="w-3 h-3 text-orange-400" />
-                <span>Uraian Pekerjaan (Detail Aktivitas)</span>
-              </label>
-              <textarea
-                required
-                rows={4}
-                value={uraianPekerjaan}
-                onChange={(e) => setUraianPekerjaan(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-orange-500 leading-relaxed font-mono"
-              />
-            </div>
+              {/* Uraian Pekerjaan */}
+              <div className="col-span-2">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                  <span>Uraian Pekerjaan (Detail Aktivitas)</span>
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={uraianPekerjaan}
+                  onChange={(e) => setUraianPekerjaan(e.target.value)}
+                  placeholder="Jelaskan rincian aktivitas pekerjaan lembur..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 sm:p-3.5 text-sm text-white focus:outline-none focus:border-orange-500 leading-relaxed font-mono"
+                />
+              </div>
 
-            {/* Nominal Kompensasi */}
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center justify-between">
-                <span className="flex items-center gap-1">
-                  <span className="text-[10px] font-black text-orange-400 border border-orange-500/40 px-1 py-0.2 rounded bg-orange-500/10 font-mono">
-                    RP
+              {/* Nominal Kompensasi */}
+              <div className="col-span-2">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-black text-orange-400 border border-orange-500/40 px-1 py-0.2 rounded bg-orange-500/10 font-mono">
+                      RP
+                    </span>
+                    <span>Nominal Kompensasi / Uang Lembur (Rp)</span>
                   </span>
-                  <span>Nominal Kompensasi / Uang Lembur (Rp)</span>
-                </span>
-                {canEditNominal ? (
-                  <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
-                    Dapat Diisi (Mode {currentRole === 'director' ? 'Director' : 'Finance'})
+                  {canEditNominal ? (
+                    <span className="text-[10px] sm:text-xs text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                      Dapat Diisi (Mode {currentRole === 'director' ? 'Director' : 'Finance'})
+                    </span>
+                  ) : (
+                    <span className="text-[10px] sm:text-xs text-slate-500 font-medium flex items-center gap-1">
+                      <Lock className="w-3 h-3" />
+                      <span>Dihitung Direktur / Finance</span>
+                    </span>
+                  )}
+                </label>
+                <div className="relative">
+                  <span className={`absolute left-3 top-2.5 sm:top-3 text-sm font-bold ${canEditNominal ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Rp
                   </span>
-                ) : (
-                  <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
-                    <Lock className="w-2.5 h-2.5" />
-                    <span>Dihitung Direktur / Finance</span>
-                  </span>
-                )}
-              </label>
-              <div className="relative">
-                <span className={`absolute left-3 top-2 text-xs font-bold ${canEditNominal ? 'text-slate-400' : 'text-slate-500'}`}>
-                  Rp
-                </span>
-                {canEditNominal ? (
-                  <input
-                    type="text"
-                    value={nominal}
-                    onChange={handleNominalChange}
-                    placeholder="0"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-orange-400 font-mono focus:outline-none focus:border-orange-500"
-                  />
-                ) : (
-                  <>
+                  {canEditNominal ? (
                     <input
                       type="text"
-                      readOnly
-                      disabled
-                      value={nominal === '0' || !nominal ? 'Dihitung oleh Direktur' : nominal}
-                      className="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-slate-400 font-mono cursor-not-allowed select-none shadow-inner"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={nominal}
+                      onChange={handleNominalChange}
+                      placeholder="0"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-3 py-2.5 sm:py-3 text-sm font-bold text-orange-400 font-mono focus:outline-none focus:border-orange-500"
                     />
-                    <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2" />
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        readOnly
+                        disabled
+                        value={nominal === '0' || !nominal ? 'Dihitung oleh Direktur' : nominal}
+                        className="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-10 pr-8 py-2.5 sm:py-3 text-sm font-bold text-slate-400 font-mono cursor-not-allowed select-none shadow-inner"
+                      />
+                      <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2" />
+                    </>
+                  )}
+                </div>
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-1">
+                  {canEditNominal
+                    ? 'Masukkan nominal kompensasi / uang lembur yang disetujui untuk karyawan.'
+                    : 'Hanya akun Direktur dan Finance yang dapat mengisi dan menentukan nominal kompensasi lembur.'}
+                </p>
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                {canEditNominal
-                  ? 'Masukkan nominal kompensasi / uang lembur yang disetujui untuk karyawan.'
-                  : 'Hanya akun Direktur dan Finance yang dapat mengisi dan menentukan nominal kompensasi lembur.'}
-              </p>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="pt-4 pb-3 border-t border-slate-800 flex items-center justify-end gap-2.5">
+          {/* Action Buttons: 2 Kolom dalam 1 Baris, Icon Saja */}
+          <div className="pt-3 border-t border-slate-800 grid grid-cols-2 gap-2.5 sm:gap-4">
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition cursor-pointer"
+              className="w-full py-2.5 sm:py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+              title="Batal"
+              aria-label="Batal"
             >
-              Batal
+              <X className="w-5 h-5" />
             </button>
 
             <button
               type="submit"
               disabled={isPending}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md disabled:opacity-50 cursor-pointer"
+              className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-md shadow-orange-950/30 transition flex items-center justify-center disabled:opacity-50 cursor-pointer active:scale-95"
+              title="Simpan Perubahan Lembur"
+              aria-label="Simpan Perubahan Lembur"
             >
               {isPending ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Menyimpan...</span>
-                </>
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <>
-                  <Save className="w-3.5 h-3.5" />
-                  <span>Simpan Perubahan Lembur</span>
-                </>
+                <Save className="w-5 h-5" />
               )}
             </button>
           </div>
