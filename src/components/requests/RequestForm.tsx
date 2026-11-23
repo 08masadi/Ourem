@@ -511,7 +511,7 @@ export default function RequestForm() {
   };
 
   return (
-    <div className="w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
+    <div className="max-w-3xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
       {/* Header: Clean, Corporate & Professional */}
       <div className="mb-6 border-b border-slate-200 dark:border-slate-800 pb-5">
         <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
@@ -821,7 +821,7 @@ export default function RequestForm() {
                   </div>
                   <div className="text-[11px] font-bold text-orange-600 dark:text-amber-400 mt-1.5 flex items-center justify-between h-5">
                     <span className="text-slate-500 dark:text-slate-400 font-normal">Subtotal {block.account}:</span>
-                    <span>
+                    <span className="font-mono">
                       {block.amount
                         ? new Intl.NumberFormat('id-ID', {
                             style: 'currency',

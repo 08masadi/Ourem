@@ -23,7 +23,19 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: 'Calibri', 'Segoe UI', Candara, Optima, Arial, sans-serif;
+}
+
+/* ========================================================
+   CALIBRI FONT UNTUK SELURUH TAMPILAN NOMINAL
+   ======================================================== */
+.font-mono,
+.font-calibri,
+.font-nominal,
+[class*="font-mono"] {
+  font-family: 'Calibri', 'Segoe UI', Candara, Optima, Arial, sans-serif !important;
+  font-feature-settings: 'tnum' 1;
+  font-variant-numeric: tabular-nums;
 }
 
 body {

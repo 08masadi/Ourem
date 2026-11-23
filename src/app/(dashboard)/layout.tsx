@@ -115,8 +115,8 @@ export default async function DashboardLayout({
           </div>
         </header>
 
-        {/* Page Content: Full screen on desktop */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-28 md:pb-8 w-full">
+        {/* Page Content: Centered responsive desktop container */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-28 md:pb-8 max-w-7xl w-full mx-auto">
           {children}
         </main>
 

@@ -117,7 +117,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
   };
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-6 max-w-4xl mx-auto">
       {/* Top Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 p-6 sm:p-8 text-white shadow-xl">
         <div className="relative z-10">

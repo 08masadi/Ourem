@@ -302,13 +302,13 @@ export default function ProfilePage() {
 
   const roleBadge =
     profile?.role === 'director'
-      ? { text: 'Director / Approver', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' }
+      ? { text: 'Director / Approver', color: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30' }
       : profile?.role === 'finance'
-      ? { text: 'Finance / Payer', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }
-      : { text: 'Employee / Staff', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' };
+      ? { text: 'Finance / Payer', color: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30' }
+      : { text: 'Employee / Staff', color: 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700' };
 
   return (
-    <div className="w-full space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-xl sm:text-2xl font-black text-white">Profil & Pengaturan Akun</h1>
@@ -408,9 +408,9 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
               >
-                <Upload className="w-3.5 h-3.5" />
+                <Upload className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
                 <span>{previewAvatar ? 'Ganti Foto' : 'Pilih Foto'}</span>
               </button>
 
@@ -418,10 +418,10 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={handleRemoveAvatar}
-                  className="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition flex items-center gap-1 cursor-pointer"
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-500/10 dark:text-slate-300 dark:hover:text-rose-400 border border-slate-300 dark:border-slate-700 hover:border-rose-300 text-xs font-semibold transition flex items-center gap-1 cursor-pointer shadow-sm active:scale-95"
                   title="Hapus foto profil"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-3.5 h-3.5 text-slate-500 hover:text-rose-600" />
                   <span>Hapus</span>
                 </button>
               )}
