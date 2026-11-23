@@ -1,16 +1,14 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { ReimbursementRequest } from '@/types/database';
-import {
-  extractOvertimeFromDescription,
-} from '@/lib/formatters';
+import { extractOvertimeFromDescription } from '@/lib/formatters';
 import {
   Wallet,
   Clock,
   CheckCircle2,
   X,
-  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 
 interface EmployeeMetricsCardsProps {
@@ -31,7 +29,6 @@ interface RekapanRow {
 
 export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsProps) {
   const [selectedCategory, setSelectedCategory] = useState<MetricCategory>(null);
-  const detailPanelRef = useRef<HTMLDivElement>(null);
 
   // Helper untuk mengenali kategori pengajuan
   const isOvertimeReq = (r: ReimbursementRequest) =>
@@ -111,17 +108,10 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
   const approvedCount = approvedRequests.length;
 
   const toggleCategory = (cat: MetricCategory) => {
-    if (selectedCategory === cat) {
-      setSelectedCategory(null);
-    } else {
-      setSelectedCategory(cat);
-      setTimeout(() => {
-        detailPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 50);
-    }
+    setSelectedCategory((prev) => (prev === cat ? null : cat));
   };
 
-  // Generate daftar baris rekapan dengan 5 kolom: Tanggal, Jenis, Account, Nominal, Status
+  // Generate daftar baris rekapan per tanggal pengajuan (1 baris per tiket pengajuan)
   const getRekapanRows = (): RekapanRow[] => {
     if (!selectedCategory) return [];
 
@@ -153,7 +143,7 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
       }
 
       const ov = isOvertime ? extractOvertimeFromDescription(req.description) : null;
-      // Tampilkan per tanggal pengajuan saja (1 baris per pengajuan)
+      // Per tanggal pengajuan saja (1 baris per pengajuan)
       const tglPengajuan = req.request_date || (isOvertime ? ov?.tanggal_lembur : null) || req.created_at;
       const jenis = isOvertime ? 'Lembur' : (req.reimbursement_type || 'Petty Cash');
       const acc = isOvertime
@@ -179,7 +169,7 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
   const totalNominalRekapan = rekapanRows.reduce((acc, curr) => acc + curr.nominal, 0);
 
   return (
-    <div className="space-y-4">
+    <>
       {/* 4 Kartu Ringkasan Interaktif: Native button untuk respon instan Web & Android */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Kolom 1: Petty Cash */}
@@ -219,9 +209,9 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
             <span className="text-[11px] font-semibold text-orange-400/90">
               {unpaidPettyCashRequests.length} pengajuan belum cair
             </span>
-            <ChevronDown
+            <ChevronRight
               className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
-                selectedCategory === 'petty_cash' ? 'rotate-180 text-orange-400' : 'group-hover:text-orange-400'
+                selectedCategory === 'petty_cash' ? 'text-orange-400 translate-x-0.5' : 'group-hover:text-orange-400'
               }`}
             />
           </div>
@@ -264,9 +254,9 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
             <span className="text-[11px] font-semibold text-amber-400/90">
               {unpaidVoucherRequests.length} pengajuan belum cair
             </span>
-            <ChevronDown
+            <ChevronRight
               className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
-                selectedCategory === 'voucher' ? 'rotate-180 text-amber-400' : 'group-hover:text-amber-400'
+                selectedCategory === 'voucher' ? 'text-amber-400 translate-x-0.5' : 'group-hover:text-amber-400'
               }`}
             />
           </div>
@@ -309,9 +299,9 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
             <span className="text-[11px] font-semibold text-orange-400/90">
               {unpaidOvertimeRequests.length} pengajuan belum cair
             </span>
-            <ChevronDown
+            <ChevronRight
               className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
-                selectedCategory === 'lembur' ? 'rotate-180 text-orange-400' : 'group-hover:text-orange-400'
+                selectedCategory === 'lembur' ? 'text-orange-400 translate-x-0.5' : 'group-hover:text-orange-400'
               }`}
             />
           </div>
@@ -356,162 +346,183 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
                 ? `${approvedUnpaidRequests.length} siap dicairkan finance`
                 : 'Semua telah dicairkan'}
             </span>
-            <ChevronDown
+            <ChevronRight
               className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
-                selectedCategory === 'approved' ? 'rotate-180 text-emerald-400' : 'group-hover:text-emerald-400'
+                selectedCategory === 'approved' ? 'text-emerald-400 translate-x-0.5' : 'group-hover:text-emerald-400'
               }`}
             />
           </div>
         </button>
       </div>
 
-      {/* TAMPILAN DAFTAR KLAIM BERFORMAT REKAPAN: Langsung muncul saat kartu di-klik */}
+      {/* TAMPILAN MENGAMBANG (FLOATING POP-UP MODAL OVERLAY) */}
       {selectedCategory && (
         <div
-          ref={detailPanelRef}
-          className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-200"
+          className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
+          onClick={() => setSelectedCategory(null)}
         >
-          {/* Header Bar Rekapan */}
-          <div className="flex items-center justify-between pb-2.5 border-b border-slate-800">
-            <div className="flex items-center gap-2.5">
-              <span className="text-sm sm:text-base font-bold text-white flex items-center gap-2 flex-wrap">
-                <span>Daftar Rekapan Klaim :</span>
-                <span
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                    selectedCategory === 'petty_cash'
-                      ? 'text-orange-400 bg-orange-500/10 border border-orange-500/30'
+          <div
+            className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl shadow-black overflow-hidden animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header Bar Rekapan */}
+            <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900 sticky top-0 z-10">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <span className="text-sm sm:text-base font-bold text-white flex items-center gap-2 flex-wrap">
+                  <span>Daftar Rekapan Klaim :</span>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                      selectedCategory === 'petty_cash'
+                        ? 'text-orange-400 bg-orange-500/10 border border-orange-500/30'
+                        : selectedCategory === 'voucher'
+                        ? 'text-amber-400 bg-amber-500/10 border border-amber-500/30'
+                        : selectedCategory === 'lembur'
+                        ? 'text-purple-400 bg-purple-500/10 border border-purple-500/30'
+                        : 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/30'
+                    }`}
+                  >
+                    {selectedCategory === 'petty_cash'
+                      ? 'Petty Cash'
                       : selectedCategory === 'voucher'
-                      ? 'text-amber-400 bg-amber-500/10 border border-amber-500/30'
+                      ? 'Voucher Reimbursement'
                       : selectedCategory === 'lembur'
-                      ? 'text-purple-400 bg-purple-500/10 border border-purple-500/30'
-                      : 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/30'
-                  }`}
-                >
-                  {selectedCategory === 'petty_cash'
-                    ? 'Petty Cash'
-                    : selectedCategory === 'voucher'
-                    ? 'Voucher Reimbursement'
-                    : selectedCategory === 'lembur'
-                    ? 'Form Lembur'
-                    : 'Telah Disetujui'}
+                      ? 'Form Lembur'
+                      : 'Telah Disetujui'}
+                  </span>
+                  <span className="text-xs text-slate-400 font-normal">
+                    ({rekapanRows.length} data)
+                  </span>
                 </span>
-                <span className="text-xs text-slate-400 font-normal">
-                  ({rekapanRows.length} data)
-                </span>
-              </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedCategory(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0"
+                title="Tutup Rekapan"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setSelectedCategory(null)}
-              className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition cursor-pointer"
-              title="Tutup Rekapan"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Tabel Rekapan: HANYA Kolom Tanggal, Jenis, Account, Nominal, dan Status */}
-          <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/50">
-            <table className="w-full text-left border-collapse text-xs sm:text-sm">
-              <thead>
-                <tr className="bg-slate-950 text-slate-300 font-bold border-b border-slate-800 text-[11px] sm:text-xs uppercase tracking-wider">
-                  <th className="py-2.5 px-3 sm:px-4 whitespace-nowrap">Tanggal</th>
-                  <th className="py-2.5 px-3 sm:px-4 whitespace-nowrap">Jenis</th>
-                  <th className="py-2.5 px-3 sm:px-4 whitespace-nowrap">Account</th>
-                  <th className="py-2.5 px-3 sm:px-4 whitespace-nowrap text-right">Nominal</th>
-                  <th className="py-2.5 px-3 sm:px-4 whitespace-nowrap text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {rekapanRows.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-400 text-xs">
-                      Tidak ada pengajuan dalam kategori ini.
-                    </td>
-                  </tr>
-                ) : (
-                  rekapanRows.map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-800/40 transition">
-                      {/* 1. Tanggal */}
-                      <td className="py-2.5 px-3 sm:px-4 text-slate-300 font-mono whitespace-nowrap">
-                        {row.tanggal}
-                      </td>
-
-                      {/* 2. Jenis */}
-                      <td className="py-2.5 px-3 sm:px-4 whitespace-nowrap">
-                        <span
-                          className={`font-semibold ${
-                            row.jenis === 'Lembur'
-                              ? 'text-purple-400'
-                              : row.jenis === 'Voucher'
-                              ? 'text-amber-400'
-                              : 'text-orange-400'
-                          }`}
-                        >
-                          {row.jenis}
-                        </span>
-                      </td>
-
-                      {/* 3. Account */}
-                      <td className="py-2.5 px-3 sm:px-4 text-white font-medium whitespace-nowrap">
-                        {row.account}
-                      </td>
-
-                      {/* 4. Nominal */}
-                      <td className="py-2.5 px-3 sm:px-4 text-right font-mono font-bold text-orange-400 whitespace-nowrap">
-                        {formatRupiah(row.nominal)}
-                      </td>
-
-                      {/* 5. Status */}
-                      <td className="py-2.5 px-3 sm:px-4 text-center whitespace-nowrap">
-                        {row.statusType === 'pending' && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                            Menunggu Approval
-                          </span>
-                        )}
-                        {row.statusType === 'unpaid' && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                            Siap Dicairkan (UNPAID)
-                          </span>
-                        )}
-                        {row.statusType === 'paid' && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-teal-500/10 text-teal-300 border border-teal-500/30">
-                            Sudah Ditransfer (PAID)
-                          </span>
-                        )}
-                        {row.statusType === 'rejected' && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30">
-                            Ditolak
-                          </span>
-                        )}
-                      </td>
+            {/* Isi Tabel Rekapan: HANYA Kolom Tanggal, Jenis, Account, Nominal, dan Status */}
+            <div className="p-4 sm:p-5 overflow-y-auto max-h-[65vh] custom-scrollbar">
+              <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/50">
+                <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                  <thead>
+                    <tr className="bg-slate-950 text-slate-300 font-bold border-b border-slate-800 text-[11px] sm:text-xs uppercase tracking-wider">
+                      <th className="py-2.5 px-3 sm:px-4 whitespace-nowrap">Tanggal</th>
+                      <th className="py-2.5 px-3 sm:px-4 whitespace-nowrap">Jenis</th>
+                      <th className="py-2.5 px-3 sm:px-4 whitespace-nowrap">Account</th>
+                      <th className="py-2.5 px-3 sm:px-4 whitespace-nowrap text-right">Nominal</th>
+                      <th className="py-2.5 px-3 sm:px-4 whitespace-nowrap text-center">Status</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-              {rekapanRows.length > 0 && (
-                <tfoot>
-                  <tr className="bg-slate-950 font-bold border-t-2 border-slate-700">
-                    <td
-                      colSpan={3}
-                      className="py-2.5 px-3 sm:px-4 text-slate-300 text-right uppercase tracking-wider text-xs"
-                    >
-                      Total Nominal :
-                    </td>
-                    <td className="py-2.5 px-3 sm:px-4 text-right font-mono text-sm font-black text-white whitespace-nowrap">
-                      {formatRupiah(totalNominalRekapan)}
-                    </td>
-                    <td className="py-2.5 px-3 sm:px-4 text-center text-xs text-slate-400 whitespace-nowrap">
-                      {rekapanRows.length} item
-                    </td>
-                  </tr>
-                </tfoot>
-              )}
-            </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {rekapanRows.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-8 text-center text-slate-400 text-xs">
+                          Tidak ada pengajuan dalam kategori ini.
+                        </td>
+                      </tr>
+                    ) : (
+                      rekapanRows.map((row) => (
+                        <tr key={row.id} className="hover:bg-slate-800/40 transition">
+                          {/* 1. Tanggal */}
+                          <td className="py-2.5 px-3 sm:px-4 text-slate-300 font-mono whitespace-nowrap">
+                            {row.tanggal}
+                          </td>
+
+                          {/* 2. Jenis */}
+                          <td className="py-2.5 px-3 sm:px-4 whitespace-nowrap">
+                            <span
+                              className={`font-semibold ${
+                                row.jenis === 'Lembur'
+                                  ? 'text-purple-400'
+                                  : row.jenis === 'Voucher'
+                                  ? 'text-amber-400'
+                                  : 'text-orange-400'
+                              }`}
+                            >
+                              {row.jenis}
+                            </span>
+                          </td>
+
+                          {/* 3. Account */}
+                          <td className="py-2.5 px-3 sm:px-4 text-white font-medium whitespace-nowrap">
+                            {row.account}
+                          </td>
+
+                          {/* 4. Nominal */}
+                          <td className="py-2.5 px-3 sm:px-4 text-right font-mono font-bold text-orange-400 whitespace-nowrap">
+                            {formatRupiah(row.nominal)}
+                          </td>
+
+                          {/* 5. Status */}
+                          <td className="py-2.5 px-3 sm:px-4 text-center whitespace-nowrap">
+                            {row.statusType === 'pending' && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                                Menunggu Approval
+                              </span>
+                            )}
+                            {row.statusType === 'unpaid' && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                Siap Dicairkan (UNPAID)
+                              </span>
+                            )}
+                            {row.statusType === 'paid' && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-teal-500/10 text-teal-300 border border-teal-500/30">
+                                Sudah Ditransfer (PAID)
+                              </span>
+                            )}
+                            {row.statusType === 'rejected' && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                                Ditolak
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                  {rekapanRows.length > 0 && (
+                    <tfoot>
+                      <tr className="bg-slate-950 font-bold border-t-2 border-slate-700">
+                        <td
+                          colSpan={3}
+                          className="py-2.5 px-3 sm:px-4 text-slate-300 text-right uppercase tracking-wider text-xs"
+                        >
+                          Total Nominal :
+                        </td>
+                        <td className="py-2.5 px-3 sm:px-4 text-right font-mono text-sm font-black text-white whitespace-nowrap">
+                          {formatRupiah(totalNominalRekapan)}
+                        </td>
+                        <td className="py-2.5 px-3 sm:px-4 text-center text-xs text-slate-400 whitespace-nowrap">
+                          {rekapanRows.length} item
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
+                </table>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-3.5 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
+              <span className="text-xs text-slate-400 font-mono">
+                Total: <strong className="text-white">{formatRupiah(totalNominalRekapan)}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedCategory(null)}
+                className="px-5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
