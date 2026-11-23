@@ -40,7 +40,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
   );
   const [perusahaan, setPerusahaan] = useState('');
   const [namaPekerjaan, setNamaPekerjaan] = useState('');
-  const [jamLembur, setJamLembur] = useState('17:00 - 21:00 (4 Jam)');
+  const [jamLembur, setJamLembur] = useState('');
   const [uraianPekerjaan, setUraianPekerjaan] = useState('');
   const [nominal, setNominal] = useState('0');
   const [department, setDepartment] = useState(
@@ -138,18 +138,19 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
       )}
 
       {/* Main Form Container */}
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-2xl space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm dark:shadow-2xl space-y-4 sm:space-y-5">
         {/* Section 1: Informasi Waktu & Karyawan */}
         <div>
-          <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
+          <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3 border-b border-slate-200 dark:border-slate-800 pb-1.5">
             1. Informasi Umum & Waktu Lembur
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
             {/* Tanggal Lembur */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Tanggal Lembur
+              <label className="block text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                <Calendar className="w-3 h-3 text-orange-400 shrink-0" />
+                <span className="truncate">Tanggal Lembur</span>
               </label>
               <input
                 type="date"
@@ -161,56 +162,57 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                     e.currentTarget.showPicker?.();
                   } catch {}
                 }}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
               />
             </div>
 
             {/* Tipe Hari: Hari Kerja vs Hari Libur */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Kategori Hari
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 <button
                   type="button"
                   onClick={() => setTipeHari('hari kerja')}
-                  className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`py-1.5 px-1 sm:px-2 rounded-xl text-[11px] sm:text-xs font-bold border transition flex items-center justify-center gap-1 cursor-pointer ${
                     tipeHari === 'hari kerja'
                       ? 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/50 shadow-sm'
                       : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[9px] ${
+                  <span className={`w-3 h-3 rounded-full border flex items-center justify-center text-[8px] ${
                     tipeHari === 'hari kerja' ? 'border-orange-500 bg-orange-500 text-white font-black' : 'border-slate-400'
                   }`}>
                     {tipeHari === 'hari kerja' ? '✓' : ''}
                   </span>
-                  <span>Hari Kerja</span>
+                  <span><span className="hidden sm:inline">Hari </span>Kerja</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setTipeHari('hari libur')}
-                  className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`py-1.5 px-1 sm:px-2 rounded-xl text-[11px] sm:text-xs font-bold border transition flex items-center justify-center gap-1 cursor-pointer ${
                     tipeHari === 'hari libur'
                       ? 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/50 shadow-sm'
                       : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[9px] ${
+                  <span className={`w-3 h-3 rounded-full border flex items-center justify-center text-[8px] ${
                     tipeHari === 'hari libur' ? 'border-orange-500 bg-orange-500 text-white font-black' : 'border-slate-400'
                   }`}>
                     {tipeHari === 'hari libur' ? '✓' : ''}
                   </span>
-                  <span>Hari Libur</span>
+                  <span><span className="hidden sm:inline">Hari </span>Libur</span>
                 </button>
               </div>
             </div>
 
             {/* Lokasi Lembur */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Lokasi Lembur
+              <label className="block text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-orange-400 shrink-0" />
+                <span className="truncate">Lokasi Lembur</span>
               </label>
               <input
                 type="text"
@@ -218,13 +220,29 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 value={lokasiLembur}
                 onChange={(e) => setLokasiLembur(e.target.value)}
                 placeholder="Masukkan lokasi lembur..."
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400"
+              />
+            </div>
+
+            {/* Jam Lembur */}
+            <div>
+              <label className="block text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                <Clock className="w-3 h-3 text-orange-400 shrink-0" />
+                <span className="truncate">Jam Lembur</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={jamLembur}
+                onChange={(e) => setJamLembur(e.target.value)}
+                placeholder="Masukkan jam lembur"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400 font-mono"
               />
             </div>
 
             {/* Nama Karyawan */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Nama Karyawan
               </label>
               <input
@@ -232,16 +250,16 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 required
                 value={namaKaryawan}
                 onChange={(e) => setNamaKaryawan(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 uppercase font-semibold"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 uppercase font-semibold"
               />
             </div>
 
             {/* Department (Terkunci) */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
-                <span>Department</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal flex items-center gap-1">
-                  <Lock className="w-3 h-3" />
+              <label className="block text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
+                <span className="truncate">Department</span>
+                <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-normal flex items-center gap-0.5 shrink-0">
+                  <Lock className="w-2.5 h-2.5" />
                   Terkunci
                 </span>
               </label>
@@ -251,90 +269,80 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                   disabled
                   readOnly
                   value={department}
-                  className="w-full pl-9 pr-4 py-2.5 bg-slate-100 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90"
+                  className="w-full pl-7 pr-2.5 py-1.5 sm:pl-8 sm:pr-3 sm:py-2 bg-slate-100 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90 truncate"
                 />
-                <Briefcase className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Briefcase className="w-3 h-3 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input type="hidden" name="department" value={department} />
               </div>
-            </div>
-
-            {/* Jam Lembur */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Jam Lembur
-              </label>
-              <input
-                type="text"
-                required
-                value={jamLembur}
-                onChange={(e) => setJamLembur(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
             </div>
           </div>
         </div>
 
         {/* Section 2: Deskripsi Pekerjaan */}
-        <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-          <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
+        <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+          <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3 border-b border-slate-200 dark:border-slate-800 pb-1.5">
             2. Rincian & Deskripsi Pekerjaan
           </h2>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
             {/* Perusahaan */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Perusahaan / Klien
+              <label className="block text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
+                <span className="truncate">Perusahaan / Klien</span>
               </label>
               <input
                 type="text"
                 required
                 value={perusahaan}
                 onChange={(e) => setPerusahaan(e.target.value)}
-                placeholder="Masukkan nama perusahaan atau klien..."
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400"
+                placeholder="Masukkan nama perusahaan..."
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400"
               />
             </div>
 
             {/* Nama Pekerjaan */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Nama Pekerjaan
+              <label className="block text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                <FileText className="w-3 h-3 text-slate-400 shrink-0" />
+                <span className="truncate">Nama Pekerjaan</span>
               </label>
               <input
                 type="text"
                 required
                 value={namaPekerjaan}
                 onChange={(e) => setNamaPekerjaan(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="Nama pekerjaan..."
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400"
               />
             </div>
 
             {/* Uraian Pekerjaan */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            <div className="col-span-2">
+              <label className="block text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Uraian Pekerjaan (Detail Aktivitas)
               </label>
               <textarea
                 required
-                rows={5}
+                rows={3}
                 value={uraianPekerjaan}
                 onChange={(e) => setUraianPekerjaan(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl p-3.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed font-mono"
+                placeholder="Jelaskan rincian aktivitas pekerjaan lembur..."
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl p-2.5 sm:p-3 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed font-mono placeholder:text-slate-400"
               />
             </div>
 
             {/* Nominal Uang Lembur (Terkunci untuk Employee) */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+            <div className="col-span-2">
+              <label className="block text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
                 <span>Nominal Kompensasi / Uang Lembur (Rp)</span>
                 <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
-                  <Lock className="w-3 h-3" />
+                  <Lock className="w-2.5 h-2.5" />
                   <span>Dihitung Direktur / Finance</span>
                 </span>
               </label>
               <div className="relative">
-                <span className="absolute left-3.5 top-2.5 text-xs font-bold text-slate-400">
+                <span className="absolute left-3 top-1.5 sm:top-2 text-xs font-bold text-slate-400">
                   Rp
                 </span>
                 <input
@@ -342,43 +350,40 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                   readOnly
                   disabled
                   value="Dihitung oleh Direktur"
-                  className="w-full bg-slate-100 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl pl-10 pr-9 py-2.5 text-xs font-bold text-slate-500 dark:text-slate-400 font-mono cursor-not-allowed select-none shadow-inner"
+                  className="w-full bg-slate-100 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl pl-9 pr-8 py-1.5 sm:py-2 text-xs font-bold text-slate-500 dark:text-slate-400 font-mono cursor-not-allowed select-none shadow-inner"
                 />
                 <Lock className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                 Nominal kompensasi ditentukan dan diisi oleh Direktur / Finance saat proses persetujuan.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="pt-4 pb-8 sm:pb-0 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+        {/* Action Buttons: 2 Kolom dalam 1 baris, Icon Saja */}
+        <div className="pt-3 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-2.5 sm:gap-4">
           <button
             type="button"
             onClick={() => setShowPreviewPdf(true)}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-semibold text-xs transition flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+            title="Lihat Preview Form Lembur"
+            aria-label="Lihat Preview Form Lembur"
           >
-            <Printer className="w-4 h-4 text-slate-500" />
-            <span>Lihat Preview Form Lembur</span>
+            <Printer className="w-4 h-4 text-slate-600 dark:text-slate-300" />
           </button>
 
           <button
             type="submit"
             disabled={isPending}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-lg shadow-orange-950/40 transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+            className="w-full py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-md shadow-orange-950/30 transition flex items-center justify-center disabled:opacity-50 cursor-pointer active:scale-95"
+            title="Kirim Pengajuan Lembur"
+            aria-label="Kirim Pengajuan Lembur"
           >
             {isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Menyimpan Pengajuan Lembur...</span>
-              </>
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <>
-                <Send className="w-4 h-4" />
-                <span>Kirim Pengajuan Lembur</span>
-              </>
+              <Send className="w-4 h-4" />
             )}
           </button>
         </div>
