@@ -729,20 +729,10 @@ export default function RequestForm() {
 
               {/* 2. CUSTOMER & DESCRIPTION ROWS DALAM KOLOM INI (2 BARIS KE BAWAH) */}
               <div className="space-y-3 pt-1">
-                <div className="flex items-center justify-between">
+                <div>
                   <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Rincian Customer & Keterangan:
                   </label>
-                  {/* TOMBOL TAMBAH CUSTOMER: ICON ORANGE */}
-                  <button
-                    type="button"
-                    onClick={() => addCustomerToBlock(blockIndex)}
-                    className="p-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
-                    title="Tambah Customer"
-                    aria-label="Tambah Customer"
-                  >
-                    <Plus className="w-4 h-4 text-orange-600 dark:text-orange-400 stroke-[2.5]" />
-                  </button>
                 </div>
 
                 {block.entries.map((entry, entryIndex) => (
@@ -804,6 +794,19 @@ export default function RequestForm() {
                     </div>
                   </div>
                 ))}
+
+                {/* Tombol Tambah Customer di bawah kolom keterangan di luar kolom rincian sebelah kanan */}
+                <div className="flex justify-end pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => addCustomerToBlock(blockIndex)}
+                    className="p-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                    title="Tambah Customer"
+                    aria-label="Tambah Customer"
+                  >
+                    <Plus className="w-4 h-4 text-orange-600 dark:text-orange-400 stroke-[2.5]" />
+                  </button>
+                </div>
               </div>
 
               {/* 3. NOMINAL & TANGGAL NOTA (1 BARIS, 2 KOLOM) */}
