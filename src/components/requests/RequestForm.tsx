@@ -511,53 +511,54 @@ export default function RequestForm() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
-            Formulir Resmi
-          </span>
-          <span className="text-xs text-slate-400">Ouffice Reimbursement</span>
-        </div>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <span>Buat Pengajuan Reimbursement</span>
-        </h2>
-        <p className="text-xs text-slate-400 mt-0.5">
-          Pilih jenis pengajuan (Petty Cash / Voucher) dan lengkapi rincian account transaksi
+    <div className="w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
+      {/* Header: Clean, Corporate & Professional */}
+      <div className="mb-6 border-b border-slate-200 dark:border-slate-800 pb-5">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+          Buat Pengajuan Reimbursement
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+          Pilih kategori pengajuan (Petty Cash atau Voucher) dan lengkapi rincian transaksi beban operasional.
         </p>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2.5">
-          <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+        <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs flex items-center gap-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 dark:text-rose-400" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Jenis Reimbursement Toggle (Petty Cash vs Voucher) */}
       <div className="mb-6">
-        <label className="block text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
-          <Layers className="w-4 h-4 text-orange-400" />
-          <span>Pilih Jenis Reimbursement:</span>
+        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+          Jenis Reimbursement
         </label>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => handleTypeChange('Petty Cash')}
-            className={`p-4 rounded-2xl border-2 text-left transition flex flex-col justify-between cursor-pointer ${
+            className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between cursor-pointer ${
               reimbursementType === 'Petty Cash'
-                ? 'border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-950/40'
-                : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                ? 'border-orange-500 bg-orange-50/80 dark:bg-orange-500/10 shadow-sm ring-1 ring-orange-500/30'
+                : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 hover:border-slate-300 dark:hover:border-slate-700'
             }`}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-extrabold text-white">PETTY CASH</span>
+            <div className="flex items-center justify-between mb-1">
+              <span className={`text-sm font-bold ${
+                reimbursementType === 'Petty Cash'
+                  ? 'text-orange-600 dark:text-orange-400'
+                  : 'text-slate-800 dark:text-slate-200'
+              }`}>
+                PETTY CASH
+              </span>
               {reimbursementType === 'Petty Cash' && (
-                <span className="w-2.5 h-2.5 rounded-full bg-orange-400"></span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 border border-orange-200 dark:border-orange-500/30">
+                  Dipilih
+                </span>
               )}
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
               Kas kecil operasional harian (Khusus kategori Transport: Bensin, Parkir, Tol)
             </p>
           </button>
@@ -565,54 +566,60 @@ export default function RequestForm() {
           <button
             type="button"
             onClick={() => handleTypeChange('Voucher')}
-            className={`p-4 rounded-2xl border-2 text-left transition flex flex-col justify-between cursor-pointer ${
+            className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between cursor-pointer ${
               reimbursementType === 'Voucher'
-                ? 'border-amber-500 bg-amber-500/10 shadow-lg shadow-amber-950/40'
-                : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                ? 'border-amber-500 bg-amber-50/80 dark:bg-amber-500/10 shadow-sm ring-1 ring-amber-500/30'
+                : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 hover:border-slate-300 dark:hover:border-slate-700'
             }`}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-extrabold text-white">VOUCHER</span>
+            <div className="flex items-center justify-between mb-1">
+              <span className={`text-sm font-bold ${
+                reimbursementType === 'Voucher'
+                  ? 'text-amber-600 dark:text-amber-400'
+                  : 'text-slate-800 dark:text-slate-200'
+              }`}>
+                VOUCHER
+              </span>
               {reimbursementType === 'Voucher' && (
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
+                  Dipilih
+                </span>
               )}
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">
-              Voucher klaim biaya selain transport (Material, Konsumsi, Operasional)
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+              Voucher klaim biaya selain transport (Material, Konsumsi, Operasional Kantor)
             </p>
           </button>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Department & Tanggal */}
+        {/* Department (Terkunci) & Tanggal Pengajuan */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
-              <Briefcase className="w-3.5 h-3.5 text-orange-400" />
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
               <span>Department</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal flex items-center gap-1">
+                <Lock className="w-3 h-3" />
+                Terkunci
+              </span>
             </label>
             <div className="relative">
-              <select
-                name="department"
+              <input
+                type="text"
+                disabled
+                readOnly
                 value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
-              >
-                {DEPARTMENT_OPTIONS.map((dep) => (
-                  <option key={dep} value={dep}>
-                    {dep}
-                  </option>
-                ))}
-              </select>
-              <Briefcase className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                className="w-full pl-9 pr-4 py-2.5 bg-slate-100 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90"
+              />
+              <Briefcase className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input type="hidden" name="department" value={department} />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-orange-400" />
-              <span>Tanggal</span>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Tanggal Pengajuan
             </label>
             <input
               type="date"
@@ -624,22 +631,20 @@ export default function RequestForm() {
                   e.currentTarget.showPicker?.();
                 } catch {}
               }}
-              className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
-              style={{ colorScheme: 'dark' }}
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
             />
           </div>
         </div>
 
         {/* LIST KOLOM / CARD ACCOUNT (BEBAN) */}
         <div className="space-y-5">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
             <div>
-              <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                <Building className="w-4 h-4 text-orange-400" />
-                <span>Rincian Kolom Account & Customer</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                Rincian Akun & Beban Transaksi
               </span>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Pilih menu account di atas kolom, lengkapi customer & deskripsi, serta nominal dan foto nota.
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Pilih menu account, lengkapi customer & deskripsi, serta nominal dan foto nota bukti pembayaran.
               </p>
             </div>
           </div>
@@ -647,15 +652,15 @@ export default function RequestForm() {
           {blocks.map((block, blockIndex) => (
             <div
               key={block.id}
-              className="bg-slate-950/80 border-2 border-slate-800 hover:border-slate-700/80 rounded-2xl p-4 sm:p-5 space-y-4 relative shadow-lg transition"
+              className="bg-white dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4 relative shadow-sm dark:shadow-lg transition"
             >
               {/* Card Top Bar: Nomor Account & Tombol Hapus */}
-              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30">
                     Account #{blockIndex + 1}
                   </span>
-                  <span className="text-xs font-bold text-slate-300">
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                     {block.account}
                   </span>
                 </div>
@@ -664,7 +669,7 @@ export default function RequestForm() {
                   <button
                     type="button"
                     onClick={() => removeAccountBlock(blockIndex)}
-                    className="py-1 px-2.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 text-xs font-semibold transition flex items-center gap-1 cursor-pointer"
+                    className="py-1 px-2.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-semibold transition flex items-center gap-1 cursor-pointer"
                     title="Hapus kolom account ini"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -675,46 +680,43 @@ export default function RequestForm() {
 
               {/* 1. MENU PILIH ACCOUNT DI ATAS KOLOM INI */}
               <div>
-                <label className="block text-xs font-bold text-orange-400 mb-1.5 flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5" />
-                  <span>
-                    {reimbursementType === 'Petty Cash'
-                      ? 'Pilih Menu Transport (Beban):'
-                      : 'Pilih Menu Account (Beban):'}
-                  </span>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  {reimbursementType === 'Petty Cash'
+                    ? 'Kategori Transport (Beban):'
+                    : 'Kategori Akun (Beban):'}
                 </label>
                 <select
                   value={block.account}
                   onChange={(e) => updateBlockField(blockIndex, 'account', e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold cursor-pointer"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
                 >
                   {reimbursementType === 'Petty Cash' ? (
-                    <optgroup label="─── TRANSPORT (PETTY CASH) ───" className="bg-slate-900 text-orange-400 font-bold">
-                      <option value="Bensin" className="text-white">Bensin</option>
-                      <option value="Parkir" className="text-white">Parkir</option>
-                      <option value="Tol" className="text-white">Tol</option>
-                      <option value="Transport Lainnya" className="text-white">Transport Lainnya</option>
+                    <optgroup label="─── TRANSPORT (PETTY CASH) ───" className="font-bold">
+                      <option value="Bensin">Bensin</option>
+                      <option value="Parkir">Parkir</option>
+                      <option value="Tol">Tol</option>
+                      <option value="Transport Lainnya">Transport Lainnya</option>
                     </optgroup>
                   ) : (
                     <>
-                      <optgroup label="─── MATERIAL & PERLENGKAPAN ───" className="bg-slate-900 text-emerald-400 font-bold">
-                        <option value="Material" className="text-white">Material</option>
-                        <option value="Alat Tulis Kantor (ATK)" className="text-white">Alat Tulis Kantor (ATK)</option>
-                        <option value="Sparepart & Perlengkapan" className="text-white">Sparepart & Perlengkapan</option>
+                      <optgroup label="─── MATERIAL & PERLENGKAPAN ───" className="font-bold">
+                        <option value="Material">Material</option>
+                        <option value="Alat Tulis Kantor (ATK)">Alat Tulis Kantor (ATK)</option>
+                        <option value="Sparepart & Perlengkapan">Sparepart & Perlengkapan</option>
                       </optgroup>
 
-                      <optgroup label="─── KONSUMSI ───" className="bg-slate-900 text-amber-400 font-bold">
-                        <option value="Makan" className="text-white">Makan</option>
-                        <option value="Kopi" className="text-white">Kopi</option>
-                        <option value="Rokok" className="text-white">Rokok</option>
-                        <option value="Konsumsi Lainnya" className="text-white">Konsumsi Lainnya</option>
+                      <optgroup label="─── KONSUMSI ───" className="font-bold">
+                        <option value="Makan">Makan</option>
+                        <option value="Kopi">Kopi</option>
+                        <option value="Rokok">Rokok</option>
+                        <option value="Konsumsi Lainnya">Konsumsi Lainnya</option>
                       </optgroup>
 
-                      <optgroup label="─── OPERASIONAL LAINNYA ───" className="bg-slate-900 text-teal-400 font-bold">
-                        <option value="Entertain Partner" className="text-white">Entertain Partner</option>
-                        <option value="Hotel & Penginapan" className="text-white">Hotel & Penginapan</option>
-                        <option value="Medis & Kesehatan" className="text-white">Medis & Kesehatan</option>
-                        <option value="Operasional Kantor" className="text-white">Operasional Kantor</option>
+                      <optgroup label="─── OPERASIONAL LAINNYA ───" className="font-bold">
+                        <option value="Entertain Partner">Entertain Partner</option>
+                        <option value="Hotel & Penginapan">Hotel & Penginapan</option>
+                        <option value="Medis & Kesehatan">Medis & Kesehatan</option>
+                        <option value="Operasional Kantor">Operasional Kantor</option>
                       </optgroup>
                     </>
                   )}
@@ -723,22 +725,22 @@ export default function RequestForm() {
 
               {/* 2. CUSTOMER & DESCRIPTION ROWS DALAM KOLOM INI */}
               <div className="space-y-3 pt-1">
-                <label className="block text-[11px] font-semibold text-slate-400">
-                  Rincian Customer & Description untuk {block.account}:
+                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                  Rincian Customer & Keterangan ({block.account}):
                 </label>
 
                 {block.entries.map((entry, entryIndex) => (
                   <div
                     key={entryIndex}
-                    className="bg-slate-900/70 border border-slate-800/80 rounded-xl p-3 flex flex-col sm:flex-row items-start gap-3 relative"
+                    className="bg-slate-50/80 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 flex flex-col sm:flex-row items-start gap-3 relative"
                   >
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-orange-400 shrink-0 mt-2 sm:mt-1">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-orange-400 shrink-0 mt-2 sm:mt-1">
                       #{entryIndex + 1}
                     </span>
 
                     {/* Customer Input */}
                     <div className="w-full sm:w-5/12">
-                      <label className="block text-[10px] font-semibold text-slate-400 mb-1">
+                      <label className="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
                         Customer / Klien / Project
                       </label>
                       <input
@@ -749,15 +751,14 @@ export default function RequestForm() {
                           updateCustomerEntry(blockIndex, entryIndex, 'customer', e.target.value)
                         }
                         placeholder="Contoh: KPU RI Imbon"
-                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
                     </div>
 
-                    {/* Description Textarea (Tanpa Bullet) */}
+                    {/* Description Textarea */}
                     <div className="w-full sm:flex-1 flex flex-col">
-                      <label className="block text-[10px] font-semibold text-slate-400 mb-1 flex items-center gap-1">
-                        <List className="w-3 h-3 text-orange-400" />
-                        <span>Description (Keterangan)</span>
+                      <label className="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                        Keterangan (Deskripsi Transaksi)
                       </label>
                       <textarea
                         rows={2}
@@ -767,7 +768,7 @@ export default function RequestForm() {
                           updateCustomerEntry(blockIndex, entryIndex, 'description', e.target.value)
                         }
                         placeholder="Keterangan transaksi..."
-                        className="w-full flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed min-h-[50px]"
+                        className="w-full flex-1 px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed min-h-[50px]"
                       />
                     </div>
 
@@ -776,7 +777,7 @@ export default function RequestForm() {
                       <button
                         type="button"
                         onClick={() => removeCustomerFromBlock(blockIndex, entryIndex)}
-                        className="p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition sm:mt-6 shrink-0 cursor-pointer"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition sm:mt-6 shrink-0 cursor-pointer"
                         title="Hapus baris customer ini"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -785,31 +786,28 @@ export default function RequestForm() {
                   </div>
                 ))}
 
-                {/* TOMBOL TAMBAH CUSTOMER DI POJOK KANAN BAGIAN PALING BAWAH CUSTOMER */}
+                {/* TOMBOL TAMBAH CUSTOMER: Kontras Tinggi & Profesional */}
                 <div className="flex justify-end pt-1">
                   <button
                     type="button"
                     onClick={() => addCustomerToBlock(blockIndex)}
-                    className="py-1.5 px-3 rounded-xl bg-orange-600/20 hover:bg-orange-600/30 text-orange-400 border border-orange-500/40 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                    className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
                     title="Tambah customer di bawah kolom ini"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
                     <span>Tambah Customer</span>
                   </button>
                 </div>
               </div>
 
-              {/* 3. NOMINAL, TANGGAL NOTA, & FOTO NOTA (3 KOLOM SEJAJAR: KIRI, TENGAH, KANAN) */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-3 border-t border-slate-800/80">
-                {/* Kolom 1: Nominal Amount (Kiri) */}
+              {/* 3. NOMINAL, TANGGAL NOTA, & FOTO NOTA */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-3 border-t border-slate-200 dark:border-slate-800/80">
+                {/* Kolom 1: Nominal Amount */}
                 <div className="flex flex-col justify-between sm:col-span-5">
                   <div>
                     <div className="flex items-center justify-between mb-1.5 h-5">
-                      <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                        <span className="text-[10px] font-black text-orange-400 border border-orange-500/40 px-1 py-0.2 rounded bg-orange-500/10 font-mono">
-                          RP
-                        </span>
-                        <span>Nominal Amount (Rp)</span>
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Nominal (Rp)
                       </label>
                     </div>
                     <input
@@ -818,11 +816,11 @@ export default function RequestForm() {
                       value={block.amount ? Number(block.amount).toLocaleString('id-ID') : ''}
                       onChange={(e) => updateBlockField(blockIndex, 'amount', e.target.value)}
                       placeholder="0"
-                      className="w-full h-11 px-3.5 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full h-11 px-3.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
-                  <div className="text-[11px] font-bold text-amber-400 mt-1.5 flex items-center justify-between h-5">
-                    <span>Subtotal {block.account}:</span>
+                  <div className="text-[11px] font-bold text-orange-600 dark:text-amber-400 mt-1.5 flex items-center justify-between h-5">
+                    <span className="text-slate-500 dark:text-slate-400 font-normal">Subtotal {block.account}:</span>
                     <span>
                       {block.amount
                         ? new Intl.NumberFormat('id-ID', {
@@ -835,13 +833,12 @@ export default function RequestForm() {
                   </div>
                 </div>
 
-                {/* Kolom 2: Tanggal Nota (Tengah) */}
+                {/* Kolom 2: Tanggal Nota */}
                 <div className="flex flex-col justify-between sm:col-span-4">
                   <div>
                     <div className="flex items-center justify-between mb-1.5 h-5">
-                      <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-orange-400" />
-                        <span>Tanggal Nota</span>
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Tanggal Nota
                       </label>
                     </div>
                     <input
@@ -854,27 +851,25 @@ export default function RequestForm() {
                           e.currentTarget.showPicker?.();
                         } catch {}
                       }}
-                      className="w-full h-11 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer font-medium"
-                      style={{ colorScheme: 'dark' }}
+                      className="w-full h-11 px-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer font-medium"
                     />
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-1.5 flex items-center justify-between h-5">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-center justify-between h-5">
                     <span>Tgl Transaksi Nota</span>
                   </div>
                 </div>
 
-                {/* Kolom 3: Foto Bukti Nota / Kwitansi (Kanan - Ikon Kamera Diperkecil) */}
+                {/* Kolom 3: Foto Bukti Nota */}
                 <div className="flex flex-col justify-between sm:col-span-3">
                   <div>
                     <div className="flex items-center justify-between mb-1.5 h-5">
-                      <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5 truncate" title="Foto Bukti Nota">
-                        <Camera className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                        <span className="truncate">Foto Nota</span>
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate" title="Foto Bukti Nota">
+                        Foto Nota
                       </label>
                       <button
                         type="button"
                         onClick={() => galleryInputRefs.current[blockIndex]?.click()}
-                        className="text-[10px] text-slate-400 hover:text-orange-400 flex items-center gap-1 transition cursor-pointer shrink-0 ml-1"
+                        className="text-[11px] text-slate-500 hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-400 flex items-center gap-1 transition cursor-pointer shrink-0 ml-1 font-medium"
                         title="Pilih gambar dari galeri HP atau dokumen PDF"
                       >
                         <ImageIcon className="w-3 h-3" />
@@ -882,7 +877,7 @@ export default function RequestForm() {
                       </button>
                     </div>
 
-                    {/* Hidden Camera Input (Membuka Kamera Belakang Langsung) */}
+                    {/* Hidden Camera Input */}
                     <input
                       ref={(el) => {
                         cameraInputRefs.current[blockIndex] = el;
@@ -899,7 +894,7 @@ export default function RequestForm() {
                       className="hidden"
                     />
 
-                    {/* Hidden Gallery Input (Buka Galeri / File Manager) */}
+                    {/* Hidden Gallery Input */}
                     <input
                       ref={(el) => {
                         galleryInputRefs.current[blockIndex] = el;
@@ -916,20 +911,20 @@ export default function RequestForm() {
                     />
 
                     {block.receiptPreview ? (
-                      <div className="w-full h-11 bg-slate-900 border border-slate-700/80 rounded-xl px-2 flex items-center justify-between gap-1 shadow-sm">
+                      <div className="w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-xl px-2 flex items-center justify-between gap-1 shadow-sm">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <img
                             src={block.receiptPreview}
                             alt="Preview Nota"
-                            className="h-7 w-7 rounded-lg border border-slate-700 object-cover shrink-0 cursor-pointer hover:opacity-90 transition"
+                            className="h-7 w-7 rounded-lg border border-slate-300 dark:border-slate-700 object-cover shrink-0 cursor-pointer hover:opacity-90 transition"
                             onClick={() => handleReCrop(blockIndex)}
                             title="Klik untuk atur posisi & crop ulang"
                           />
                           <div className="min-w-0">
-                            <div className="text-[11px] font-bold text-white truncate max-w-[60px] sm:max-w-[70px]">
+                            <div className="text-[11px] font-bold text-slate-800 dark:text-white truncate max-w-[60px] sm:max-w-[70px]">
                               {block.receiptFile?.name || 'Foto Nota'}
                             </div>
-                            <div className="text-[9px] text-emerald-400 font-semibold truncate">
+                            <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold truncate">
                               ✓ Siap
                             </div>
                           </div>
@@ -939,7 +934,7 @@ export default function RequestForm() {
                           <button
                             type="button"
                             onClick={() => handleReCrop(blockIndex)}
-                            className="p-1 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg text-xs font-semibold transition cursor-pointer"
+                            className="p-1 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 dark:text-orange-400 border border-slate-200 dark:border-orange-500/30 rounded-lg text-xs font-semibold transition cursor-pointer"
                             title="Atur posisi & crop ulang foto ini"
                           >
                             <Crop className="w-3 h-3" />
@@ -953,7 +948,7 @@ export default function RequestForm() {
                                 )
                               );
                             }}
-                            className="p-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 rounded-lg text-xs transition cursor-pointer"
+                            className="p-1 bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 rounded-lg text-xs transition cursor-pointer"
                             title="Hapus foto"
                           >
                             <Trash2 className="w-3 h-3" />
@@ -963,20 +958,20 @@ export default function RequestForm() {
                     ) : (
                       <div
                         onClick={() => cameraInputRefs.current[blockIndex]?.click()}
-                        className="w-full h-11 border-2 border-dashed border-orange-500/40 hover:border-orange-500 bg-slate-900/60 hover:bg-orange-500/5 rounded-xl px-2 text-center cursor-pointer transition flex items-center justify-center gap-1.5 group shadow-sm"
+                        className="w-full h-11 border border-dashed border-slate-300 hover:border-orange-500 dark:border-orange-500/40 dark:hover:border-orange-500 bg-slate-50 hover:bg-orange-50/50 dark:bg-slate-900/60 dark:hover:bg-orange-500/5 rounded-xl px-2 text-center cursor-pointer transition flex items-center justify-center gap-1.5 group shadow-sm"
                         title="Klik untuk Buka Kamera Langsung"
                       >
-                        <div className="w-6 h-6 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 group-hover:scale-110 group-hover:bg-orange-500/20 transition shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-orange-500/10 flex items-center justify-center text-slate-600 dark:text-orange-400 group-hover:scale-110 transition shrink-0">
                           <Camera className="w-3 h-3" />
                         </div>
-                        <span className="text-[11px] font-semibold text-orange-400 group-hover:text-orange-300">
+                        <span className="text-[11px] font-semibold text-slate-700 dark:text-orange-400">
                           Kamera
                         </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="text-[10px] text-slate-500 mt-1.5 flex items-center justify-between h-5">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-center justify-between h-5">
                     <span>{block.receiptPreview ? '✓ Terlampir' : 'Kamera'}</span>
                     <span>{block.receiptPreview ? 'Siap' : 'Maks 10MB'}</span>
                   </div>
@@ -990,41 +985,41 @@ export default function RequestForm() {
             <button
               type="button"
               onClick={addAccountBlock}
-              className="w-full py-3.5 px-4 rounded-2xl bg-orange-600/10 hover:bg-orange-600/20 text-orange-400 border-2 border-dashed border-orange-500/40 hover:border-orange-500 text-xs font-extrabold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              className="w-full py-3 px-4 rounded-2xl bg-orange-50 hover:bg-orange-100 text-orange-700 dark:bg-orange-600/10 dark:hover:bg-orange-600/20 dark:text-orange-400 border border-dashed border-orange-300 dark:border-orange-500/40 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95"
             >
-              <PlusCircle className="w-4 h-4 text-orange-400" />
-              <span>+ Tambah Pilih Account (Beban Baru)</span>
+              <PlusCircle className="w-4 h-4" />
+              <span>+ Tambah Akun Beban Baru</span>
             </button>
-            <p className="text-[10px] text-slate-500 mt-1 text-center">
-              💡 Tambahkan kategori akun lain (misal: Bensin + Parkir + Tol) dalam 1 pengajuan reimbursement
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 text-center">
+              Tambahkan kategori beban lain (misal: Bensin + Parkir + Tol) dalam satu form pengajuan
             </p>
           </div>
         </div>
 
         {/* TOTAL RINGKASAN PENGAJUAN */}
-        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner">
+        <div className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner">
           <div>
-            <div className="text-xs font-semibold text-slate-400">
+            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
               Total Pengajuan ({blocks.length} Account)
             </div>
-            <div className="text-lg sm:text-xl font-black text-amber-400 font-mono mt-0.5">
+            <div className="text-lg sm:text-xl font-black text-orange-600 dark:text-amber-400 font-mono mt-0.5">
               {formattedTotalAmount}
             </div>
           </div>
 
-          <div className="text-xs text-slate-400 sm:text-right">
-            <span className="text-slate-500 text-[11px]">Akun yang diajukan: </span>
-            <span className="text-white font-semibold">
+          <div className="text-xs text-slate-500 dark:text-slate-400 sm:text-right">
+            <span className="text-[11px]">Akun yang diajukan: </span>
+            <span className="text-slate-800 dark:text-white font-semibold">
               {blocks.map((b) => b.account).join(', ')}
             </span>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-slate-800">
+        <div className="flex items-center justify-end gap-3 pt-3 pb-8 sm:pb-0 border-t border-slate-200 dark:border-slate-800">
           <Link
             href={userProfile?.role === 'director' ? '/director' : userProfile?.role === 'finance' ? '/finance' : '/employee'}
-            className="px-5 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition cursor-pointer"
+            className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
           >
             Batal
           </Link>

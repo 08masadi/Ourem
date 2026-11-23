@@ -220,30 +220,42 @@ html.dark .logo-dark {
     color: #be123c !important; /* Rich deep rose */
   }
 
-  /* Keep crisp white text on buttons, badges, banners, avatars */
-  :root:not(.dark) [class*="bg-orange-"] .text-white,
-  :root:not(.dark) [class*="bg-orange-"] .text-white-forced,
+  /* Keep crisp white text on solid buttons, badges, banners, avatars (exclude tinted / translucent backgrounds) */
+  :root:not(.dark) [class*="bg-orange-"]:not([class*="/"]) .text-white,
+  :root:not(.dark) [class*="bg-orange-"]:not([class*="/"]) .text-white-forced,
   :root:not(.dark) [class*="from-orange-"] .text-white,
   :root:not(.dark) [class*="from-orange-"] * .text-white,
-  :root:not(.dark) [class*="bg-emerald-"] .text-white,
+  :root:not(.dark) [class*="bg-emerald-"]:not([class*="/"]) .text-white,
   :root:not(.dark) [class*="from-emerald-"] .text-white,
-  :root:not(.dark) [class*="bg-rose-"] .text-white,
+  :root:not(.dark) [class*="bg-rose-"]:not([class*="/"]) .text-white,
   :root:not(.dark) [class*="from-rose-"] .text-white,
-  :root:not(.dark) [class*="bg-amber-"] .text-white,
+  :root:not(.dark) [class*="bg-amber-"]:not([class*="/"]) .text-white,
   :root:not(.dark) [class*="from-amber-"] .text-white,
-  :root:not(.dark) [class*="bg-teal-"] .text-white,
+  :root:not(.dark) [class*="bg-teal-"]:not([class*="/"]) .text-white,
   :root:not(.dark) [class*="from-teal-"] .text-white,
   :root:not(.dark) [class*="bg-gradient-"] .text-white,
-  :root:not(.dark) button.bg-orange-600,
-  :root:not(.dark) button.bg-orange-500,
-  :root:not(.dark) button.bg-emerald-600,
-  :root:not(.dark) button.bg-rose-600,
+  :root:not(.dark) button.bg-orange-600:not([class*="/"]),
+  :root:not(.dark) button.bg-orange-500:not([class*="/"]),
+  :root:not(.dark) button.bg-orange-700:not([class*="/"]),
+  :root:not(.dark) button.bg-emerald-600:not([class*="/"]),
+  :root:not(.dark) button.bg-emerald-500:not([class*="/"]),
+  :root:not(.dark) button.bg-rose-600:not([class*="/"]),
+  :root:not(.dark) button.bg-rose-500:not([class*="/"]),
   :root:not(.dark) button[class*="bg-gradient-"],
-  :root:not(.dark) button[class*="bg-orange-"],
-  :root:not(.dark) button[class*="bg-emerald-"],
-  :root:not(.dark) button[class*="bg-rose-"],
   :root:not(.dark) .preserve-white {
     color: #ffffff !important;
+  }
+
+  /* Subtly tinted buttons use high-contrast dark text in light mode */
+  :root:not(.dark) button[class*="bg-orange-"][class*="/"],
+  :root:not(.dark) button[class*="bg-amber-"][class*="/"] {
+    color: #c2410c !important;
+  }
+  :root:not(.dark) button[class*="bg-emerald-"][class*="/"] {
+    color: #047857 !important;
+  }
+  :root:not(.dark) button[class*="bg-rose-"][class*="/"] {
+    color: #be123c !important;
   }
 
   /* Deeper, warmer, eye-comfortable banners */
@@ -353,29 +365,41 @@ html.light .text-rose-500 {
   color: #be123c !important;
 }
 
-html.light [class*="bg-orange-"] .text-white,
-html.light [class*="bg-orange-"] .text-white-forced,
+html.light [class*="bg-orange-"]:not([class*="/"]) .text-white,
+html.light [class*="bg-orange-"]:not([class*="/"]) .text-white-forced,
 html.light [class*="from-orange-"] .text-white,
 html.light [class*="from-orange-"] * .text-white,
-html.light [class*="bg-emerald-"] .text-white,
+html.light [class*="bg-emerald-"]:not([class*="/"]) .text-white,
 html.light [class*="from-emerald-"] .text-white,
-html.light [class*="bg-rose-"] .text-white,
+html.light [class*="bg-rose-"]:not([class*="/"]) .text-white,
 html.light [class*="from-rose-"] .text-white,
-html.light [class*="bg-amber-"] .text-white,
+html.light [class*="bg-amber-"]:not([class*="/"]) .text-white,
 html.light [class*="from-amber-"] .text-white,
-html.light [class*="bg-teal-"] .text-white,
+html.light [class*="bg-teal-"]:not([class*="/"]) .text-white,
 html.light [class*="from-teal-"] .text-white,
 html.light [class*="bg-gradient-"] .text-white,
-html.light button.bg-orange-600,
-html.light button.bg-orange-500,
-html.light button.bg-emerald-600,
-html.light button.bg-rose-600,
+html.light button.bg-orange-600:not([class*="/"]),
+html.light button.bg-orange-500:not([class*="/"]),
+html.light button.bg-orange-700:not([class*="/"]),
+html.light button.bg-emerald-600:not([class*="/"]),
+html.light button.bg-emerald-500:not([class*="/"]),
+html.light button.bg-rose-600:not([class*="/"]),
+html.light button.bg-rose-500:not([class*="/"]),
 html.light button[class*="bg-gradient-"],
-html.light button[class*="bg-orange-"],
-html.light button[class*="bg-emerald-"],
-html.light button[class*="bg-rose-"],
 html.light .preserve-white {
   color: #ffffff !important;
+}
+
+/* Subtly tinted buttons use high-contrast dark text in light mode */
+html.light button[class*="bg-orange-"][class*="/"],
+html.light button[class*="bg-amber-"][class*="/"] {
+  color: #c2410c !important;
+}
+html.light button[class*="bg-emerald-"][class*="/"] {
+  color: #047857 !important;
+}
+html.light button[class*="bg-rose-"][class*="/"] {
+  color: #be123c !important;
 }
 
 html.light .from-orange-600.via-orange-500.to-amber-500 {
