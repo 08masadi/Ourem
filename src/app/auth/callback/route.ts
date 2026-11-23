@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+function sanitizeRedirectPath(path: string | null): string | null {
+  if (!path) return null;
+  const trimmed = path.trim();
+  // Cegah open redirect: hanya izinkan path lokal yang diawali satu slash '/'
+  // Tolak protocol-relative '//', backslash '\\', atau skema URL eksternal ':'
+  if (!trimmed.startsWith('/') || trimmed.startsWith('//') || trimmed.includes('\\') || trimmed.includes(':')) {
+    return null;
+  }
+  return trimmed;
+}
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
@@ -10,28 +21,22 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      let targetPath = nextParam;
+      let targetPath = sanitizeRedirectPath(nextParam);
       if (!targetPath) {
-        // Cek role user untuk menentukan dashboard tujuan
+        // Cek role user untuk menentukan dashboard tujuan secara aman
         const user = data?.user;
         const role = user?.user_metadata?.role || 'employee';
         targetPath = role === 'director' ? '/director' : role === 'finance' ? '/finance' : '/employee';
       }
 
-      const forwardedHost = request.headers.get('x-forwarded-host');
-      const isLocalEnv = process.env.NODE_ENV === 'development';
-      if (isLocalEnv) {
-        return NextResponse.redirect(new URL(targetPath, request.url));
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${targetPath}`);
-      } else {
-        return NextResponse.redirect(new URL(targetPath, request.url));
-      }
+      // Gunakan origin request yang valid untuk mencegah Host Header Poisoning
+      const redirectUrl = new URL(targetPath, requestUrl.origin);
+      return NextResponse.redirect(redirectUrl);
     }
   }
 
   // Redirect to login with error parameter if code is invalid or expired
   return NextResponse.redirect(
-    new URL('/login?error=Tautan+konfirmasi+atau+reset+tidak+valid+atau+telah+kedaluwarsa', request.url)
+    new URL('/login?error=Tautan+konfirmasi+atau+reset+tidak+valid+atau+telah+kedaluwarsa', requestUrl.origin)
   );
 }

@@ -608,6 +608,23 @@ export async function deleteReceiptAction(requestId: string, targetReceiptUrl?: 
 
   if (fetchErr || !req) return { error: 'Pengajuan tidak ditemukan.' };
 
+  // Security Fix (VULN-NEW-02): Cegah IDOR & manipulasi nota pada pengajuan yang sudah disetujui / dibayar
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  const isPrivileged = userProfile?.role === 'director' || userProfile?.role === 'finance';
+  if (!isPrivileged) {
+    if (req.user_id !== user.id) {
+      return { error: 'Akses Ditolak: Anda tidak dapat menghapus bukti nota milik pengguna lain.' };
+    }
+    if (req.status !== 'Menunggu Approval' || req.payment_status === 'Paid') {
+      return { error: 'Bukti nota pada transaksi yang telah disetujui atau dicairkan tidak dapat dihapus.' };
+    }
+  }
+
   let newReceiptUrl: string | null = null;
   let newDescription = req.description;
 

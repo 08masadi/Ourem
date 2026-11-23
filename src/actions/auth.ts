@@ -74,7 +74,24 @@ export async function signUp(prevState: any, formData: FormData) {
     department = 'Staff OPS';
   }
 
-  const origin = (formData.get('origin') as string) || 'https://ourem.vercel.app';
+  let safeOrigin = process.env.NEXT_PUBLIC_APP_URL || 'https://ourem.vercel.app';
+  const rawOrigin = (formData.get('origin') as string) || '';
+  if (rawOrigin) {
+    try {
+      const parsed = new URL(rawOrigin);
+      const isAllowed =
+        parsed.hostname === 'localhost' ||
+        parsed.hostname === '127.0.0.1' ||
+        parsed.hostname === 'ourem.vercel.app' ||
+        parsed.hostname.endsWith('.vercel.app') ||
+        parsed.hostname.endsWith('ouffice.co.id');
+      if (isAllowed && (parsed.protocol === 'https:' || parsed.protocol === 'http:')) {
+        safeOrigin = parsed.origin;
+      }
+    } catch {}
+  }
+
+  const origin = safeOrigin;
 
   const email = (rawEmail || '').trim().toLowerCase();
 
@@ -766,8 +783,26 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
 
   const supabase = await createClient();
 
-  const redirectTarget = origin
-    ? `${origin}/auth/callback?next=/reset-password`
+  // Security Fix (VULN-NEW-03): Cegah Password Reset Poisoning via origin parameter
+  let safeOrigin = process.env.NEXT_PUBLIC_APP_URL || '';
+  if (origin) {
+    try {
+      const parsedOrigin = new URL(origin);
+      const isAllowedOrigin =
+        parsedOrigin.hostname === 'localhost' ||
+        parsedOrigin.hostname === '127.0.0.1' ||
+        parsedOrigin.hostname === 'ourem.vercel.app' ||
+        parsedOrigin.hostname.endsWith('.vercel.app') ||
+        parsedOrigin.hostname.endsWith('ouffice.co.id');
+
+      if (isAllowedOrigin && (parsedOrigin.protocol === 'https:' || parsedOrigin.protocol === 'http:')) {
+        safeOrigin = parsedOrigin.origin;
+      }
+    } catch {}
+  }
+
+  const redirectTarget = safeOrigin
+    ? `${safeOrigin}/auth/callback?next=/reset-password`
     : undefined;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
