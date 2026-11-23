@@ -4,6 +4,7 @@ import { useState, useTransition, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { signIn, signUp, requestPasswordReset } from '@/actions/auth';
 import { UserRole, DEPARTMENT_OPTIONS } from '@/types/database';
+import NeonVortexLoader from '@/components/ui/NeonVortexLoader';
 import {
   Lock,
   Mail,
@@ -404,6 +405,22 @@ function LoginContent() {
           )}
         </div>
       </div>
+
+      {/* Full-screen Loading Overlay saat proses Login / Register / Lupa Password */}
+      {isPending && (
+        <NeonVortexLoader
+          size="xl"
+          label={
+            isForgotPassword
+              ? 'Mengirim Tautan Pemulihan...'
+              : isRegister
+              ? 'Mendaftarkan Akun Baru...'
+              : 'Memproses Masuk ke Akun...'
+          }
+          sublabel="Menghubungkan ke server Ourem"
+          fullScreen
+        />
+      )}
     </div>
   );
 }
@@ -412,8 +429,12 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6">
+          <NeonVortexLoader
+            size="xl"
+            label="Menyiapkan Halaman Login..."
+            sublabel="Ouffice Reimbursement Enterprise"
+          />
         </div>
       }
     >

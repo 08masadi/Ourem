@@ -683,6 +683,66 @@ html.light .custom-scrollbar {
   }
 }
 
+/* Futuristic Neon Vortex Rotating Rings */
+@keyframes vortex-cw {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes vortex-ccw {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-vortex-ring-1 {
+  transform-origin: 160px 160px;
+  animation: vortex-cw 2.4s linear infinite;
+}
+
+.animate-vortex-ring-2 {
+  transform-origin: 160px 160px;
+  animation: vortex-ccw 3.2s linear infinite;
+}
+
+.animate-vortex-ring-3 {
+  transform-origin: 160px 160px;
+  animation: vortex-cw 4.0s linear infinite;
+}
+
+.animate-vortex-ring-4 {
+  transform-origin: 160px 160px;
+  animation: vortex-ccw 2.9s linear infinite;
+}
+
+.animate-vortex-ring-5 {
+  transform-origin: 160px 160px;
+  animation: vortex-cw 5.0s linear infinite;
+}
+
+.animate-vortex-ring-6 {
+  transform-origin: 160px 160px;
+  animation: vortex-ccw 3.6s linear infinite;
+}
+
+.animate-vortex-ring-7 {
+  transform-origin: 160px 160px;
+  animation: vortex-cw 6.0s linear infinite;
+}
+
+.animate-vortex-ring-8 {
+  transform-origin: 160px 160px;
+  animation: vortex-ccw 4.4s linear infinite;
+}
+
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

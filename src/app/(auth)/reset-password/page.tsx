@@ -15,6 +15,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
+import NeonVortexLoader from '@/components/ui/NeonVortexLoader';
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -154,11 +155,12 @@ function ResetPasswordContent() {
         {/* Card */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
           {isCheckingSession ? (
-            <div className="py-12 text-center">
-              <Loader2 className="w-8 h-8 animate-spin text-orange-500 mx-auto mb-3" />
-              <p className="text-sm text-slate-400 font-medium">
-                Memverifikasi sesi pemulihan kata sandi...
-              </p>
+            <div className="py-10 text-center flex flex-col items-center justify-center">
+              <NeonVortexLoader
+                size="md"
+                label="Memverifikasi Sesi..."
+                sublabel="Memeriksa tautan pemulihan kata sandi"
+              />
             </div>
           ) : !hasValidSession && !success ? (
             <div className="py-4 text-center space-y-4">
@@ -306,8 +308,12 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6">
+          <NeonVortexLoader
+            size="xl"
+            label="Memuat Pemulihan Akun..."
+            sublabel="Ouffice Reimbursement Enterprise"
+          />
         </div>
       }
     >

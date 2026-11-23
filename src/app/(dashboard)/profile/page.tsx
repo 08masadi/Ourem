@@ -6,6 +6,7 @@ import { UserProfile, DEPARTMENT_OPTIONS } from '@/types/database';
 import AvatarCropperModal from '@/components/profile/AvatarCropperModal';
 import { triggerSuccessNotification } from '@/components/ui/DynamicIslandSuccess';
 import ModernLoader from '@/components/ui/ModernLoader';
+import NeonVortexLoader from '@/components/ui/NeonVortexLoader';
 import {
   User,
   Mail,
@@ -295,8 +296,12 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="w-full max-w-2xl mx-auto py-12 px-4">
-        <ModernLoader label="Memuat Profil & Rekening..." sublabel="Sinkronisasi data akun Anda" />
+      <div className="w-full min-h-[65vh] flex flex-col items-center justify-center py-12 px-4">
+        <NeonVortexLoader
+          size="xl"
+          label="Memuat Profil & Rekening..."
+          sublabel="Sinkronisasi data akun Anda"
+        />
       </div>
     );
   }
