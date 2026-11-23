@@ -511,12 +511,21 @@ html.light .custom-scrollbar {
     visibility: visible !important;
   }
 
-  /* Only apply A5 148mm fixed bounds when printing standard A5 voucher (.printable-sheet) */
-  body:has(.printable-sheet):not(:has(.printable-word-doc)) {
+  /* Only apply A5 148mm fixed bounds when printing standard A5 voucher (.printable-sheet) that is NOT A4 portrait */
+  body:has(.printable-sheet:not(.reimbursement-voucher-a4)):not(:has(.printable-word-doc)) {
     width: 210mm !important;
     height: 148mm !important;
     max-width: 210mm !important;
     max-height: 148mm !important;
+    overflow: hidden !important;
+  }
+
+  /* A4 Portrait Reimbursement Voucher */
+  body:has(.reimbursement-voucher-a4) {
+    width: 210mm !important;
+    height: 297mm !important;
+    max-width: 210mm !important;
+    max-height: 297mm !important;
     overflow: hidden !important;
   }
 
@@ -610,6 +619,14 @@ html.light .custom-scrollbar {
 
   .printable-sheet.border-black {
     border: 2px solid #000000 !important;
+  }
+
+  .printable-sheet.reimbursement-voucher-a4 {
+    width: 210mm !important;
+    height: 297mm !important;
+    max-width: 210mm !important;
+    max-height: 297mm !important;
+    padding: 8mm 10mm !important;
   }
 
   /* Hide print controls, headers, buttons, navigation, and background UI */
