@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import {
   ReimbursementRequest,
   UserRole,
@@ -42,14 +43,13 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import ReimbursementVoucherPdf from './ReimbursementVoucherPdf';
-import OvertimeVoucherPdf from './OvertimeVoucherPdf';
-import MonthlyRecapReportPdf from './MonthlyRecapReportPdf';
-import EditRequestModal from './EditRequestModal';
-import EditOvertimeModal from './EditOvertimeModal';
-import WordVoucherPreviewModal from './WordVoucherPreviewModal';
+const ReimbursementVoucherPdf = dynamic(() => import('./ReimbursementVoucherPdf'), { ssr: false });
+const OvertimeVoucherPdf = dynamic(() => import('./OvertimeVoucherPdf'), { ssr: false });
+const MonthlyRecapReportPdf = dynamic(() => import('./MonthlyRecapReportPdf'), { ssr: false });
+const EditRequestModal = dynamic(() => import('./EditRequestModal'), { ssr: false });
+const EditOvertimeModal = dynamic(() => import('./EditOvertimeModal'), { ssr: false });
+const WordVoucherPreviewModal = dynamic(() => import('./WordVoucherPreviewModal'), { ssr: false });
 import { triggerSuccessNotification } from '@/components/ui/DynamicIslandSuccess';
-import { generateReimbursementDocx, downloadDocxFile } from '@/lib/wordVoucherGenerator';
 import {
   parseCustomerEntries,
   getCleanDescription,
@@ -664,6 +664,9 @@ export default function RequestList({
           }
         } catch {}
       }
+
+      // Dynamic import docx generator on demand to keep initial bundle lightweight
+      const { generateReimbursementDocx, downloadDocxFile } = await import('@/lib/wordVoucherGenerator');
 
       // Pastikan HANYA mencetak data dari pengajuan ini sendiri (tidak bocor dari/ke pengajuan lain)
       const blob = await generateReimbursementDocx({
