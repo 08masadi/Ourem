@@ -296,9 +296,9 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="w-full min-h-[65vh] flex flex-col items-center justify-center py-12 px-4">
+      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center py-10 px-4">
         <NeonVortexLoader
-          size="xl"
+          size="md"
           label="Memuat Profil & Rekening..."
         />
       </div>

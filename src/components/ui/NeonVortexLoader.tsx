@@ -15,19 +15,19 @@ export default function NeonVortexLoader({
   sublabel,
   fullScreen = false,
 }: NeonVortexLoaderProps) {
-  // Dimensions based on size
+  // Dimensions based on size - scaled down for compact, elegant aesthetics
   const dimensionClass = {
-    sm: 'w-28 h-28',
-    md: 'w-44 h-44',
-    lg: 'w-64 h-64 sm:w-72 sm:h-72',
-    xl: 'w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96',
+    sm: 'w-16 h-16',
+    md: 'w-28 h-28 sm:w-32 sm:h-32',
+    lg: 'w-36 h-36 sm:w-40 sm:h-40',
+    xl: 'w-48 h-48 sm:w-52 sm:h-52',
   }[size];
 
   const strokeWidth = {
-    sm: 2.5,
-    md: 3,
-    lg: 3.5,
-    xl: 4,
+    sm: 3,
+    md: 4,
+    lg: 4.5,
+    xl: 5,
   }[size];
 
   const loaderVisual = (
@@ -182,14 +182,14 @@ export default function NeonVortexLoader({
 
       {/* Optional Clean Typography */}
       {(label || sublabel) && (
-        <div className="mt-8 text-center space-y-1.5 max-w-sm px-4">
+        <div className="mt-5 text-center space-y-1 max-w-sm px-4">
           {label && (
-            <p className="text-sm sm:text-base font-black tracking-wider text-orange-500 uppercase font-mono drop-shadow-[0_0_12px_rgba(255,102,0,0.6)]">
+            <p className="text-xs sm:text-sm font-bold tracking-wider text-orange-500 uppercase font-mono drop-shadow-[0_0_8px_rgba(255,102,0,0.5)]">
               {label}
             </p>
           )}
           {sublabel && (
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
               {sublabel}
             </p>
           )}

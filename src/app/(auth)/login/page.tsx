@@ -409,7 +409,7 @@ function LoginContent() {
       {/* Full-screen Loading Overlay saat proses Login / Register / Lupa Password */}
       {isPending && (
         <NeonVortexLoader
-          size="xl"
+          size="md"
           label={
             isForgotPassword
               ? 'Mengirim Tautan Pemulihan...'
@@ -417,7 +417,6 @@ function LoginContent() {
               ? 'Mendaftarkan Akun Baru...'
               : 'Memproses Masuk ke Akun...'
           }
-          sublabel="Menghubungkan ke server Ourem"
           fullScreen
         />
       )}
@@ -431,9 +430,8 @@ export default function LoginPage() {
       fallback={
         <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6">
           <NeonVortexLoader
-            size="xl"
+            size="md"
             label="Menyiapkan Halaman Login..."
-            sublabel="Ouffice Reimbursement Enterprise"
           />
         </div>
       }

@@ -310,9 +310,8 @@ export default function ResetPasswordPage() {
       fallback={
         <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6">
           <NeonVortexLoader
-            size="xl"
+            size="md"
             label="Memuat Pemulihan Akun..."
-            sublabel="Ouffice Reimbursement Enterprise"
           />
         </div>
       }
