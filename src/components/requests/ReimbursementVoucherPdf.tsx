@@ -244,7 +244,9 @@ export default function ReimbursementVoucherPdf({
                         fontFamily: "'Calibri', sans-serif",
                       }}
                     >
-                      {data.department || 'STAFF OPS'}
+                      {data.department === 'Staff OPS' || data.department === 'STAFF OPS' || !data.department
+                        ? 'STAFF OPERASIONAL'
+                        : data.department}
                     </div>
                   </div>
 

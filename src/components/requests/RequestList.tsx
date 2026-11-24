@@ -573,10 +573,11 @@ export default function RequestList({
       ? formatDateIndo(paidReq.updated_at.split('T')[0])
       : formatDateIndo(dateStr);
 
+    const formatDeptUpper = (d?: string | null) => (!d || d === 'Staff OPS' || d === 'STAFF OPS' ? 'STAFF OPERASIONAL' : d.toUpperCase());
     const printData: ReimbursementVoucherPrintData = {
       type: determinedType,
       requestedBy: first.profiles?.full_name || 'MISKADI',
-      department: first.department || first.profiles?.department || 'STAFF OPS',
+      department: formatDeptUpper(first.department || first.profiles?.department),
       date: formatDateIndo(dateStr),
       items: formatPrintItems(dateRequests, determinedType),
       totalAmount,
@@ -782,10 +783,9 @@ export default function RequestList({
       'Staff';
 
     const requesterDept =
-      enrichedReq.department ||
-      enrichedReq.profiles?.department ||
-      reqMeta.department ||
-      'STAFF OPS';
+      enrichedReq.department === 'Staff OPS' || enrichedReq.department === 'STAFF OPS' || !enrichedReq.department
+        ? 'STAFF OPERASIONAL'
+        : (enrichedReq.department || enrichedReq.profiles?.department || reqMeta.department || 'STAFF OPERASIONAL');
 
     const printData: ReimbursementVoucherPrintData = {
       type: determinedType,
@@ -831,7 +831,10 @@ export default function RequestList({
     const printData: ReimbursementVoucherPrintData = {
       type: determinedType,
       requestedBy: first.profiles?.full_name || 'MISKADI',
-      department: first.department || first.profiles?.department || 'STAFF OPS',
+      department:
+        first.department === 'Staff OPS' || first.department === 'STAFF OPS' || !first.department
+          ? 'STAFF OPERASIONAL'
+          : (first.department || first.profiles?.department || 'STAFF OPERASIONAL'),
       date: formatDateIndo(first.request_date),
       items: formatPrintItems(selectedItems, determinedType),
       totalAmount,
@@ -903,7 +906,8 @@ export default function RequestList({
         r.profiles?.full_name ||
         (r as any).nama_karyawan ||
         'Karyawan';
-      const dept = r.department || r.profiles?.department || 'Staff OPS';
+      const rawDeptItem = r.department || r.profiles?.department || '';
+      const dept = rawDeptItem === 'Staff OPS' || !rawDeptItem ? 'Staff Operasional' : rawDeptItem;
 
       // Tanggal Pengajuan (Reimburse ataupun Lembur)
       let submissionDateRaw = r.request_date;
@@ -1436,7 +1440,7 @@ export default function RequestList({
 
                       {/* Pengaju & Department */}
                       <span>
-                        • {getRequesterDisplayName(req)} ({req.department || req.profiles?.department || 'Staff OPS'})
+                        • {getRequesterDisplayName(req)} ({(!req.department || req.department === 'Staff OPS' ? 'Staff Operasional' : req.department)})
                       </span>
                     </div>
 
@@ -1613,7 +1617,7 @@ export default function RequestList({
                   <div>
                     <span className="text-slate-400">Department:</span>
                     <p className="text-white font-semibold">
-                      {selectedRequest.department || selectedRequest.profiles?.department || 'Staff OPS'}
+                      {!selectedRequest.department || selectedRequest.department === 'Staff OPS' ? 'Staff Operasional' : selectedRequest.department}
                     </p>
                   </div>
                 </div>
@@ -1622,7 +1626,7 @@ export default function RequestList({
                   <div>
                     <span className="text-slate-400">Department:</span>
                     <p className="text-white font-semibold">
-                      {selectedRequest.department || selectedRequest.profiles?.department || 'Staff OPS'}
+                      {!selectedRequest.department || selectedRequest.department === 'Staff OPS' ? 'Staff Operasional' : selectedRequest.department}
                     </p>
                   </div>
                   <div>

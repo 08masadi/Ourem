@@ -67,8 +67,9 @@ export default function EditRequestModal({
   const [reimbursementType, setReimbursementType] = useState<ReimbursementType>(
     request.reimbursement_type || 'Petty Cash'
   );
+  const rawReqDept = request.department || request.profiles?.department || '';
   const [department, setDepartment] = useState<string>(
-    request.department || request.profiles?.department || 'Staff OPS'
+    rawReqDept === 'Staff OPS' || !rawReqDept ? 'Staff Operasional' : rawReqDept
   );
   const [requestDate, setRequestDate] = useState<string>(request.request_date || '');
   const [rfNumber, setRfNumber] = useState<string>(

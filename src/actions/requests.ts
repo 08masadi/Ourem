@@ -45,7 +45,8 @@ export async function createReimbursement(arg1: any, arg2?: any) {
     const reimbursement_type = (formData.get('reimbursement_type') as ReimbursementType) || 'Petty Cash';
     const customer = (formData.get('customer') as string) || '';
     const account = (formData.get('account') as string) || (formData.get('category') as string) || 'Bensin';
-    const department = (formData.get('department') as string) || 'Staff OPS';
+    const rawDept = (formData.get('department') as string) || '';
+    const department = rawDept === 'Staff OPS' || !rawDept ? 'Staff Operasional' : rawDept;
     const rf_number = (formData.get('rf_number') as string) || '';
     const describe_purpose = (formData.get('describe_purpose') as string) || '';
     let signature_url = (formData.get('signature_url') as string) || '';
@@ -180,7 +181,7 @@ export async function createReimbursement(arg1: any, arg2?: any) {
       reimbursement_type,
       customer: customer || null,
       account: account || null,
-      department: department || 'Staff OPS',
+      department: department || 'Staff Operasional',
       signature_url: signature_url || null,
     };
 
@@ -275,7 +276,8 @@ export async function createOvertimeRequest(arg1: any, arg2?: any) {
     const jam_lembur = (formData.get('jam_lembur') as string) || '';
     const uraian_pekerjaan = (formData.get('uraian_pekerjaan') as string) || '';
     const nominalStr = (formData.get('nominal') as string) || '0';
-    const department = (formData.get('department') as string) || 'Staff OPS';
+    const rawDept = (formData.get('department') as string) || '';
+    const department = rawDept === 'Staff OPS' || !rawDept ? 'Staff Operasional' : rawDept;
 
     if (!nama_pekerjaan || !jam_lembur || !uraian_pekerjaan) {
       return { error: 'Nama pekerjaan, jam lembur, dan uraian pekerjaan wajib diisi.' };
@@ -410,7 +412,8 @@ export async function updateReimbursement(prevState: any, formData: FormData) {
   const reimbursement_type = (formData.get('reimbursement_type') as ReimbursementType) || 'Petty Cash';
   const customer = (formData.get('customer') as string) || '';
   const account = (formData.get('account') as string) || (formData.get('category') as string) || 'Bensin';
-  const department = (formData.get('department') as string) || 'Staff OPS';
+  const rawEditDept = (formData.get('department') as string) || '';
+  const department = rawEditDept === 'Staff OPS' || !rawEditDept ? 'Staff Operasional' : rawEditDept;
   const rf_number = (formData.get('rf_number') as string) || '';
   const describe_purpose = (formData.get('describe_purpose') as string) || '';
   let signature_url = (formData.get('signature_url') as string) || '';
@@ -538,7 +541,7 @@ export async function updateReimbursement(prevState: any, formData: FormData) {
     reimbursement_type,
     customer: customer || null,
     account: account || null,
-    department: department || 'Staff OPS',
+    department: department || 'Staff Operasional',
     receipt_url: deleteReceipt ? null : (receipt_url || null),
     updated_at: new Date().toISOString(),
   };
@@ -697,7 +700,8 @@ export async function updateOvertimeRequest(prevState: any, formData: FormData) 
   const jam_lembur = (formData.get('jam_lembur') as string) || '';
   const uraian_pekerjaan = (formData.get('uraian_pekerjaan') as string) || '';
   const nominalStr = (formData.get('nominal') as string) || '0';
-  const department = (formData.get('department') as string) || 'Staff OPS';
+  const rawEditDept = (formData.get('department') as string) || '';
+  const department = rawEditDept === 'Staff OPS' || !rawEditDept ? 'Staff Operasional' : rawEditDept;
 
   if (!id || !nama_pekerjaan || !jam_lembur || !uraian_pekerjaan) {
     return { error: 'Nama pekerjaan, jam lembur, dan uraian pekerjaan wajib diisi.' };
@@ -870,8 +874,9 @@ export async function getEmployeeRequests(): Promise<ReimbursementRequest[]> {
       item.account || meta.account || item.category,
       determinedType
     );
-    const determinedDepartment =
-      item.department || meta.department || item.profiles?.department || userProfile?.department || 'Staff OPS';
+    const rawDeptVal =
+      item.department || meta.department || item.profiles?.department || userProfile?.department || 'Staff Operasional';
+    const determinedDepartment = rawDeptVal === 'Staff OPS' || rawDeptVal === 'STAFF OPS' ? 'Staff Operasional' : rawDeptVal;
     const determinedSignature =
       item.signature_url || meta.signature_url || userProfile?.signature_url || null;
 
@@ -1007,8 +1012,9 @@ export async function getAllRequests(): Promise<ReimbursementRequest[]> {
       item.account || meta.account || item.category,
       determinedType
     );
-    const determinedDepartment =
-      item.department || meta.department || item.profiles?.department || 'Staff OPS';
+    const rawSingleDept =
+      item.department || meta.department || item.profiles?.department || 'Staff Operasional';
+    const determinedDepartment = rawSingleDept === 'Staff OPS' || rawSingleDept === 'STAFF OPS' ? 'Staff Operasional' : rawSingleDept;
     const determinedSignature =
       item.signature_url || meta.signature_url || null;
 

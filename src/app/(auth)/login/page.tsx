@@ -27,7 +27,7 @@ function LoginContent() {
   const [isRegister, setIsRegister] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [role, setRole] = useState<UserRole>('employee');
-  const [department, setDepartment] = useState('Staff OPS');
+  const [department, setDepartment] = useState('Staff Operasional');
   const [emailInput, setEmailInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);

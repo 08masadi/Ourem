@@ -31,7 +31,8 @@ export async function POST(request: Request) {
       (formData.get('account') as string) ||
       (formData.get('category') as string) ||
       'Bensin';
-    const department = (formData.get('department') as string) || 'Staff OPS';
+    const rawApiDept = (formData.get('department') as string) || '';
+    const department = rawApiDept === 'Staff OPS' || !rawApiDept ? 'Staff Operasional' : rawApiDept;
     let signature_url = (formData.get('signature_url') as string) || '';
 
     let userProfile = null;
@@ -244,7 +245,7 @@ export async function POST(request: Request) {
       reimbursement_type,
       customer: customer || null,
       account: account || null,
-      department: department || 'Staff OPS',
+      department: department || 'Staff Operasional',
       signature_url: signature_url || null,
     };
 

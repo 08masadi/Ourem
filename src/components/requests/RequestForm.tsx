@@ -103,7 +103,7 @@ async function compressImageFile(file: File, maxWidth = 1200, quality = 0.82): P
 
 export default function RequestForm() {
   const [reimbursementType, setReimbursementType] = useState<ReimbursementType>('Petty Cash');
-  const [department, setDepartment] = useState<string>('Staff OPS');
+  const [department, setDepartment] = useState<string>('Staff Operasional');
   const [requestDate, setRequestDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
@@ -197,9 +197,8 @@ export default function RequestForm() {
       const p = await getCurrentUserProfile();
       if (p) {
         setUserProfile(p);
-        if (p.department) {
-          setDepartment(p.department);
-        }
+        const resolvedDept = p.department === 'Staff OPS' || !p.department ? 'Staff Operasional' : p.department;
+        setDepartment(resolvedDept);
       }
     }
     loadProfile();

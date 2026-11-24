@@ -40,7 +40,7 @@ export default function ProfilePage() {
 
   // Controlled form states
   const [fullName, setFullName] = useState('');
-  const [department, setDepartment] = useState('Staff OPS');
+  const [department, setDepartment] = useState('Staff Operasional');
   const [phone, setPhone] = useState('');
   const [employeeId, setEmployeeId] = useState('');
   const [bankName, setBankName] = useState('');
@@ -70,7 +70,8 @@ export default function ProfilePage() {
         const defaultId = data.employee_id || storedId || (data.email?.includes('miskadi') ? 'CSK-007' : '');
 
         setFullName(data.full_name || '');
-        setDepartment(data.department || 'Staff OPS');
+        const currentDept = data.department === 'Staff OPS' || !data.department ? 'Staff Operasional' : data.department;
+        setDepartment(currentDept);
         setPhone(defaultPhone);
         setEmployeeId(defaultId);
         setBankName(data.bank_name || '');

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     email TEXT NOT NULL,
     full_name TEXT NOT NULL,
     role TEXT NOT NULL CHECK (role IN ('employee', 'director', 'finance')) DEFAULT 'employee',
-    department TEXT DEFAULT 'Staff OPS',
+    department TEXT DEFAULT 'Staff Operasional',
     bank_name TEXT,
     bank_account_number TEXT,
     bank_account_holder TEXT,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 
 -- Migrasi tambahan kolom jika tabel sudah ada sebelumnya:
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS department TEXT DEFAULT 'Staff OPS';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS department TEXT DEFAULT 'Staff Operasional';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS signature_url TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT;
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS public.reimbursement_requests (
     reimbursement_type TEXT NOT NULL CHECK (reimbursement_type IN ('Petty Cash', 'Voucher')) DEFAULT 'Petty Cash',
     account TEXT,
     customer TEXT,
-    department TEXT DEFAULT 'Staff OPS',
+    department TEXT DEFAULT 'Staff Operasional',
     signature_url TEXT,
     amount NUMERIC NOT NULL CHECK (amount > 0),
     request_date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS public.reimbursement_requests (
 ALTER TABLE public.reimbursement_requests ADD COLUMN IF NOT EXISTS reimbursement_type TEXT DEFAULT 'Petty Cash';
 ALTER TABLE public.reimbursement_requests ADD COLUMN IF NOT EXISTS account TEXT;
 ALTER TABLE public.reimbursement_requests ADD COLUMN IF NOT EXISTS customer TEXT;
-ALTER TABLE public.reimbursement_requests ADD COLUMN IF NOT EXISTS department TEXT DEFAULT 'Staff OPS';
+ALTER TABLE public.reimbursement_requests ADD COLUMN IF NOT EXISTS department TEXT DEFAULT 'Staff Operasional';
 ALTER TABLE public.reimbursement_requests ADD COLUMN IF NOT EXISTS signature_url TEXT;
 
 -- Lepas batasan check constraint agar fleksibel menerima tipe 'Lembur' dan nominal awal 0:
@@ -104,7 +104,7 @@ BEGIN
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
     COALESCE(NEW.raw_user_meta_data->>'role', 'employee'),
-    COALESCE(NEW.raw_user_meta_data->>'department', 'Staff OPS')
+    COALESCE(NEW.raw_user_meta_data->>'department', 'Staff Operasional')
   )
   ON CONFLICT (id) DO UPDATE
   SET

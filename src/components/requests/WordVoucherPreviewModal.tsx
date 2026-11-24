@@ -198,11 +198,15 @@ export default function WordVoucherPreviewModal({
     requesterId = directoryId;
   }
 
-  const requesterJabatan =
+  const rawVoucherDept =
     request.department ||
     request.profiles?.department ||
     meta.department ||
-    'Staff OPS';
+    '';
+  const requesterJabatan =
+    rawVoucherDept === 'Staff OPS' || rawVoucherDept === 'STAFF OPS' || !rawVoucherDept
+      ? 'Staff Operasional'
+      : rawVoucherDept;
 
   const bankName =
     request.profiles?.bank_name ||

@@ -250,7 +250,9 @@ export default function MonthlyRecapReportPdf({
                             className="text-center font-bold border-r border-[#EA580C] px-2 py-0.5 uppercase"
                             style={{ verticalAlign: 'middle', color: '#000000' }}
                           >
-                            {item.department || 'STAFF OPS'}
+                            {item.department === 'Staff OPS' || item.department === 'STAFF OPS' || !item.department
+                              ? 'STAFF OPERASIONAL'
+                              : item.department}
                           </td>
 
                           {/* Tanggal Pembayaran */}

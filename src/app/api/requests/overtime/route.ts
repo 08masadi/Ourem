@@ -37,7 +37,8 @@ export async function POST(request: Request) {
     const jam_lembur = (formData.get('jam_lembur') as string) || '';
     const uraian_pekerjaan = (formData.get('uraian_pekerjaan') as string) || '';
     const nominalStr = (formData.get('nominal') as string) || '0';
-    const department = (formData.get('department') as string) || 'Staff OPS';
+    const rawOtDept = (formData.get('department') as string) || '';
+    const department = rawOtDept === 'Staff OPS' || !rawOtDept ? 'Staff Operasional' : rawOtDept;
 
     if (!nama_pekerjaan || !jam_lembur || !uraian_pekerjaan) {
       return NextResponse.json(

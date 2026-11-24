@@ -44,7 +44,9 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
   const [uraianPekerjaan, setUraianPekerjaan] = useState('');
   const [nominal, setNominal] = useState('0');
   const [department, setDepartment] = useState(
-    userProfile?.department || 'Staff OPS'
+    userProfile?.department === 'Staff OPS' || !userProfile?.department
+      ? 'Staff Operasional'
+      : userProfile.department
   );
 
   // Preview State

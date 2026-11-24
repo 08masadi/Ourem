@@ -18,7 +18,7 @@ export type ReimbursementCategory =
   | 'Operasional Lainnya';
 
 export const DEPARTMENT_OPTIONS = [
-  'Staff OPS',
+  'Staff Operasional',
   'Staff Administration',
   'Staff Purchasing',
   'Sales Executive',

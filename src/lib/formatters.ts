@@ -149,7 +149,7 @@ export function formatOvertimeToDescription(
 ): string {
   const payload: RequestMetadataPayload = {
     reimbursement_type: 'Lembur',
-    department: meta?.department || 'Staff OPS',
+    department: meta?.department === 'Staff OPS' ? 'Staff Operasional' : (meta?.department || 'Staff Operasional'),
     signature_url: meta?.signature_url,
     overtime_data: data,
   };

@@ -44,17 +44,25 @@ export async function signIn(prevState: any, formData: FormData) {
     return { error: error.message };
   }
 
-  // Determine user role
+  // Determine user role and auto-migrate legacy 'Staff OPS' to 'Staff Operasional'
   let role: UserRole = (data.user?.user_metadata?.role as UserRole) || 'employee';
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, department')
     .eq('id', data.user.id)
     .single();
 
   if (profile?.role) {
     role = profile.role as UserRole;
+  }
+
+  // Terapkan update otomatis 'Staff OPS' -> 'Staff Operasional' pada akun yang sudah dibuat
+  if (profile?.department === 'Staff OPS' || profile?.department === 'STAFF OPS') {
+    await supabase
+      .from('profiles')
+      .update({ department: 'Staff Operasional' })
+      .eq('id', data.user.id);
   }
 
   const targetPath = role === 'director' ? '/director' : role === 'finance' ? '/finance' : '/employee';
@@ -70,8 +78,8 @@ export async function signUp(prevState: any, formData: FormData) {
   // Role 'director' atau 'finance' hanya boleh diberikan oleh Administrator di panel Supabase.
   const role: UserRole = 'employee';
   let department = (formData.get('department') as string || '').trim();
-  if (!department) {
-    department = 'Staff OPS';
+  if (!department || department === 'Staff OPS') {
+    department = 'Staff Operasional';
   }
 
   let safeOrigin = process.env.NEXT_PUBLIC_APP_URL || 'https://ourem.vercel.app';
@@ -221,12 +229,23 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
   const bank_account_holder: string | null =
     profile?.bank_account_holder || (user.user_metadata?.bank_account_holder as string) || null;
 
+  let userDepartment = profile?.department || user.user_metadata?.department || 'Staff Operasional';
+  if (userDepartment === 'Staff OPS' || userDepartment === 'STAFF OPS') {
+    userDepartment = 'Staff Operasional';
+    // Otomatis sinkronisasi pembaruan ke tabel profiles di database untuk akun lama
+    supabase
+      .from('profiles')
+      .update({ department: 'Staff Operasional' })
+      .eq('id', user.id)
+      .then();
+  }
+
   return {
     id: user.id,
     email: user.email || '',
     full_name: profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
     role: (profile?.role as UserRole) || (user.user_metadata?.role as UserRole) || 'employee',
-    department: profile?.department || user.user_metadata?.department || 'Staff OPS',
+    department: userDepartment,
     phone,
     employee_id,
     bank_name,
@@ -336,7 +355,7 @@ export async function updateProfileBank(formData: FormData) {
   const full_name = formData.get('full_name') as string;
   let department = formData.get('department') as string;
 
-  // Determine user role to ensure Director and Finance are never assigned Staff OPS
+  // Determine user role to ensure Director and Finance are never assigned Staff Operasional
   const { data: userRoleCheck } = await supabase
     .from('profiles')
     .select('role')
@@ -348,8 +367,8 @@ export async function updateProfileBank(formData: FormData) {
     department = 'Director';
   } else if (effectiveRole === 'finance') {
     department = 'Finance';
-  } else if (!department) {
-    department = 'Staff OPS';
+  } else if (!department || department === 'Staff OPS' || department === 'STAFF OPS') {
+    department = 'Staff Operasional';
   }
   const bank_name = formData.get('bank_name') as string;
   const bank_account_number = formData.get('bank_account_number') as string;
@@ -531,7 +550,7 @@ export async function updateProfileBank(formData: FormData) {
     id: user.id,
     email: user.email,
     full_name: full_name || user.user_metadata?.full_name || 'User',
-    department: department || (effectiveRole === 'director' ? 'Director' : effectiveRole === 'finance' ? 'Finance' : 'Staff OPS'),
+    department: department || (effectiveRole === 'director' ? 'Director' : effectiveRole === 'finance' ? 'Finance' : 'Staff Operasional'),
     bank_name: bank_name || null,
     bank_account_number: bank_account_number || null,
     bank_account_holder: bank_account_holder || null,
@@ -578,7 +597,7 @@ export async function updateProfileBank(formData: FormData) {
       id: user.id,
       email: user.email,
       full_name: full_name || user.user_metadata?.full_name || 'User',
-      department: department || (effectiveRole === 'director' ? 'Director' : effectiveRole === 'finance' ? 'Finance' : 'Staff OPS'),
+      department: department || (effectiveRole === 'director' ? 'Director' : effectiveRole === 'finance' ? 'Finance' : 'Staff Operasional'),
       phone: phone || '',
       employee_id: employee_id || '',
       bank_name: bank_name || '',
@@ -931,7 +950,7 @@ export async function getRequesterProfileInfo(userId: string): Promise<{
       email = email || 'miskadi@ouffice.co.id';
       phone = phone || '085710002923';
       employee_id = employee_id || 'CSK-007';
-      department = department || 'Staff OPS';
+      department = department === 'Staff OPS' ? 'Staff Operasional' : (department || 'Staff Operasional');
       bank_name = bank_name || 'BCA';
       bank_account_number = bank_account_number || '2760125710';
       bank_account_holder = bank_account_holder || 'Miskadi';

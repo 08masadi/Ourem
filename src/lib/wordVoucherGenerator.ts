@@ -344,11 +344,15 @@ export async function generateReimbursementDocx(
     requesterId = directoryId;
   }
 
-  const requesterJabatan =
+  const rawGenDept =
     request.department ||
     request.profiles?.department ||
     meta.department ||
-    'Staff OPS';
+    '';
+  const requesterJabatan =
+    rawGenDept === 'Staff OPS' || rawGenDept === 'STAFF OPS' || !rawGenDept
+      ? 'Staff Operasional'
+      : rawGenDept;
 
   const bankName =
     request.profiles?.bank_name ||

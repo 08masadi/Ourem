@@ -45,8 +45,9 @@ export default function EditOvertimeModal({
   const [namaKaryawan, setNamaKaryawan] = useState(
     ov?.nama_karyawan || request.profiles?.full_name || 'Staff'
   );
+  const rawOtDept = request.department || request.profiles?.department || '';
   const [department, setDepartment] = useState(
-    request.department || request.profiles?.department || 'Staff OPS'
+    rawOtDept === 'Staff OPS' || !rawOtDept ? 'Staff Operasional' : rawOtDept
   );
   const [perusahaan, setPerusahaan] = useState(
     ov?.perusahaan || request.customer || ''
