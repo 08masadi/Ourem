@@ -6,7 +6,7 @@ import NotificationBell from '@/components/layout/NotificationBell';
 import DynamicIslandSuccess from '@/components/ui/DynamicIslandSuccess';
 import SuccessUrlWatcher from '@/components/ui/SuccessUrlWatcher';
 import PushNotificationSubscriber from '@/components/notifications/PushNotificationSubscriber';
-import { LogOut } from 'lucide-react';
+import { LogOut, Compass } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function DashboardLayout({
@@ -44,6 +44,16 @@ export default async function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Landing Page Link on Desktop */}
+            <Link
+              href="/landing"
+              title="Lihat Landing Page Ourem"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/40 text-xs font-semibold transition shadow-sm"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>Landing Page</span>
+            </Link>
+
             {/* Notification Bell on Desktop */}
             <NotificationBell role={role} />
 
@@ -97,6 +107,15 @@ export default async function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Landing Page Link on Mobile */}
+            <Link
+              href="/landing"
+              title="Landing Page Ourem"
+              className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-orange-400 flex items-center justify-center transition border border-orange-500/30 shadow-sm"
+            >
+              <Compass className="w-4 h-4" />
+            </Link>
+
             {/* Notification Bell on Mobile */}
             <NotificationBell role={role} />
 

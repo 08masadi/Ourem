@@ -10,6 +10,7 @@ import {
   CheckSquare,
   CreditCard,
   User,
+  Compass,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -27,18 +28,21 @@ export default function Sidebar({ role }: SidebarProps) {
     { href: '/employee/new', label: 'Buat Pengajuan', icon: PlusCircle },
     { href: '/employee/overtime', label: 'Form Lembur', icon: Clock },
     { href: '/profile', label: 'Profil & Rekening', icon: User },
+    { href: '/landing', label: 'Landing Page Ourem', icon: Compass },
   ];
 
   const directorLinks = [
     { href: '/director', label: 'Approval Pengajuan', icon: CheckSquare },
     { href: '/employee/new', label: 'Ajukan Reimbursement', icon: PlusCircle },
     { href: '/profile', label: 'Profil Saya', icon: User },
+    { href: '/landing', label: 'Landing Page Ourem', icon: Compass },
   ];
 
   const financeLinks = [
     { href: '/finance', label: 'Pencairan Dana (Paid)', icon: CreditCard },
     { href: '/employee/new', label: 'Ajukan Reimbursement', icon: PlusCircle },
     { href: '/profile', label: 'Profil Saya', icon: User },
+    { href: '/landing', label: 'Landing Page Ourem', icon: Compass },
   ];
 
   const links =
