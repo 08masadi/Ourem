@@ -14,6 +14,12 @@ export const auth = betterAuth({
       apiKey: process.env.BETTER_AUTH_API_KEY,
     }),
   ],
+  advanced: {
+    ipAddress: {
+      // Prioritaskan header Vercel dan Cloudflare untuk mendeteksi IP asli pengguna
+      ipAddressHeaders: ['x-vercel-forwarded-for', 'cf-connecting-ip', 'x-forwarded-for'],
+    },
+  },
   user: {
     additionalFields: {
       role: {
