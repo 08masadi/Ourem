@@ -1,5 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { dash } from '@better-auth/infra';
+import { nextCookies } from 'better-auth/next-js';
 import { Pool } from 'pg';
 
 export const auth = betterAuth({
@@ -14,6 +15,7 @@ export const auth = betterAuth({
     dash({
       apiKey: process.env.BETTER_AUTH_API_KEY,
     }),
+    nextCookies(),
   ],
   advanced: {
     database: {
