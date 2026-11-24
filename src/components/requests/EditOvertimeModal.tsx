@@ -371,7 +371,6 @@ export default function EditOvertimeModal({
                     <input
                       type="text"
                       inputMode="numeric"
-                      pattern="[0-9]*"
                       value={nominal}
                       onChange={handleNominalChange}
                       placeholder="0"

@@ -776,7 +776,6 @@ export default function EditRequestModal({
                     <input
                       type="text"
                       inputMode="numeric"
-                      pattern="[0-9]*"
                       required
                       value={block.amount ? Number(block.amount).toLocaleString('id-ID') : ''}
                       onChange={(e) => updateBlockField(blockIndex, 'amount', e.target.value)}
