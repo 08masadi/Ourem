@@ -1,10 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
+import { getSessionCookie } from 'better-auth/cookies';
+import { betterFetch } from '@better-fetch/fetch';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  const { supabaseResponse, user, role } = await updateSession(request);
 
   const isAuthRoute = pathname.startsWith('/login');
   const isDashboardRoute =
@@ -12,6 +12,63 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/director') ||
     pathname.startsWith('/finance') ||
     pathname.startsWith('/profile');
+
+  // 1. Cek sesi Better Auth melalui cookie token jika ada
+  const hasBetterAuthCookie = !!getSessionCookie(request);
+  let betterAuthUser: any = null;
+  let betterAuthRole: string = 'employee';
+
+  if (hasBetterAuthCookie) {
+    try {
+      const { data: sessionData } = await betterFetch<any>('/api/auth/get-session', {
+        baseURL: request.nextUrl.origin,
+        headers: {
+          cookie: request.headers.get('cookie') || '',
+        },
+      });
+      if (sessionData?.user) {
+        betterAuthUser = sessionData.user;
+        betterAuthRole = sessionData.user.role || 'employee';
+      }
+    } catch {}
+  }
+
+  // 2. Jika sesi Better Auth aktif, tangani navigasi & proteksi rute
+  if (betterAuthUser) {
+    if (isAuthRoute) {
+      const targetDashboard =
+        betterAuthRole === 'director' ? '/director' : betterAuthRole === 'finance' ? '/finance' : '/employee';
+      return NextResponse.redirect(new URL(targetDashboard, request.url));
+    }
+
+    if (pathname === '/') {
+      const targetDashboard =
+        betterAuthRole === 'director' ? '/director' : betterAuthRole === 'finance' ? '/finance' : '/employee';
+      return NextResponse.redirect(new URL(targetDashboard, request.url));
+    }
+
+    if (isDashboardRoute) {
+      if (pathname.startsWith('/director') && betterAuthRole !== 'director') {
+        const targetDashboard = betterAuthRole === 'finance' ? '/finance' : '/employee';
+        return NextResponse.redirect(new URL(targetDashboard, request.url));
+      }
+
+      if (pathname.startsWith('/finance') && betterAuthRole !== 'finance') {
+        const targetDashboard = betterAuthRole === 'director' ? '/director' : '/employee';
+        return NextResponse.redirect(new URL(targetDashboard, request.url));
+      }
+
+      if (pathname.startsWith('/employee') && !pathname.startsWith('/employee/new') && betterAuthRole !== 'employee') {
+        const targetDashboard = betterAuthRole === 'director' ? '/director' : '/finance';
+        return NextResponse.redirect(new URL(targetDashboard, request.url));
+      }
+    }
+
+    return NextResponse.next();
+  }
+
+  // 3. Fallback: Sesi Supabase (untuk akun yang masih aktif dengan sesi lama)
+  const { supabaseResponse, user, role } = await updateSession(request);
 
   // If user is logged in and visits login page, redirect to their role dashboard
   if (user && isAuthRoute) {

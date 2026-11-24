@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import { UserRole, UserProfile } from '@/types/database';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 export async function signIn(prevState: any, formData: FormData) {
   const rawEmail = formData.get('email') as string;
@@ -15,91 +17,95 @@ export async function signIn(prevState: any, formData: FormData) {
     return { error: 'Email dan password wajib diisi.' };
   }
 
+  // 1. Coba login melalui Better Auth
+  try {
+    const res = await auth.api.signInEmail({
+      body: {
+        email,
+        password,
+      },
+      headers: await headers(),
+    });
+
+    if (res?.user) {
+      const userRole = (res.user as any).role || 'employee';
+      const targetPath = userRole === 'director' ? '/director' : userRole === 'finance' ? '/finance' : '/employee';
+      redirect(targetPath);
+    }
+  } catch (betterAuthErr: any) {
+    if (betterAuthErr?.message === 'NEXT_REDIRECT' || betterAuthErr?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw betterAuthErr;
+    }
+  }
+
+  // 2. Fallback login Supabase jika pengguna memiliki sesi lama atau belum login ulang
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!supabaseUrl || supabaseUrl.includes('your-project') || !supabaseUrl.startsWith('https://')) {
-    return {
-      error: 'Supabase belum dihubungkan. Silakan isi URL & Key asli di file .env.local.',
-    };
-  }
+  if (supabaseUrl && !supabaseUrl.includes('your-project') && supabaseUrl.startsWith('https://')) {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-  const supabase = await createClient();
+      if (!error && data?.user) {
+        let role: UserRole = (data.user?.user_metadata?.role as UserRole) || 'employee';
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, department')
+          .eq('id', data.user.id)
+          .single();
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+        if (profile?.role) {
+          role = profile.role as UserRole;
+        }
 
-  if (error) {
-    const msg = error.message.toLowerCase();
-    if (msg.includes('invalid login credentials')) {
-      return {
-        error: 'Email atau kata sandi tidak cocok. Jika Anda baru mendaftar, pastikan email Anda sudah dikonfirmasi (atau dikonfirmasi langsung oleh admin di panel Supabase).',
-      };
+        if (profile?.department === 'Staff OPS' || profile?.department === 'STAFF OPS') {
+          await supabase
+            .from('profiles')
+            .update({ department: 'Staff Operasional' })
+            .eq('id', data.user.id);
+        }
+
+        // Sinkronkan login ke Better Auth jika memungkinkan
+        try {
+          await auth.api.signInEmail({
+            body: { email, password },
+            headers: await headers(),
+          });
+        } catch (syncErr: any) {
+          if (syncErr?.message === 'NEXT_REDIRECT' || syncErr?.digest?.startsWith('NEXT_REDIRECT')) {
+            throw syncErr;
+          }
+        }
+
+        const targetPath = role === 'director' ? '/director' : role === 'finance' ? '/finance' : '/employee';
+        redirect(targetPath);
+      }
+    } catch (supaErr: any) {
+      if (supaErr?.message === 'NEXT_REDIRECT' || supaErr?.digest?.startsWith('NEXT_REDIRECT')) {
+        throw supaErr;
+      }
     }
-    if (msg.includes('email not confirmed')) {
-      return {
-        error: 'Email belum dikonfirmasi. Silakan buka tautan konfirmasi di email Anda atau minta Admin untuk mengonfirmasi akun di Supabase.',
-      };
-    }
-    return { error: error.message };
   }
 
-  // Determine user role and auto-migrate legacy 'Staff OPS' to 'Staff Operasional'
-  let role: UserRole = (data.user?.user_metadata?.role as UserRole) || 'employee';
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, department')
-    .eq('id', data.user.id)
-    .single();
-
-  if (profile?.role) {
-    role = profile.role as UserRole;
-  }
-
-  // Terapkan update otomatis 'Staff OPS' -> 'Staff Operasional' pada akun yang sudah dibuat
-  if (profile?.department === 'Staff OPS' || profile?.department === 'STAFF OPS') {
-    await supabase
-      .from('profiles')
-      .update({ department: 'Staff Operasional' })
-      .eq('id', data.user.id);
-  }
-
-  const targetPath = role === 'director' ? '/director' : role === 'finance' ? '/finance' : '/employee';
-  redirect(targetPath);
+  return {
+    error: 'Email atau kata sandi tidak cocok. Silakan periksa kembali email dan kata sandi Anda.',
+  };
 }
 
-export async function signUp(prevState: any, formData: FormData) {
+export async function signUp(
+  prevState: any,
+  formData: FormData
+): Promise<{ error?: string; success?: string } | void> {
   const rawEmail = formData.get('email') as string;
   const password = formData.get('password') as string;
   const full_name = (formData.get('full_name') as string || '').trim();
-  // Security Fix (VULN-02): Cegah eskalasi hak akses saat pendaftaran akun baru.
-  // Semua pendaftaran baru selalu diatur ke role 'employee'.
-  // Role 'director' atau 'finance' hanya boleh diberikan oleh Administrator di panel Supabase.
   const role: UserRole = 'employee';
   let department = (formData.get('department') as string || '').trim();
   if (!department || department === 'Staff OPS') {
     department = 'Staff Operasional';
   }
-
-  let safeOrigin = process.env.NEXT_PUBLIC_APP_URL || 'https://ourem.vercel.app';
-  const rawOrigin = (formData.get('origin') as string) || '';
-  if (rawOrigin) {
-    try {
-      const parsed = new URL(rawOrigin);
-      const isAllowed =
-        parsed.hostname === 'localhost' ||
-        parsed.hostname === '127.0.0.1' ||
-        parsed.hostname === 'ourem.vercel.app' ||
-        parsed.hostname.endsWith('.vercel.app') ||
-        parsed.hostname.endsWith('ouffice.co.id');
-      if (isAllowed && (parsed.protocol === 'https:' || parsed.protocol === 'http:')) {
-        safeOrigin = parsed.origin;
-      }
-    } catch {}
-  }
-
-  const origin = safeOrigin;
 
   const email = (rawEmail || '').trim().toLowerCase();
 
@@ -111,22 +117,53 @@ export async function signUp(prevState: any, formData: FormData) {
     return { error: 'Password minimal 6 karakter.' };
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!supabaseUrl || supabaseUrl.includes('your-project') || !supabaseUrl.startsWith('https://')) {
-    return {
-      error: 'Supabase belum dihubungkan. Silakan isi URL & Key asli di file .env.local.',
-    };
+  // 1. Daftarkan di Better Auth
+  try {
+    const res = await auth.api.signUpEmail({
+      body: {
+        email,
+        password,
+        name: full_name,
+        role,
+        department,
+      },
+      headers: await headers(),
+    });
+
+    if (res?.user) {
+      // Sinkronkan ke public.profiles agar relasi dokumen di Supabase tetap sinkron
+      try {
+        const supabase = await createClient();
+        await supabase.from('profiles').upsert({
+          id: res.user.id,
+          email,
+          full_name,
+          role,
+          department,
+          updated_at: new Date().toISOString(),
+        });
+      } catch {}
+
+      redirect('/employee');
+    }
+  } catch (err: any) {
+    if (err?.message === 'NEXT_REDIRECT' || err?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw err;
+    }
+    const msg = err?.message?.toLowerCase() || '';
+    if (msg.includes('already exists') || msg.includes('unique')) {
+      return { error: 'Email ini sudah terdaftar. Silakan langsung masuk ke akun Anda.' };
+    }
   }
 
+  // 2. Fallback: Daftarkan di Supabase
   const supabase = await createClient();
-
   const targetPath = '/employee';
 
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/auth/callback?next=${targetPath}`,
       data: {
         full_name,
         role,
@@ -140,39 +177,96 @@ export async function signUp(prevState: any, formData: FormData) {
   }
 
   if (data.user) {
-    // Upsert to profiles table
-    const profilePayload: Record<string, any> = {
-      id: data.user.id,
-      email,
-      full_name,
-      role,
-      department,
-      updated_at: new Date().toISOString(),
-    };
-    let { error: profErr } = await supabase.from('profiles').upsert(profilePayload);
-    if (profErr && profErr.message.includes('department')) {
-      delete profilePayload.department;
-      await supabase.from('profiles').upsert(profilePayload);
-    }
+    try {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        email,
+        full_name,
+        role,
+        department,
+        updated_at: new Date().toISOString(),
+      });
+    } catch {}
   }
 
-  // If session is already created (email confirmation disabled in Supabase)
-  if (data.session) {
-    redirect(targetPath);
-  }
-
-  return {
-    success: 'Pendaftaran berhasil! Silakan periksa inbox email untuk tautan konfirmasi, atau hubungi Admin untuk konfirmasi akun langsung di Supabase.',
-  };
+  redirect(targetPath);
 }
 
 export async function signOutAction() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  try {
+    await auth.api.signOut({
+      headers: await headers(),
+    });
+  } catch {}
+
+  try {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+  } catch {}
+
   redirect('/login');
 }
 
 export async function getCurrentUserProfile(): Promise<UserProfile | null> {
+  // 1. Cek sesi Better Auth terlebih dahulu
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (session?.user) {
+      const u = session.user as any;
+      let userDepartment = u.department || 'Staff Operasional';
+      if (userDepartment === 'Staff OPS' || userDepartment === 'STAFF OPS') {
+        userDepartment = 'Staff Operasional';
+      }
+
+      let phone = u.phone || null;
+      let employee_id = u.employee_id || null;
+      let bank_name = u.bank_name || null;
+      let bank_account_number = u.bank_account_number || null;
+      let bank_account_holder = u.bank_account_holder || null;
+      let signature_url = u.signature_url || null;
+      let avatar_url = u.image || null;
+
+      try {
+        const supabase = await createClient();
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('phone, employee_id, bank_name, bank_account_number, bank_account_holder, avatar_url, signature_url, department')
+          .eq('id', u.id)
+          .single();
+
+        if (prof) {
+          if (!phone && (prof as any).phone) phone = (prof as any).phone;
+          if (!employee_id && (prof as any).employee_id) employee_id = (prof as any).employee_id;
+          if (!bank_name && prof.bank_name) bank_name = prof.bank_name;
+          if (!bank_account_number && prof.bank_account_number) bank_account_number = prof.bank_account_number;
+          if (!bank_account_holder && prof.bank_account_holder) bank_account_holder = prof.bank_account_holder;
+          if (!signature_url && prof.signature_url) signature_url = prof.signature_url;
+          if (!avatar_url && prof.avatar_url) avatar_url = prof.avatar_url;
+          if (prof.department && prof.department !== 'Staff OPS') userDepartment = prof.department;
+        }
+      } catch {}
+
+      return {
+        id: u.id,
+        email: u.email || '',
+        full_name: u.name || u.email?.split('@')[0] || 'User',
+        role: (u.role as UserRole) || 'employee',
+        department: userDepartment,
+        phone,
+        employee_id,
+        bank_name,
+        bank_account_number,
+        bank_account_holder,
+        avatar_url,
+        signature_url,
+      };
+    }
+  } catch {}
+
+  // 2. Fallback: Cek sesi Supabase jika belum ada sesi Better Auth
   const supabase = await createClient();
   const {
     data: { user },

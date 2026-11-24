@@ -111,8 +111,28 @@ async function migrate() {
     `);
     console.log('User synchronization completed:', result.rowCount, 'users synchronized!');
 
+    console.log('Syncing credentials / password hashes from auth.users to public.account...');
+    const accResult = await client.query(`
+      INSERT INTO public."account" (id, "accountId", "providerId", "userId", password, "createdAt", "updatedAt")
+      SELECT 
+        'acc_' || u.id,
+        u.id::text,
+        'credential',
+        u.id::text,
+        u.encrypted_password,
+        COALESCE(u.created_at, NOW()),
+        COALESCE(u.updated_at, NOW())
+      FROM auth.users u
+      JOIN public."user" pu ON pu.id = u.id::text
+      WHERE u.encrypted_password IS NOT NULL
+      ON CONFLICT (id) DO UPDATE SET password = EXCLUDED.password;
+    `);
+    console.log('Accounts password sync completed:', accResult.rowCount, 'accounts synced!');
+
     const userCount = await client.query('SELECT COUNT(*) FROM public."user"');
     console.log('Total users in Better Auth table:', userCount.rows[0].count);
+    const accCount = await client.query('SELECT COUNT(*) FROM public."account"');
+    console.log('Total accounts in Better Auth table:', accCount.rows[0].count);
 
   } finally {
     client.release();
