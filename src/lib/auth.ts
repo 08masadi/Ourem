@@ -3,6 +3,7 @@ import { dash } from '@better-auth/infra';
 import { Pool } from 'pg';
 
 export const auth = betterAuth({
+  appName: 'Ourem Gen 2',
   database: new Pool({
     connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/postgres',
   }),
