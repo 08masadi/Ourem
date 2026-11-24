@@ -3,6 +3,7 @@
 import { useState, useTransition, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { signIn, signUp, requestPasswordReset } from '@/actions/auth';
+import { authClient } from '@/lib/auth-client';
 import { UserRole, DEPARTMENT_OPTIONS } from '@/types/database';
 import NeonVortexLoader from '@/components/ui/NeonVortexLoader';
 import {
@@ -92,12 +93,45 @@ function LoginContent() {
             setIsRegister(false);
           }
         } else {
+          const rawEmail = formData.get('email') as string;
+          const password = formData.get('password') as string;
+          const email = (rawEmail || '').trim().toLowerCase();
+
+          if (!email || !password) {
+            setError('Email dan password wajib diisi.');
+            return;
+          }
+
+          // 1. Coba login langsung via Better Auth client REST API (langsung simpan cookie di browser & kebal redeploy)
+          try {
+            const { data: authData, error: clientErr } = await authClient.signIn.email({
+              email,
+              password,
+            });
+
+            if (authData?.user) {
+              const userRole = (authData.user as any).role || 'employee';
+              const targetPath =
+                userRole === 'director' ? '/director' : userRole === 'finance' ? '/finance' : '/employee';
+              window.location.href = targetPath;
+              return;
+            }
+          } catch {}
+
+          // 2. Fallback ke Server Action (misal akun lama di Supabase)
           const res = await signIn(null, formData);
           if (res?.error) {
             setError(res.error);
           }
         }
       } catch (err: any) {
+        if (
+          err?.message?.includes('failed-to-find-server-action') ||
+          err?.message?.includes('was not found on the server')
+        ) {
+          window.location.reload();
+          return;
+        }
         // Next.js redirect throws a digest error when redirecting from server actions, which is normal
         if (err?.message && !err.message.includes('NEXT_REDIRECT')) {
           setError(err.message || 'Terjadi kesalahan sistem.');
