@@ -15,6 +15,9 @@ export const auth = betterAuth({
     }),
   ],
   advanced: {
+    database: {
+      joins: true, // Enable database joins for better performance
+    },
     ipAddress: {
       // Prioritaskan header Vercel dan Cloudflare untuk mendeteksi IP asli pengguna
       ipAddressHeaders: ['x-vercel-forwarded-for', 'cf-connecting-ip', 'x-forwarded-for'],
