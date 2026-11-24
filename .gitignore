@@ -44,6 +44,7 @@ next-env.d.ts
 *recovery-codes*
 *authenticati*
 *.local.txt
+*Password Database*
 .impeccable/
 
 # android build and apks
