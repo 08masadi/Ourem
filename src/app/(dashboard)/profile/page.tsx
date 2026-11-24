@@ -713,14 +713,15 @@ export default function ProfilePage() {
 
             <p className="text-base font-bold text-white">{profile?.full_name || 'Pengguna'}</p>
             <p className="text-xs text-slate-400 mt-0.5">{profile?.email}</p>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
-              {profile?.role === 'director'
-                ? 'Direktur / Approver'
-                : profile?.role === 'finance'
-                ? 'Finance / Payer'
-                : profile?.department === 'Staff OPS'
+            <p className="text-xs font-semibold text-slate-400 mt-1">
+              {profile?.department === 'Staff OPS' || profile?.department === 'STAFF OPS'
                 ? 'Staff Operasional'
-                : profile?.department || 'Staff Operasional'}
+                : profile?.department ||
+                  (profile?.role === 'director'
+                    ? 'Director'
+                    : profile?.role === 'finance'
+                    ? 'Finance'
+                    : 'Staff Operasional')}
             </p>
           </div>
         </div>

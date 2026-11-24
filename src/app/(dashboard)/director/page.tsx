@@ -64,6 +64,7 @@ export default async function DirectorDashboardPage() {
           fullName={profile?.full_name}
           email={profile?.email}
           role={profile?.role}
+          department={profile?.department}
         />
       </div>
 

@@ -105,6 +105,7 @@ export default async function EmployeeDashboardPage() {
           fullName={profile?.full_name}
           email={profile?.email}
           role={profile?.role}
+          department={profile?.department}
         />
       </div>
 

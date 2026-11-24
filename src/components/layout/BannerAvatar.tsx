@@ -8,10 +8,27 @@ interface BannerAvatarProps {
   fullName?: string | null;
   email?: string | null;
   role?: string | null;
+  department?: string | null;
 }
 
-export default function BannerAvatar({ avatarUrl, fullName, email, role }: BannerAvatarProps) {
+export default function BannerAvatar({
+  avatarUrl,
+  fullName,
+  email,
+  role,
+  department,
+}: BannerAvatarProps) {
   const [showLarge, setShowLarge] = useState(false);
+
+  const displayDepartment =
+    department === 'Staff OPS' || department === 'STAFF OPS'
+      ? 'Staff Operasional'
+      : department ||
+        (role === 'director'
+          ? 'Director'
+          : role === 'finance'
+          ? 'Finance'
+          : 'Staff Operasional');
 
   return (
     <>
@@ -76,6 +93,9 @@ export default function BannerAvatar({ avatarUrl, fullName, email, role }: Banne
 
             <p className="text-base font-bold text-white">{fullName || 'Pengguna'}</p>
             {email && <p className="text-xs text-slate-400 mt-0.5">{email}</p>}
+            <p className="text-xs font-semibold text-slate-400 mt-1">
+              {displayDepartment}
+            </p>
 
             <button
               type="button"

@@ -64,6 +64,7 @@ export default async function FinanceDashboardPage() {
           fullName={profile?.full_name}
           email={profile?.email}
           role={profile?.role}
+          department={profile?.department}
         />
       </div>
 
