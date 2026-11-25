@@ -9,7 +9,7 @@ function cleanUrl(url?: string): string {
 export async function createClient() {
   const cookieStore = await cookies();
   const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   const validUrl = cleanUrl(rawUrl) || 'https://placeholder.supabase.co';
   const validKey = supabaseKey || 'placeholder-key';
