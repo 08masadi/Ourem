@@ -254,7 +254,7 @@ function LoginContent() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                     Alamat Email Terdaftar
                   </label>
                   <div className="relative">
@@ -265,7 +265,7 @@ function LoginContent() {
                       required
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                     />
                   </div>
                 </div>
@@ -310,7 +310,7 @@ function LoginContent() {
               {isRegister && (
                 <>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                       Nama Lengkap
                     </label>
                     <div className="relative">
@@ -319,28 +319,28 @@ function LoginContent() {
                         name="full_name"
                         type="text"
                         required
-                        className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                       Peran / Role Akun
                     </label>
-                    <div className="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 flex items-center justify-between text-xs">
+                    <div className="p-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-orange-500" />
-                        <span className="font-bold text-orange-400">Employee (Staff)</span>
+                        <span className="font-bold text-orange-600 dark:text-orange-400">Employee (Staff)</span>
                       </div>
-                      <span className="text-[10px] text-slate-500 font-medium">Role Direktur/Finance diset Admin</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Role Direktur/Finance diset Admin</span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
                       <span className="flex items-center gap-1.5">
-                        <Briefcase className="w-3.5 h-3.5 text-orange-400" />
+                        <Briefcase className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400" />
                         <span>Departemen</span>
                       </span>
                     </label>
@@ -350,10 +350,10 @@ function LoginContent() {
                         name="department"
                         value={department}
                         onChange={(e) => setDepartment(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
                       >
                         {DEPARTMENT_OPTIONS.map((dep) => (
-                          <option key={dep} value={dep}>
+                          <option key={dep} value={dep} className="text-slate-900 bg-white dark:text-white dark:bg-slate-900">
                             {dep}
                           </option>
                         ))}
@@ -364,7 +364,7 @@ function LoginContent() {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   Alamat Email
                 </label>
                 <div className="relative">
@@ -375,14 +375,14 @@ function LoginContent() {
                     required
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold text-slate-300">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Kata Sandi (Password)
                   </label>
                   {!isRegister && (
@@ -393,7 +393,7 @@ function LoginContent() {
                         setError(null);
                         setSuccess(null);
                       }}
-                      className="text-xs font-semibold text-orange-400 hover:text-orange-300 transition cursor-pointer"
+                      className="text-xs font-semibold text-orange-500 hover:text-orange-400 dark:text-orange-400 dark:hover:text-orange-300 transition cursor-pointer"
                     >
                       Lupa Password?
                     </button>
@@ -405,7 +405,7 @@ function LoginContent() {
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     required
-                    className="w-full pl-10 pr-10 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                   />
                   <button
                     type="button"
