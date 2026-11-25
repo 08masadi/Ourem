@@ -157,10 +157,10 @@ function LoginContent() {
               className="logo-light h-14 sm:h-16 w-auto object-contain"
             />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">
+          <h1 className="text-2xl font-black text-orange-500 dark:text-orange-400 tracking-tight">
             Sistem Reimbursement Enterprise
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">
             {isForgotPassword
               ? 'Pemulihan Akun & Reset Kata Sandi'
               : isRegister
