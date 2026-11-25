@@ -91,8 +91,18 @@ function ResetPasswordContent() {
     setError(null);
     setSuccess(null);
 
-    if (password.length < 6) {
-      setError('Kata sandi baru minimal 6 karakter.');
+    if (password.length < 8) {
+      setError('Kata sandi baru minimal 8 karakter.');
+      return;
+    }
+
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password);
+
+    if (!hasUpper || !hasLower || !hasNumber || !hasSymbol) {
+      setError('Kata sandi baru harus memuat kombinasi huruf besar, huruf kecil, angka, dan simbol.');
       return;
     }
 

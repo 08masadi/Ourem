@@ -30,11 +30,21 @@ function LoginContent() {
   const [role, setRole] = useState<UserRole>('employee');
   const [department, setDepartment] = useState('Staff Operasional');
   const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [resetEmailSent, setResetEmailSent] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Password strength checks for register
+  const passMinLength = passwordInput.length >= 8;
+  const passHasUpper = /[A-Z]/.test(passwordInput);
+  const passHasLower = /[a-z]/.test(passwordInput);
+  const passHasNumber = /[0-9]/.test(passwordInput);
+  const passHasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(passwordInput);
+  const isPasswordStrong = passMinLength && passHasUpper && passHasLower && passHasNumber && passHasSymbol;
 
   const handleRoleChange = (newRole: UserRole) => {
     setRole(newRole);
@@ -44,6 +54,17 @@ function LoginContent() {
       setDepartment('Finance');
     }
   };
+
+  // Load Remember Me email on mount
+  useEffect(() => {
+    try {
+      const savedEmail = localStorage.getItem('ourem_remember_email');
+      if (savedEmail) {
+        setEmailInput(savedEmail);
+        setRememberMe(true);
+      }
+    } catch {}
+  }, []);
 
   // Handle URL query parameters (e.g. ?reset=success or ?error=...)
   useEffect(() => {
@@ -84,6 +105,12 @@ function LoginContent() {
             setResetEmailSent(res.email || emailInput);
           }
         } else if (isRegister) {
+          if (!isPasswordStrong) {
+            setError(
+              'Kata sandi harus minimal 8 karakter dan memuat kombinasi huruf besar, huruf kecil, angka, serta simbol khusus.'
+            );
+            return;
+          }
           formData.set('origin', typeof window !== 'undefined' ? window.location.origin : '');
           const res = await signUp(null, formData);
           if (res?.error) {
@@ -91,6 +118,7 @@ function LoginContent() {
           } else if (res?.success) {
             setSuccess(res.success);
             setIsRegister(false);
+            setPasswordInput('');
           }
         } else {
           const rawEmail = formData.get('email') as string;
@@ -102,11 +130,21 @@ function LoginContent() {
             return;
           }
 
+          // Simpan atau hapus Remember Me
+          try {
+            if (rememberMe) {
+              localStorage.setItem('ourem_remember_email', email);
+            } else {
+              localStorage.removeItem('ourem_remember_email');
+            }
+          } catch {}
+
           // 1. Coba login langsung via Better Auth client REST API (langsung simpan cookie di browser & kebal redeploy)
           try {
             const { data: authData, error: clientErr } = await authClient.signIn.email({
               email,
               password,
+              rememberMe,
             });
 
             if (authData?.user) {
@@ -141,7 +179,10 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-zinc-900 flex flex-col justify-center items-center p-4">
+    <div
+      style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
+      className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-zinc-900 flex flex-col justify-center items-center p-4 [&_*]:font-[Arial,Helvetica,sans-serif]"
+    >
       <div className="w-full max-w-md">
         {/* Brand Header */}
         <div className="text-center mb-8">
@@ -181,6 +222,7 @@ function LoginContent() {
                   setIsForgotPassword(false);
                   setError(null);
                   setSuccess(null);
+                  setPasswordInput('');
                 }}
                 className={`flex-1 py-2 text-xs font-bold rounded-xl transition cursor-pointer ${
                   !isRegister
@@ -197,6 +239,7 @@ function LoginContent() {
                   setIsForgotPassword(false);
                   setError(null);
                   setSuccess(null);
+                  setPasswordInput('');
                 }}
                 className={`flex-1 py-2 text-xs font-bold rounded-xl transition cursor-pointer ${
                   isRegister
@@ -263,9 +306,10 @@ function LoginContent() {
                       name="email"
                       type="email"
                       required
+                      placeholder="nama@email.com"
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                     />
                   </div>
                 </div>
@@ -319,7 +363,8 @@ function LoginContent() {
                         name="full_name"
                         type="text"
                         required
-                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                        placeholder="Nama lengkap sesuai KTP"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                       />
                     </div>
                   </div>
@@ -363,6 +408,7 @@ function LoginContent() {
                 </>
               )}
 
+              {/* Alamat Email */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   Alamat Email
@@ -373,19 +419,87 @@ function LoginContent() {
                     name="email"
                     type="email"
                     required
+                    placeholder="nama@email.com"
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                   />
                 </div>
               </div>
 
+              {/* Kata Sandi (Password) */}
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Kata Sandi (Password)
-                  </label>
-                  {!isRegister && (
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Kata Sandi (Password)
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <input
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    placeholder="Minimal 8 karakter"
+                    value={passwordInput}
+                    onChange={(e) => setPasswordInput(e.target.value)}
+                    className="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition cursor-pointer"
+                    title={showPassword ? 'Sembunyikan Kata Sandi' : 'Tampilkan Kata Sandi'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+
+                {/* Password Strength Requirement Checklist saat Daftar Baru */}
+                {isRegister && (
+                  <div className="mt-2.5 p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] space-y-1.5">
+                    <div className="text-slate-400 font-semibold mb-1">Syarat Kombinasi Kata Sandi Baru:</div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <div className={`flex items-center gap-1.5 ${passMinLength ? 'text-emerald-400 font-medium' : 'text-slate-500'}`}>
+                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passMinLength ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-500'}`}>
+                          {passMinLength ? '✓' : '•'}
+                        </span>
+                        <span>Minimal 8 karakter</span>
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${passHasUpper && passHasLower ? 'text-emerald-400 font-medium' : 'text-slate-500'}`}>
+                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passHasUpper && passHasLower ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-500'}`}>
+                          {passHasUpper && passHasLower ? '✓' : '•'}
+                        </span>
+                        <span>Huruf besar & kecil</span>
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${passHasNumber ? 'text-emerald-400 font-medium' : 'text-slate-500'}`}>
+                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passHasNumber ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-500'}`}>
+                          {passHasNumber ? '✓' : '•'}
+                        </span>
+                        <span>Kombinasi angka (0-9)</span>
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${passHasSymbol ? 'text-emerald-400 font-medium' : 'text-slate-500'}`}>
+                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passHasSymbol ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-500'}`}>
+                          {passHasSymbol ? '✓' : '•'}
+                        </span>
+                        <span>Simbol khusus (!@#$...)</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Baris Bawah Kolom Password: Checkbox Remember Me (kiri) & Tombol Lupa Password (kanan) */}
+                {!isRegister && (
+                  <div className="flex items-center justify-between mt-2.5 px-0.5">
+                    <label className="flex items-center gap-2 cursor-pointer select-none group">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="w-4 h-4 rounded border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-950 text-orange-500 accent-orange-500 focus:ring-orange-500 cursor-pointer"
+                      />
+                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium group-hover:text-slate-800 dark:group-hover:text-slate-200 transition">
+                        Remember Me
+                      </span>
+                    </label>
                     <button
                       type="button"
                       onClick={() => {
@@ -397,25 +511,8 @@ function LoginContent() {
                     >
                       Lupa Password?
                     </button>
-                  )}
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    className="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition cursor-pointer"
-                    title={showPassword ? 'Sembunyikan Kata Sandi' : 'Tampilkan Kata Sandi'}
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+                  </div>
+                )}
               </div>
 
               <button
@@ -462,7 +559,10 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6">
+        <div
+          style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
+          className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6"
+        >
           <NeonVortexLoader
             size="md"
             label="Menyiapkan Halaman Login..."

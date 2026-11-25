@@ -113,8 +113,19 @@ export async function signUp(
     return { error: 'Nama lengkap, email, dan password wajib diisi.' };
   }
 
-  if (password.length < 6) {
-    return { error: 'Password minimal 6 karakter.' };
+  if (password.length < 8) {
+    return { error: 'Password minimal 8 karakter.' };
+  }
+
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password);
+
+  if (!hasUpper || !hasLower || !hasNumber || !hasSymbol) {
+    return {
+      error: 'Password harus memuat kombinasi huruf besar, huruf kecil, angka, dan simbol.',
+    };
   }
 
   // 1. Daftarkan di Better Auth
