@@ -350,13 +350,48 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
   };
 }
 
-export async function uploadAvatarAction(formData: FormData): Promise<{ error?: string; success?: string; avatar_url?: string }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export async function getAuthUser(): Promise<{
+  id: string;
+  email: string;
+  role: UserRole;
+  full_name?: string;
+  user_metadata?: Record<string, any>;
+} | null> {
+  const profile = await getCurrentUserProfile();
+  if (profile?.id) {
+    return {
+      id: profile.id,
+      email: profile.email,
+      role: profile.role,
+      full_name: profile.full_name,
+      user_metadata: {
+        role: profile.role,
+        full_name: profile.full_name,
+      },
+    };
+  }
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      return {
+        id: user.id,
+        email: user.email || '',
+        role: (user.user_metadata?.role as UserRole) || 'employee',
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+        user_metadata: user.user_metadata,
+      };
+    }
+  } catch {}
+  return null;
+}
 
+export async function uploadAvatarAction(formData: FormData): Promise<{ error?: string; success?: string; avatar_url?: string }> {
+  const user = await getAuthUser();
   if (!user) return { error: 'Unauthorized' };
+  const supabase = await createClient();
 
   const avatarData = (formData.get('avatar_data') as string) || '';
   const avatarFile = formData.get('avatar_file') as File | null;
@@ -439,12 +474,9 @@ export async function uploadAvatarAction(formData: FormData): Promise<{ error?: 
 }
 
 export async function updateProfileBank(formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) return { error: 'Unauthorized' };
+  const supabase = await createClient();
 
   const full_name = formData.get('full_name') as string;
   let department = formData.get('department') as string;

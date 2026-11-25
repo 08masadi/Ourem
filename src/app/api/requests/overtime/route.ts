@@ -10,17 +10,16 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const userProfile = await getCurrentUserProfile();
+    if (!userProfile?.id) {
       return NextResponse.json(
         { error: 'Sesi login telah berakhir. Silakan login kembali.' },
         { status: 401 }
       );
     }
+
+    const user = { id: userProfile.id, email: userProfile.email };
+    const supabase = await createClient();
 
     const formData = await request.formData();
 
@@ -38,7 +37,10 @@ export async function POST(request: Request) {
     const uraian_pekerjaan = (formData.get('uraian_pekerjaan') as string) || '';
     const nominalStr = (formData.get('nominal') as string) || '0';
     const rawOtDept = (formData.get('department') as string) || '';
-    const department = rawOtDept === 'Staff OPS' || !rawOtDept ? 'Staff Operasional' : rawOtDept;
+    const department =
+      rawOtDept === 'Staff OPS' || !rawOtDept
+        ? userProfile.department || 'Staff Operasional'
+        : rawOtDept;
 
     if (!nama_pekerjaan || !jam_lembur || !uraian_pekerjaan) {
       return NextResponse.json(
@@ -51,13 +53,8 @@ export async function POST(request: Request) {
     const rawNominal = Number(cleanedNominal) || 0;
     const dbAmount = rawNominal > 0 ? rawNominal : 1;
 
-    let userProfile = null;
-    try {
-      userProfile = await getCurrentUserProfile();
-    } catch {}
-
-    const signature_url = userProfile?.signature_url || '';
-    const finalNamaKaryawan = nama_karyawan || userProfile?.full_name || 'Karyawan';
+    const signature_url = userProfile.signature_url || '';
+    const finalNamaKaryawan = nama_karyawan || userProfile.full_name || 'Karyawan';
 
     const overtimeData: OvertimeData = {
       tanggal_lembur,

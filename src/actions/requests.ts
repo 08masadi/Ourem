@@ -10,7 +10,7 @@ import {
   UserRole,
   OvertimeData,
 } from '@/types/database';
-import { getCurrentUserProfile } from './auth';
+import { getCurrentUserProfile, getAuthUser } from './auth';
 import {
   normalizeAccount,
   extractMetadataFromDescription,
@@ -32,14 +32,12 @@ export async function createReimbursement(arg1: any, arg2?: any) {
       return { error: 'Form data pengajuan tidak valid.' };
     }
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
+    const user = await getAuthUser();
     if (!user) {
       return { error: 'Anda harus login untuk membuat pengajuan.' };
     }
+
+    const supabase = await createClient();
 
     const title = (formData.get('title') as string) || '';
     const reimbursement_type = (formData.get('reimbursement_type') as ReimbursementType) || 'Petty Cash';
@@ -254,14 +252,12 @@ export async function createOvertimeRequest(arg1: any, arg2?: any) {
       return { error: 'Form data lembur tidak valid.' };
     }
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
+    const user = await getAuthUser();
     if (!user) {
       return { error: 'Anda harus login untuk membuat pengajuan lembur.' };
     }
+
+    const supabase = await createClient();
 
     const tanggal_lembur =
       (formData.get('tanggal_lembur') as string) || new Date().toISOString().split('T')[0];
@@ -398,14 +394,11 @@ export async function createOvertimeRequest(arg1: any, arg2?: any) {
 }
 
 export async function updateReimbursement(prevState: any, formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) {
     return { error: 'Anda harus login untuk mengubah pengajuan.' };
   }
+  const supabase = await createClient();
 
   const id = formData.get('id') as string;
   const title = formData.get('title') as string;
@@ -595,12 +588,9 @@ export async function updateReimbursement(prevState: any, formData: FormData) {
 }
 
 export async function deleteReceiptAction(requestId: string, targetReceiptUrl?: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) return { error: 'Unauthorized' };
+  const supabase = await createClient();
 
   // Fetch current request
   const { data: req, error: fetchErr } = await supabase
@@ -677,14 +667,11 @@ export async function deleteReceiptAction(requestId: string, targetReceiptUrl?: 
 }
 
 export async function updateOvertimeRequest(prevState: any, formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) {
     return { error: 'Anda harus login untuk mengubah pengajuan lembur.' };
   }
+  const supabase = await createClient();
 
   const id = formData.get('id') as string;
   const tanggal_lembur =
@@ -807,12 +794,9 @@ export async function updateOvertimeRequest(prevState: any, formData: FormData) 
 }
 
 export async function getEmployeeRequests(): Promise<ReimbursementRequest[]> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) return [];
+  const supabase = await createClient();
 
   let rawList: any[] = [];
 
@@ -1101,12 +1085,9 @@ export async function updateDirectorStatus(
   status: RequestStatus,
   rejectionReason?: string
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) return { error: 'Unauthorized' };
+  const supabase = await createClient();
 
   // Security Fix (VULN-01): Verifikasi bahwa user benar-benar memiliki role 'director'
   const { data: userProfile } = await supabase
@@ -1184,12 +1165,9 @@ export async function updateFinancePayment(
   paymentStatus: PaymentStatus,
   paymentNote?: string
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) return { error: 'Unauthorized' };
+  const supabase = await createClient();
 
   // Security Fix (VULN-01): Verifikasi bahwa user benar-benar memiliki role 'finance'
   const { data: userProfile } = await supabase
@@ -1244,12 +1222,9 @@ export async function updateFinancePayment(
 }
 
 export async function deleteReimbursementRequest(requestId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) return { error: 'Unauthorized' };
+  const supabase = await createClient();
 
   // Security Fix (VULN-04): Verifikasi kepemilikan dan status sebelum penghapusan
   const { data: userProfile } = await supabase
@@ -1317,12 +1292,9 @@ export async function deleteReimbursementRequest(requestId: string) {
 }
 
 export async function deleteBatchReimbursementRequests(requestIds: string[]) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) return { error: 'Unauthorized' };
+  const supabase = await createClient();
   if (!requestIds || requestIds.length === 0) return { success: true };
 
   // Security Fix (VULN-04): Filter target baris agar karyawan hanya bisa menghapus miliknya sendiri yang belum disetujui
@@ -1395,12 +1367,9 @@ export async function updateBatchDirectorStatus(
   status: RequestStatus = 'Disetujui',
   rejectionReason?: string
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) return { error: 'Unauthorized' };
+  const supabase = await createClient();
   if (!requestIds || requestIds.length === 0) return { success: true };
 
   // Security Fix (VULN-01): Verifikasi bahwa user benar-benar memiliki role 'director'
@@ -1482,12 +1451,9 @@ export async function updateBatchFinancePayment(
   paymentStatus: PaymentStatus = 'Paid',
   paymentNote?: string
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) return { error: 'Unauthorized' };
+  const supabase = await createClient();
   if (!requestIds || requestIds.length === 0) return { success: true };
 
   // Security Fix (VULN-01): Verifikasi bahwa user benar-benar memiliki role 'finance'
@@ -1567,12 +1533,9 @@ export interface AppNotification {
 }
 
 export async function getUserNotifications(targetRole?: string): Promise<AppNotification[]> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   if (!user) return [];
+  const supabase = await createClient();
 
   const effectiveRole = (
     targetRole ||
@@ -1833,11 +1796,9 @@ export async function getUserNotifications(targetRole?: string): Promise<AppNoti
 
 // Server action: Tandai satu notifikasi sebagai sudah dibaca (disimpan permanen di cloud akun user)
 export async function markNotificationAsRead(id: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false };
+  const supabase = await createClient();
 
   const current: string[] = Array.isArray(user.user_metadata?.read_notifications)
     ? user.user_metadata.read_notifications
@@ -1845,39 +1806,39 @@ export async function markNotificationAsRead(id: string) {
 
   if (!current.includes(id)) {
     const updated = [...current, id];
-    await supabase.auth.updateUser({
-      data: { read_notifications: updated },
-    });
+    try {
+      await supabase.auth.updateUser({
+        data: { read_notifications: updated },
+      });
+    } catch {}
   }
   return { success: true };
 }
 
 // Server action: Tandai semua notifikasi sebagai sudah dibaca (disimpan permanen di cloud akun user)
 export async function markAllNotificationsAsRead(ids: string[]) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false };
+  const supabase = await createClient();
 
   const current: string[] = Array.isArray(user.user_metadata?.read_notifications)
     ? user.user_metadata.read_notifications
     : [];
 
   const merged = Array.from(new Set([...current, ...ids]));
-  await supabase.auth.updateUser({
-    data: { read_notifications: merged },
-  });
+  try {
+    await supabase.auth.updateUser({
+      data: { read_notifications: merged },
+    });
+  } catch {}
   return { success: true };
 }
 
 // Server action: Hapus notifikasi (disimpan permanen di cloud akun user agar tidak muncul lagi)
 export async function deleteNotificationAction(id: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false };
+  const supabase = await createClient();
 
   const current: string[] = Array.isArray(user.user_metadata?.deleted_notifications)
     ? user.user_metadata.deleted_notifications
@@ -1885,42 +1846,40 @@ export async function deleteNotificationAction(id: string) {
 
   if (!current.includes(id)) {
     const updated = [...current, id];
-    await supabase.auth.updateUser({
-      data: { deleted_notifications: updated },
-    });
+    try {
+      await supabase.auth.updateUser({
+        data: { deleted_notifications: updated },
+      });
+    } catch {}
   }
   return { success: true };
 }
 
 // Server action: Hapus semua notifikasi sekaligus (disimpan permanen di cloud akun user)
 export async function clearAllNotificationsAction(ids: string[]) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false };
+  const supabase = await createClient();
 
   const current: string[] = Array.isArray(user.user_metadata?.deleted_notifications)
     ? user.user_metadata.deleted_notifications
     : [];
 
   const merged = Array.from(new Set([...current, ...ids]));
-  await supabase.auth.updateUser({
-    data: { deleted_notifications: merged },
-  });
+  try {
+    await supabase.auth.updateUser({
+      data: { deleted_notifications: merged },
+    });
+  } catch {}
   return { success: true };
 }
 
 // Server action: Simpan subscription push notification dari perangkat Android / browser
 export async function subscribeToPushNotifications(subscription: any, userAgent?: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: 'Unauthorized' };
 
-  const profile = await getCurrentUserProfile();
-  const role = profile?.role || 'employee';
+  const role = user.role || 'employee';
 
   const ok = await saveSubscriptionToStorage(user.id, role, subscription, userAgent);
   return { success: ok };

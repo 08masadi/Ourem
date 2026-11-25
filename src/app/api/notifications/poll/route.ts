@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 import { getUserNotifications } from '@/actions/requests';
+import { getAuthUser } from '@/actions/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,10 +14,7 @@ function cleanUrl(url?: string): string {
 export async function GET(request: Request) {
   try {
     // Security Fix (VULN-07): Autentikasi sesi & otorisasi akses polling notifikasi
-    const serverSupabase = await createClient();
-    const {
-      data: { user },
-    } = await serverSupabase.auth.getUser();
+    const user = await getAuthUser();
 
     if (!user) {
       return NextResponse.json(
@@ -25,13 +23,14 @@ export async function GET(request: Request) {
       );
     }
 
+    const serverSupabase = await createClient();
     const { data: userProfile } = await serverSupabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
 
-    const actualRole = userProfile?.role || 'employee';
+    const actualRole = userProfile?.role || user.role || 'employee';
 
     const { searchParams } = new URL(request.url);
     const requestedUserId = searchParams.get('userId');

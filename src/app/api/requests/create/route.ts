@@ -9,17 +9,16 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const userProfile = await getCurrentUserProfile();
+    if (!userProfile?.id) {
       return NextResponse.json(
         { error: 'Sesi login telah berakhir. Silakan login kembali.' },
         { status: 401 }
       );
     }
+
+    const user = { id: userProfile.id, email: userProfile.email };
+    const supabase = await createClient();
 
     const formData = await request.formData();
 
@@ -32,16 +31,14 @@ export async function POST(request: Request) {
       (formData.get('category') as string) ||
       'Bensin';
     const rawApiDept = (formData.get('department') as string) || '';
-    const department = rawApiDept === 'Staff OPS' || !rawApiDept ? 'Staff Operasional' : rawApiDept;
+    const department =
+      rawApiDept === 'Staff OPS' || !rawApiDept
+        ? userProfile.department || 'Staff Operasional'
+        : rawApiDept;
     let signature_url = (formData.get('signature_url') as string) || '';
 
-    let userProfile = null;
-    try {
-      userProfile = await getCurrentUserProfile();
-    } catch {}
-
     if (!signature_url) {
-      signature_url = userProfile?.signature_url || '';
+      signature_url = userProfile.signature_url || '';
     }
     const amountStr = (formData.get('amount') as string) || '0';
     const request_date =
