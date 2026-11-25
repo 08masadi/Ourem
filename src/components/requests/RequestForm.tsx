@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useTransition, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient as createBrowserClient } from '@/lib/supabase/client';
 import { createReimbursement } from '@/actions/requests';
 import { getCurrentUserProfile } from '@/actions/auth';
 import { ReimbursementType, UserProfile, DEPARTMENT_OPTIONS } from '@/types/database';
+import { compressImageFile } from '@/lib/imageCompressor';
 import {
   AccountBlockData,
   formatAccountBlocksToDescription,
@@ -48,68 +50,22 @@ interface AccountBlockState {
   }>;
 }
 
-async function compressImageFile(file: File, maxWidth = 1200, quality = 0.82): Promise<File> {
-  if (!file.type.startsWith('image/')) {
-    return file;
-  }
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxWidth || height > maxWidth) {
-          if (width > height) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          } else {
-            width = Math.round((width * maxWidth) / height);
-            height = maxWidth;
-          }
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(file);
-          return;
-        }
-
-        ctx.drawImage(img, 0, 0, width, height);
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              resolve(file);
-              return;
-            }
-            const cleanName = file.name.replace(/\.[^/.]+$/, '') + '.jpg';
-            resolve(new File([blob], cleanName, { type: 'image/jpeg', lastModified: Date.now() }));
-          },
-          'image/jpeg',
-          quality
-        );
-      };
-      img.onerror = () => resolve(file);
-      img.src = e.target?.result as string;
-    };
-    reader.onerror = () => resolve(file);
-    reader.readAsDataURL(file);
-  });
+interface RequestFormProps {
+  initialProfile?: UserProfile | null;
 }
 
-export default function RequestForm() {
+export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
+  const router = useRouter();
   const [reimbursementType, setReimbursementType] = useState<ReimbursementType>('Petty Cash');
-  const [department, setDepartment] = useState<string>('Staff Operasional');
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(initialProfile || null);
+  const [department, setDepartment] = useState<string>(
+    initialProfile?.department && initialProfile.department !== 'Staff OPS'
+      ? initialProfile.department
+      : 'Staff Operasional'
+  );
   const [requestDate, setRequestDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
-
-  // Profile data for auto-attaching signature and department
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // Dynamic account blocks
   const [blocks, setBlocks] = useState<AccountBlockState[]>([
@@ -193,6 +149,7 @@ export default function RequestForm() {
   };
 
   useEffect(() => {
+    if (initialProfile) return;
     async function loadProfile() {
       const p = await getCurrentUserProfile();
       if (p) {
@@ -202,7 +159,7 @@ export default function RequestForm() {
       }
     }
     loadProfile();
-  }, []);
+  }, [initialProfile]);
 
   const handleTypeChange = (newType: ReimbursementType) => {
     setReimbursementType(newType);
@@ -354,17 +311,16 @@ export default function RequestForm() {
 
     startTransition(async () => {
       try {
-        setSubmittingStatus('Mengompres foto nota...');
+        setSubmittingStatus('Mengompres & mengunggah foto nota...');
 
-        // 1. Process and compress receipt files, and attempt direct Supabase storage upload
+        // 1. Process and compress receipt files in parallel, and attempt direct Supabase storage upload
         const supabase = createBrowserClient();
         const uploadedBlockUrls: Record<number, string> = {};
         const compressedBlockFiles: Record<number, File> = {};
 
-        for (let idx = 0; idx < blocks.length; idx++) {
-          const b = blocks[idx];
-          if (b.receiptFile) {
-            setSubmittingStatus(`Mengompres & mengunggah nota #${idx + 1}...`);
+        await Promise.all(
+          blocks.map(async (b, idx) => {
+            if (!b.receiptFile) return;
             try {
               const compressed = await compressImageFile(b.receiptFile, 1200, 0.82);
               compressedBlockFiles[idx] = compressed;
@@ -392,8 +348,8 @@ export default function RequestForm() {
             } catch (storageErr) {
               console.warn(`Direct upload failed for block ${idx}, will send to server:`, storageErr);
             }
-          }
-        }
+          })
+        );
 
         setSubmittingStatus('Menyimpan data pengajuan...');
 
@@ -500,7 +456,8 @@ export default function RequestForm() {
           setError(res?.error || 'Gagal mengirim pengajuan. Silakan coba sesaat lagi.');
         } else {
           const backUrl = userProfile?.role === 'director' ? '/director' : userProfile?.role === 'finance' ? '/finance' : '/employee';
-          window.location.href = `${backUrl}?success=created_reimbursement`;
+          router.push(`${backUrl}?success=created_reimbursement`);
+          router.refresh();
         }
       } catch (err: any) {
         console.error('Submission error:', err);

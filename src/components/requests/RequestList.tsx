@@ -593,8 +593,10 @@ export default function RequestList({
   const handleOpenWordPreview = async (req: ReimbursementRequest) => {
     try {
       setWordLoadingId(req.id);
-      const finSig = await getBestFinanceSignature();
-      const dirSig = await getBestDirectorSignature();
+      const [finSig, dirSig] = await Promise.all([
+        getBestFinanceSignature(),
+        getBestDirectorSignature(),
+      ]);
 
       let enrichedReq = req;
       if (req.user_id) {
@@ -641,8 +643,10 @@ export default function RequestList({
   const handleExportDocx = async (req: ReimbursementRequest) => {
     try {
       setWordLoadingId(req.id);
-      const finSig = await getBestFinanceSignature();
-      const dirSig = await getBestDirectorSignature();
+      const [finSig, dirSig] = await Promise.all([
+        getBestFinanceSignature(),
+        getBestDirectorSignature(),
+      ]);
 
       let enrichedReq = req;
       if (req.user_id) {
@@ -710,8 +714,10 @@ export default function RequestList({
 
     if (isOvertime) {
       const ov = extractOvertimeFromDescription(req.description);
-      const finSig = await getBestFinanceSignature();
-      const dirSig = await getBestDirectorSignature();
+      const [finSig, dirSig] = await Promise.all([
+        getBestFinanceSignature(),
+        getBestDirectorSignature(),
+      ]);
       const isApproved = req.status === 'Disetujui';
       const isPaid = req.payment_status === 'Paid';
       const paidDate = req.payment_action_at
@@ -944,8 +950,10 @@ export default function RequestList({
     });
 
     const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
-    const finSig = await getBestFinanceSignature();
-    const dirSig = await getBestDirectorSignature();
+    const [finSig, dirSig] = await Promise.all([
+      getBestFinanceSignature(),
+      getBestDirectorSignature(),
+    ]);
 
     const title = `LAPORAN REKAPITULASI PEMBAYARAN ${targetType.toUpperCase()}`;
 

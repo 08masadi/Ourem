@@ -3,9 +3,8 @@
 import React, { useRef, useState } from 'react';
 import { ReimbursementVoucherPrintData } from '@/types/database';
 import { Download, Printer, X, Loader2 } from 'lucide-react';
-import { normalizeAccount } from '@/lib/formatters';
+import { normalizeAccount, formatDateSlash } from '@/lib/formatters';
 import { printVoucherDocument, downloadVoucherPdf } from '@/lib/printUtils';
-import { formatDateSlash } from '@/lib/wordVoucherGenerator';
 
 interface ReimbursementVoucherPdfProps {
   data: ReimbursementVoucherPrintData;

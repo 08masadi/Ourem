@@ -1,5 +1,6 @@
 'use server';
 
+import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { UserRole, UserProfile } from '@/types/database';
 import { redirect } from 'next/navigation';
@@ -204,21 +205,21 @@ export async function signUp(
 }
 
 export async function signOutAction() {
-  try {
-    await auth.api.signOut({
-      headers: await headers(),
-    });
-  } catch {}
-
-  try {
-    const supabase = await createClient();
-    await supabase.auth.signOut();
-  } catch {}
+  await Promise.allSettled([
+    auth.api
+      .signOut({
+        headers: await headers(),
+      })
+      .catch(() => null),
+    createClient()
+      .then((supabase) => supabase.auth.signOut())
+      .catch(() => null),
+  ]);
 
   redirect('/login');
 }
 
-export async function getCurrentUserProfile(): Promise<UserProfile | null> {
+export const getCurrentUserProfile = cache(async (): Promise<UserProfile | null> => {
   // 1. Cek sesi Better Auth terlebih dahulu
   try {
     const session = await auth.api.getSession({
@@ -359,15 +360,15 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
     avatar_url,
     signature_url,
   };
-}
+});
 
-export async function getAuthUser(): Promise<{
+export const getAuthUser = cache(async (): Promise<{
   id: string;
   email: string;
   role: UserRole;
   full_name?: string;
   user_metadata?: Record<string, any>;
-} | null> {
+} | null> => {
   const profile = await getCurrentUserProfile();
   if (profile?.id) {
     return {
@@ -397,7 +398,7 @@ export async function getAuthUser(): Promise<{
     }
   } catch {}
   return null;
-}
+});
 
 export async function uploadAvatarAction(formData: FormData): Promise<{ error?: string; success?: string; avatar_url?: string }> {
   const user = await getAuthUser();
@@ -774,10 +775,10 @@ export async function updateProfileBank(formData: FormData) {
   };
 }
 
-export async function getGlobalFinanceSignature(): Promise<{
+export const getGlobalFinanceSignature = cache(async (): Promise<{
   signature_url: string | null;
   full_name: string | null;
-}> {
+}> => {
   const supabase = await createClient();
   try {
     // 1. Direct check in profiles table
@@ -847,12 +848,12 @@ export async function getGlobalFinanceSignature(): Promise<{
   }
 
   return { signature_url: null, full_name: 'FINANCE DEPT' };
-}
+});
 
-export async function getGlobalDirectorSignature(): Promise<{
+export const getGlobalDirectorSignature = cache(async (): Promise<{
   signature_url: string | null;
   full_name: string | null;
-}> {
+}> => {
   const supabase = await createClient();
   try {
     // 1. Direct check in profiles table
@@ -920,7 +921,7 @@ export async function getGlobalDirectorSignature(): Promise<{
   }
 
   return { signature_url: null, full_name: 'DIREKTUR UTAMA' };
-}
+});
 
 export async function requestPasswordReset(prevState: any, formData: FormData) {
   const email = (formData.get('email') as string)?.trim();

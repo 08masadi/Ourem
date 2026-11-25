@@ -80,34 +80,8 @@ export function formatCurrencyNumber(num: number): string {
   }).format(num);
 }
 
-/**
- * Format YYYY-MM-DD to DD/MM/YYYY
- */
-export function formatDateSlash(dateStr?: string | null): string {
-  if (!dateStr) {
-    const today = new Date();
-    const d = String(today.getDate()).padStart(2, '0');
-    const m = String(today.getMonth() + 1).padStart(2, '0');
-    const y = today.getFullYear();
-    return `${d}/${m}/${y}`;
-  }
-  const clean = dateStr.split('T')[0];
-  const parts = clean.split('-');
-  if (parts.length === 3) {
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
-  }
-  return dateStr;
-}
-
-/**
- * Format RF Number (e.g. RF-06112026/085)
- */
-export function formatRfNumber(dateStr?: string | null, id?: string): string {
-  const slashDate = formatDateSlash(dateStr);
-  const cleanDate = slashDate.replace(/\//g, '');
-  const seq = id ? id.slice(-3).toUpperCase() : '085';
-  return `RF-${cleanDate}/${seq}`;
-}
+import { formatDateSlash, formatRfNumber } from '@/lib/formatters';
+export { formatDateSlash, formatRfNumber };
 
 /**
  * Fetch image and determine dimensions and format

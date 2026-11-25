@@ -3,14 +3,15 @@
 import React, { useState, useTransition, useRef } from 'react';
 import { ReimbursementRequest, ReimbursementType, DEPARTMENT_OPTIONS, UserRole } from '@/types/database';
 import { updateReimbursement } from '@/actions/requests';
+import { compressImageFile } from '@/lib/imageCompressor';
 import {
   AccountBlockData,
   formatAccountBlocksToDescription,
   parseAccountBlocksFromDescription,
   extractMetadataFromDescription,
   getCleanDescription,
+  formatRfNumber,
 } from '@/lib/formatters';
-import { formatRfNumber } from '@/lib/wordVoucherGenerator';
 import {
   X,
   Calendar,
@@ -382,28 +383,37 @@ export default function EditRequestModal({
     formData.set('signature_url', request.signature_url || '');
     formData.set('block_count', blocks.length.toString());
 
-    blocks.forEach((b, idx) => {
-      if (b.receiptFile) {
-        formData.set(`receipt_file_${idx}`, b.receiptFile);
-      }
-    });
-
-    const anyReceiptFile = blocks.some((b) => b.receiptFile);
-    const firstReceiptFile = blocks.find((b) => b.receiptFile)?.receiptFile;
-    const activeReceiptUrl = blocks.find((b) => b.receiptPreview)?.receiptPreview || '';
-
-    if (firstReceiptFile) {
-      formData.set('receipt_file', firstReceiptFile);
-    } else {
-      formData.set('receipt_url', activeReceiptUrl);
-    }
-
-    if (!anyReceiptFile && !activeReceiptUrl) {
-      formData.set('delete_receipt', 'true');
-    }
-
     startTransition(async () => {
       try {
+        // Compress newly attached receipt files in parallel so payload stays under ~150KB
+        await Promise.all(
+          blocks.map(async (b, idx) => {
+            if (b.receiptFile) {
+              try {
+                const compressed = await compressImageFile(b.receiptFile, 1200, 0.82);
+                formData.set(`receipt_file_${idx}`, compressed);
+              } catch {
+                formData.set(`receipt_file_${idx}`, b.receiptFile);
+              }
+            }
+          })
+        );
+
+        const anyReceiptFile = blocks.some((b) => b.receiptFile);
+        const firstReceiptFile = blocks.find((b) => b.receiptFile)?.receiptFile;
+        const activeReceiptUrl = blocks.find((b) => b.receiptPreview)?.receiptPreview || '';
+
+        if (firstReceiptFile) {
+          const firstCompressed = (formData.get('receipt_file_0') as File) || firstReceiptFile;
+          formData.set('receipt_file', firstCompressed);
+        } else {
+          formData.set('receipt_url', activeReceiptUrl);
+        }
+
+        if (!anyReceiptFile && !activeReceiptUrl) {
+          formData.set('delete_receipt', 'true');
+        }
+
         const res = await updateReimbursement(null, formData);
         if (res?.error) {
           setError(res.error);

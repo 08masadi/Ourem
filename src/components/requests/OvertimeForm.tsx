@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useTransition } from 'react';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { UserProfile, OvertimeVoucherPrintData, DEPARTMENT_OPTIONS } from '@/types/database';
 import { createOvertimeRequest } from '@/actions/requests';
 import {
@@ -19,13 +21,15 @@ import {
   Sparkles,
   Lock,
 } from 'lucide-react';
-import OvertimeVoucherPdf from './OvertimeVoucherPdf';
+
+const OvertimeVoucherPdf = dynamic(() => import('./OvertimeVoucherPdf'), { ssr: false });
 
 interface OvertimeFormProps {
   userProfile?: UserProfile | null;
 }
 
 export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -106,10 +110,9 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
 
         if (!response.ok || res?.error) {
           setError(res?.error || 'Gagal membuat pengajuan lembur.');
-        } else if (res?.success) {
-          window.location.href = '/employee?success=created_overtime';
         } else {
-          window.location.href = '/employee?success=created_overtime';
+          router.push('/employee?success=created_overtime');
+          router.refresh();
         }
       } catch (err: any) {
         console.error('Overtime submission error:', err);

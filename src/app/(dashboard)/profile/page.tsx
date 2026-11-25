@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect, useRef } from 'react';
 import { getCurrentUserProfile, updateProfileBank, uploadAvatarAction, signOutAction } from '@/actions/auth';
+import { compressImageFile } from '@/lib/imageCompressor';
 import { UserProfile, DEPARTMENT_OPTIONS } from '@/types/database';
 import AvatarCropperModal from '@/components/profile/AvatarCropperModal';
 import { triggerSuccessNotification } from '@/components/ui/DynamicIslandSuccess';
@@ -238,17 +239,23 @@ export default function ProfilePage() {
     } catch {}
 
     const formData = new FormData(e.currentTarget);
-    if (avatarFile) {
-      formData.set('avatar_file', avatarFile);
-    }
     formData.set('avatar_url', previewAvatar || '');
+    formData.set('signature_url', previewSignature || '');
 
     if (signatureFile) {
       formData.set('signature_file', signatureFile);
     }
-    formData.set('signature_url', previewSignature || '');
 
     startTransition(async () => {
+      if (avatarFile) {
+        try {
+          const compressed = await compressImageFile(avatarFile, 600, 0.85);
+          formData.set('avatar_file', compressed);
+        } catch {
+          formData.set('avatar_file', avatarFile);
+        }
+      }
+
       const res = await updateProfileBank(formData);
       if (res?.error) {
         setError(res.error);

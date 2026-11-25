@@ -1,8 +1,5 @@
 'use client';
 
-import { toPng } from 'html-to-image';
-import { jsPDF } from 'jspdf';
-
 /**
  * Print an element directly to A5 Landscape.
  * - On Android app: calls Android native PrintManager via JavaScriptInterface.
@@ -317,6 +314,11 @@ export async function downloadVoucherPdf(
   if (setLoading) setLoading(true);
 
   try {
+    const [{ toPng }, { jsPDF }] = await Promise.all([
+      import('html-to-image'),
+      import('jspdf'),
+    ]);
+
     const imgData = await toPng(element, {
       quality: 0.98,
       pixelRatio: 2.2,
