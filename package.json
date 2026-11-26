@@ -12,7 +12,7 @@
     "@better-auth/infra": "^0.4.31",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.0",
-    "better-auth": "^1.7.27",
+    "better-auth": "^1.7.28",
     "docx": "^9.16.0",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
