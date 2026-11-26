@@ -370,7 +370,7 @@ export default function ProfilePage() {
           <div className="relative group shrink-0">
             <div
               onClick={() => setShowLargeAvatar(true)}
-              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-orange-500/60 hover:border-orange-400 shadow-xl shadow-orange-950/40 overflow-hidden relative cursor-pointer bg-slate-950 transition-all flex items-center justify-center group-hover:scale-105 active:scale-95"
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-orange-500 hover:border-orange-400 shadow-xl shadow-orange-500/30 ring-2 ring-orange-500/20 overflow-hidden relative cursor-pointer bg-slate-950 transition-all flex items-center justify-center group-hover:scale-105 active:scale-95"
               title="Klik untuk perbesar foto profil"
             >
               {previewAvatar ? (
@@ -386,9 +386,9 @@ export default function ProfilePage() {
               )}
 
               {/* Hover / Tap Overlay untuk perbesar */}
-              <div className="absolute inset-0 bg-black/50 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
+              <div className="absolute inset-0 bg-black/60 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity preserve-white">
                 <ZoomIn className="w-6 h-6 mb-1 text-orange-400" />
-                <span className="text-[10px] font-bold">Lihat Foto</span>
+                <span className="text-[10px] font-bold text-white preserve-white" style={{ color: '#ffffff' }}>Lihat Foto</span>
               </div>
             </div>
           </div>
@@ -412,29 +412,30 @@ export default function ProfilePage() {
               )}
 
               {profile?.department && (
-                <span className="text-[11px] font-semibold text-slate-300 bg-slate-800 px-3 py-0.5 rounded-full border border-slate-700">
+                <span className="text-[11px] font-bold text-slate-900 bg-slate-100 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 px-3 py-0.5 rounded-full shadow-sm">
                   {profile.department}
                 </span>
               )}
             </div>
 
-            {/* Tombol aksi foto (Icon Saja) */}
+            {/* Tombol aksi foto */}
             <div className="pt-2 flex items-center justify-center sm:justify-start gap-2">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200/70 dark:border-slate-700 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
+                className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-sm text-xs font-bold"
                 title={previewAvatar ? 'Ganti Foto Profil' : 'Pilih Foto Profil'}
                 aria-label={previewAvatar ? 'Ganti Foto Profil' : 'Pilih Foto Profil'}
               >
-                <Upload className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                <Upload className="w-4 h-4 text-orange-500" />
+                <span>{previewAvatar ? 'Ganti Foto' : 'Upload Foto'}</span>
               </button>
 
               {previewAvatar && (
                 <button
                   type="button"
                   onClick={handleRemoveAvatar}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-500/10 dark:text-slate-300 dark:hover:text-rose-400 border border-slate-200/70 dark:border-slate-700 hover:border-rose-300 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
+                  className="p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-500/10 dark:text-slate-300 dark:hover:text-rose-400 border border-slate-200/80 dark:border-slate-700 hover:border-rose-300 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
                   title="Hapus foto profil"
                   aria-label="Hapus foto profil"
                 >
@@ -603,9 +604,9 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => signatureInputRef.current?.click()}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-sm"
                   >
-                    <Upload className="w-3.5 h-3.5 text-slate-400" />
+                    <Upload className="w-3.5 h-3.5 text-orange-500" />
                     <span>Ganti File</span>
                   </button>
                   <button
