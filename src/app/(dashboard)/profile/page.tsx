@@ -363,9 +363,9 @@ export default function ProfilePage() {
       />
 
       {/* Profile Card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+      <div className="bg-slate-900 border-0 shadow-md shadow-slate-200/50 dark:shadow-2xl rounded-3xl p-6 sm:p-8 space-y-6">
         {/* User Identity info dengan FRAME BULAT UPLOAD FOTO */}
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 border-b border-slate-800 pb-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 border-b border-slate-100 dark:border-slate-800/60 pb-6">
           {/* Frame Bulat Avatar (Klik untuk melihat tampilan besar) */}
           <div className="relative group shrink-0">
             <div
@@ -423,7 +423,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200/70 dark:border-slate-700 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
                 title={previewAvatar ? 'Ganti Foto Profil' : 'Pilih Foto Profil'}
                 aria-label={previewAvatar ? 'Ganti Foto Profil' : 'Pilih Foto Profil'}
               >
@@ -434,7 +434,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={handleRemoveAvatar}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-500/10 dark:text-slate-300 dark:hover:text-rose-400 border border-slate-300 dark:border-slate-700 hover:border-rose-300 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-500/10 dark:text-slate-300 dark:hover:text-rose-400 border border-slate-200/70 dark:border-slate-700 hover:border-rose-300 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
                   title="Hapus foto profil"
                   aria-label="Hapus foto profil"
                 >
@@ -462,7 +462,7 @@ export default function ProfilePage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -481,7 +481,7 @@ export default function ProfilePage() {
                     disabled
                     readOnly
                     value={department}
-                    className="w-full pl-7 pr-2.5 py-1.5 sm:pl-8 sm:pr-3 sm:py-2 bg-slate-100 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90 truncate"
+                    className="w-full pl-7 pr-2.5 py-1.5 sm:pl-8 sm:pr-3 sm:py-2 bg-slate-100 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90 truncate"
                   />
                   <Briefcase className="w-3 h-3 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input type="hidden" name="department" value={department} />
@@ -509,7 +509,7 @@ export default function ProfilePage() {
                 placeholder="Contoh: CSK-003"
                 value={employeeId}
                 onChange={(e) => setEmployeeId(e.target.value)}
-                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -524,13 +524,13 @@ export default function ProfilePage() {
                 placeholder="Contoh: 0882 3991 9129"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           </div>
 
           {/* INFORMASI REKENING BANK - 2 Kolom per baris di mobile */}
-          <div className="pt-2 border-t border-slate-800">
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60">
             <h3 className="text-xs font-bold text-white uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-1.5">
               <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
               <span>Informasi Rekening Bank Pembayaran</span>
@@ -548,7 +548,7 @@ export default function ProfilePage() {
                   placeholder="Contoh: BCA"
                   value={bankName}
                   onChange={(e) => setBankName(e.target.value)}
-                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
@@ -562,7 +562,7 @@ export default function ProfilePage() {
                   placeholder="Contoh: 1234567890"
                   value={bankAccountNumber}
                   onChange={(e) => setBankAccountNumber(e.target.value)}
-                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
@@ -576,22 +576,22 @@ export default function ProfilePage() {
                   placeholder="Nama lengkap pemilik rekening"
                   value={bankAccountHolder}
                   onChange={(e) => setBankAccountHolder(e.target.value)}
-                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
             </div>
           </div>
 
           {/* TANDA TANGAN KARYAWAN (FORMAT .PNG) */}
-          <div className="pt-2 border-t border-slate-800">
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60">
             <h3 className="text-xs font-bold text-white uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
               <PenTool className="w-3.5 h-3.5 text-orange-400" />
               <span>Foto Tanda Tangan Karyawan (Format .PNG)</span>
             </h3>
 
             {previewSignature ? (
-              <div className="bg-slate-950 border border-slate-800 rounded-xl p-2.5 sm:p-3 flex items-center justify-between gap-3">
-                <div className="bg-white p-2 rounded-lg border border-slate-300 dark:border-slate-700 flex items-center justify-center shrink-0">
+              <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl p-2.5 sm:p-3 flex items-center justify-between gap-3 shadow-sm">
+                <div className="bg-white p-2 rounded-lg border border-slate-200/70 dark:border-slate-700 flex items-center justify-center shrink-0">
                   <img
                     src={previewSignature}
                     alt="Tanda Tangan Karyawan"
@@ -603,7 +603,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => signatureInputRef.current?.click()}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-sm"
                   >
                     <Upload className="w-3.5 h-3.5 text-slate-400" />
                     <span>Ganti File</span>
@@ -611,7 +611,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={handleRemoveSignature}
-                    className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs transition cursor-pointer shadow-sm"
+                    className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer shadow-sm"
                     title="Hapus tanda tangan"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -621,7 +621,7 @@ export default function ProfilePage() {
             ) : (
               <div
                 onClick={() => signatureInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-800 hover:border-orange-500/60 bg-slate-950/60 rounded-xl p-4 text-center cursor-pointer transition"
+                className="border-2 border-dashed border-slate-200/80 dark:border-slate-800 hover:border-orange-500/60 bg-slate-50/50 dark:bg-slate-950/60 rounded-xl p-4 text-center cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-98"
               >
                 <PenTool className="w-6 h-6 text-slate-500 mx-auto mb-1" />
                 <p className="text-xs text-slate-400">
@@ -638,7 +638,7 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={isPending}
-              className="py-2.5 px-6 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+              className="py-2.5 px-6 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white text-xs font-bold rounded-xl shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               <span>Simpan Perubahan</span>
@@ -647,7 +647,7 @@ export default function ProfilePage() {
         </form>
 
         {/* Logout Button */}
-        <div className="pt-6 border-t border-slate-800">
+        <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
           <form
             action={signOutAction}
             onSubmit={() => {
@@ -662,7 +662,7 @@ export default function ProfilePage() {
           >
             <button
               type="submit"
-              className="w-full py-2.5 px-4 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-2.5 px-4 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Keluar dari Akun</span>

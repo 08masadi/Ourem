@@ -469,9 +469,9 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm dark:shadow-2xl">
+    <div className="max-w-3xl mx-auto bg-white dark:bg-slate-900 border-0 shadow-md shadow-slate-200/50 dark:shadow-2xl rounded-3xl p-4 sm:p-6">
       {/* Header: Clean, Corporate & Professional */}
-      <div className="mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+      <div className="mb-4 border-b border-slate-100 dark:border-slate-800/60 pb-3">
         <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
           Buat Pengajuan Reimbursement
         </h1>
@@ -499,7 +499,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
             className={`p-3 sm:p-4 rounded-2xl border text-left transition flex flex-col justify-between cursor-pointer ${
               reimbursementType === 'Petty Cash'
                 ? 'border-orange-500 bg-orange-50/80 dark:bg-orange-500/10 shadow-sm ring-1 ring-orange-500/30'
-                : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 hover:border-slate-300 dark:hover:border-slate-700'
+                : 'border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-950/60 hover:border-slate-300 dark:hover:border-slate-700'
             }`}
           >
             <div className="flex items-center justify-between mb-1.5">
@@ -527,7 +527,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
             className={`p-3 sm:p-4 rounded-2xl border text-left transition flex flex-col justify-between cursor-pointer ${
               reimbursementType === 'Voucher'
                 ? 'border-amber-500 bg-amber-50/80 dark:bg-amber-500/10 shadow-sm ring-1 ring-amber-500/30'
-                : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 hover:border-slate-300 dark:hover:border-slate-700'
+                : 'border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-950/60 hover:border-slate-300 dark:hover:border-slate-700'
             }`}
           >
             <div className="flex items-center justify-between mb-1.5">
@@ -568,7 +568,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                 disabled
                 readOnly
                 value={department}
-                className="w-full pl-8 pr-3 py-2.5 sm:pl-9 sm:pr-3.5 sm:py-3 bg-slate-100 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90 truncate"
+                className="w-full pl-8 pr-3 py-2.5 sm:pl-9 sm:pr-3.5 sm:py-3 bg-slate-100 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90 truncate"
               />
               <Briefcase className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input type="hidden" name="department" value={department} />
@@ -590,14 +590,14 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                   e.currentTarget.showPicker?.();
                 } catch {}
               }}
-              className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+              className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
             />
           </div>
         </div>
 
         {/* LIST KOLOM / CARD ACCOUNT (BEBAN) */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/60 pb-1.5">
             <div>
               <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                 Rincian Akun & Beban Transaksi
@@ -611,10 +611,10 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
           {blocks.map((block, blockIndex) => (
             <div
               key={block.id}
-              className="bg-white dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-5 space-y-3.5 relative shadow-sm dark:shadow-lg transition"
+              className="bg-white dark:bg-slate-950/80 border border-slate-100 dark:border-slate-800/60 rounded-2xl p-3.5 sm:p-5 space-y-3.5 relative shadow-sm dark:shadow-lg transition"
             >
               {/* Card Top Bar: Nomor Account & Tombol Hapus */}
-              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2.5">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/60 pb-2.5">
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-lg bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30">
                     Account #{blockIndex + 1}
@@ -628,7 +628,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                   <button
                     type="button"
                     onClick={() => removeAccountBlock(blockIndex)}
-                    className="p-1 sm:py-1 sm:px-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-semibold transition flex items-center gap-1 cursor-pointer"
+                    className="p-1 sm:py-1 sm:px-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-semibold transition flex items-center gap-1 cursor-pointer active:scale-95"
                     title="Hapus Account"
                     aria-label="Hapus Account"
                   >
@@ -648,7 +648,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                 <select
                   value={block.account}
                   onChange={(e) => updateBlockField(blockIndex, 'account', e.target.value)}
-                  className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
+                  className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
                 >
                   {reimbursementType === 'Petty Cash' ? (
                     <optgroup label="─── TRANSPORT (PETTY CASH) ───" className="font-bold">
@@ -694,17 +694,17 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                 {block.entries.map((entry, entryIndex) => (
                   <div
                     key={entryIndex}
-                    className="bg-slate-50/80 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 space-y-2.5 relative"
+                    className="bg-slate-50/60 dark:bg-slate-900/70 border border-slate-200/60 dark:border-slate-800/60 rounded-xl p-3 space-y-2.5 relative"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-orange-400">
+                      <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-orange-400">
                         #{entryIndex + 1}
                       </span>
                       {block.entries.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeCustomerFromBlock(blockIndex, entryIndex)}
-                          className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer"
+                          className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer active:scale-95"
                           title="Hapus baris customer ini"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -727,7 +727,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                             updateCustomerEntry(blockIndex, entryIndex, 'customer', e.target.value)
                           }
                           placeholder="Contoh: KPU RI"
-                          className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />
                       </div>
 
@@ -744,7 +744,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                             updateCustomerEntry(blockIndex, entryIndex, 'description', e.target.value)
                           }
                           placeholder="Keterangan transaksi..."
-                          className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />
                       </div>
                     </div>
@@ -756,7 +756,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                   <button
                     type="button"
                     onClick={() => addCustomerToBlock(blockIndex)}
-                    className="p-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                    className="p-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-200/70 dark:border-orange-500/30 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
                     title="Tambah Customer"
                     aria-label="Tambah Customer"
                   >
@@ -766,7 +766,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
               </div>
 
               {/* 3. NOMINAL & TANGGAL NOTA (1 BARIS, 2 KOLOM) */}
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-4 pt-3 border-t border-slate-200 dark:border-slate-800/80">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
                 {/* Kolom 1: Nominal Amount */}
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
@@ -779,7 +779,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                     value={block.amount ? Number(block.amount).toLocaleString('id-ID') : ''}
                     onChange={(e) => updateBlockField(blockIndex, 'amount', e.target.value)}
                     placeholder="0"
-                    className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                   <div className="text-[11px] text-orange-600 dark:text-amber-400 mt-1 flex items-center justify-between font-mono font-semibold truncate">
                     <span className="text-slate-500 dark:text-slate-400 font-normal">Subtotal:</span>
@@ -810,7 +810,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                         e.currentTarget.showPicker?.();
                       } catch {}
                     }}
-                    className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer font-medium"
+                    className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer font-medium"
                   />
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
                     Tgl Transaksi Nota
@@ -843,12 +843,12 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                   />
 
                   {block.receiptPreview ? (
-                    <div className="w-full py-2.5 sm:py-3 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-xl flex items-center justify-between gap-2 shadow-sm">
+                    <div className="w-full py-2.5 sm:py-3 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700/80 rounded-xl flex items-center justify-between gap-2 shadow-sm">
                       <div className="flex items-center gap-2 min-w-0">
                         <img
                           src={block.receiptPreview}
                           alt="Preview Nota"
-                          className="h-8 w-8 rounded-lg border border-slate-300 dark:border-slate-700 object-cover shrink-0 cursor-pointer hover:opacity-90 transition"
+                          className="h-8 w-8 rounded-lg border border-slate-200/70 dark:border-slate-700 object-cover shrink-0 cursor-pointer hover:opacity-90 transition hover:scale-105 active:scale-95"
                           onClick={() => handleReCrop(blockIndex)}
                           title="Klik untuk crop ulang"
                         />
@@ -860,7 +860,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                         <button
                           type="button"
                           onClick={() => handleReCrop(blockIndex)}
-                          className="p-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:hover:bg-orange-500/25 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30 rounded-lg text-xs font-semibold transition cursor-pointer bg-clip-padding overflow-hidden shadow-none active:scale-95"
+                          className="p-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:hover:bg-orange-500/25 dark:text-orange-400 border border-orange-200/70 dark:border-orange-500/30 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer bg-clip-padding overflow-hidden shadow-none"
                           title="Crop foto"
                         >
                           <Crop className="w-3.5 h-3.5" />
@@ -874,7 +874,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                               )
                             );
                           }}
-                          className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 rounded-lg text-xs transition cursor-pointer"
+                          className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 rounded-lg text-xs transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
                           title="Hapus foto"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -885,7 +885,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                     <button
                       type="button"
                       onClick={() => cameraInputRefs.current[blockIndex]?.click()}
-                      className="w-full py-2.5 sm:py-3 border border-slate-300 dark:border-slate-700/80 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-xl text-center cursor-pointer transition flex items-center justify-center shadow-sm active:scale-95"
+                      className="w-full py-2.5 sm:py-3 border border-slate-200/70 dark:border-slate-700/80 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-xl text-center cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center shadow-sm"
                       title="Buka Kamera"
                       aria-label="Buka Kamera"
                     >
@@ -908,7 +908,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
             <button
               type="button"
               onClick={addAccountBlock}
-              className="p-2.5 sm:p-3 rounded-2xl bg-orange-50 hover:bg-orange-100 text-orange-700 dark:bg-orange-600/10 dark:hover:bg-orange-600/20 dark:text-orange-400 border border-dashed border-orange-300 dark:border-orange-500/40 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+              className="p-2.5 sm:p-3 rounded-2xl bg-orange-50 hover:bg-orange-100 text-orange-700 dark:bg-orange-600/10 dark:hover:bg-orange-600/20 dark:text-orange-400 border border-dashed border-orange-300 dark:border-orange-500/40 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
               title="Tambah Akun Beban Baru"
               aria-label="Tambah Akun Beban Baru"
             >
@@ -918,7 +918,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
         </div>
 
         {/* TOTAL RINGKASAN PENGAJUAN */}
-        <div className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-4 flex items-center justify-between gap-2 shadow-inner">
+        <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/60 rounded-xl p-3 sm:p-4 flex items-center justify-between gap-2 shadow-sm">
           <div>
             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
               Total Pengajuan ({blocks.length} Account)
@@ -936,10 +936,10 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
         </div>
 
         {/* Action Buttons: 2 Kolom dalam 1 baris, Icon Saja */}
-        <div className="pt-3 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-2.5 sm:gap-4">
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/60 grid grid-cols-2 gap-2.5 sm:gap-4">
           <Link
             href={userProfile?.role === 'director' ? '/director' : userProfile?.role === 'finance' ? '/finance' : '/employee'}
-            className="w-full py-2.5 sm:py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+            className="w-full py-2.5 sm:py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200/70 dark:border-slate-700 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
             title="Batal"
             aria-label="Batal"
           >
@@ -948,7 +948,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-md shadow-orange-950/30 transition flex items-center justify-center disabled:opacity-50 cursor-pointer active:scale-95"
+            className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-md shadow-orange-950/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 flex items-center justify-center disabled:opacity-50 cursor-pointer"
             title="Kirim Pengajuan Reimbursement"
             aria-label="Kirim Pengajuan Reimbursement"
           >

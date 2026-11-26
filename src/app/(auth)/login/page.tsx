@@ -211,10 +211,10 @@ function LoginContent() {
         </div>
 
         {/* Auth Card */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+        <div className="bg-white dark:bg-slate-900/90 border-0 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
           {/* Tabs (Hanya ditampilkan saat bukan mode lupa password) */}
           {!isForgotPassword && (
-            <div className="flex bg-slate-950/60 p-1.5 rounded-2xl mb-6 border border-slate-800">
+            <div className="flex bg-slate-100 dark:bg-slate-950/60 p-1.5 rounded-2xl mb-6 border border-slate-200/70 dark:border-slate-800/80">
               <button
                 type="button"
                 onClick={() => {
@@ -224,10 +224,10 @@ function LoginContent() {
                   setSuccess(null);
                   setPasswordInput('');
                 }}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition cursor-pointer ${
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
                   !isRegister
-                    ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md shadow-orange-500/20'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
                 }`}
               >
                 Masuk
@@ -241,10 +241,10 @@ function LoginContent() {
                   setSuccess(null);
                   setPasswordInput('');
                 }}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition cursor-pointer ${
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
                   isRegister
-                    ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md shadow-orange-500/20'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
                 }`}
               >
                 Daftar Baru
@@ -309,7 +309,7 @@ function LoginContent() {
                       placeholder="nama@email.com"
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                     />
                   </div>
                 </div>
@@ -317,7 +317,7 @@ function LoginContent() {
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="w-full mt-4 py-3 px-4 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-bold rounded-xl shadow-lg shadow-orange-950/40 transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                  className="w-full mt-4 py-3 px-4 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-bold rounded-xl shadow-lg shadow-orange-950/40 transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer hover:-translate-y-0.5 active:scale-95 hover:shadow-orange-500/25"
                 >
                   {isPending ? (
                     <>
@@ -333,7 +333,7 @@ function LoginContent() {
                 </button>
               </form>
 
-              <div className="mt-5 pt-4 border-t border-slate-800/80 text-center">
+              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/80 text-center">
                 <button
                   type="button"
                   onClick={() => {
@@ -341,7 +341,7 @@ function LoginContent() {
                     setError(null);
                     setSuccess(null);
                   }}
-                  className="text-xs text-slate-400 hover:text-orange-400 font-semibold inline-flex items-center gap-1.5 transition cursor-pointer"
+                  className="text-xs text-slate-500 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 font-semibold inline-flex items-center gap-1.5 transition cursor-pointer hover:-translate-y-0.5 active:scale-95"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Kembali ke Halaman Masuk</span>
@@ -364,7 +364,7 @@ function LoginContent() {
                         type="text"
                         required
                         placeholder="Nama lengkap sesuai KTP"
-                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                       />
                     </div>
                   </div>
@@ -373,7 +373,7 @@ function LoginContent() {
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                       Peran / Role Akun
                     </label>
-                    <div className="p-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between text-xs">
+                    <div className="p-2.5 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-orange-500" />
                         <span className="font-bold text-orange-600 dark:text-orange-400">Employee (Staff)</span>
@@ -395,7 +395,7 @@ function LoginContent() {
                         name="department"
                         value={department}
                         onChange={(e) => setDepartment(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
                       >
                         {DEPARTMENT_OPTIONS.map((dep) => (
                           <option key={dep} value={dep} className="text-slate-900 bg-white dark:text-white dark:bg-slate-900">
@@ -422,7 +422,7 @@ function LoginContent() {
                     placeholder="nama@email.com"
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                   />
                 </div>
               </div>
@@ -441,12 +441,12 @@ function LoginContent() {
                     placeholder="Minimal 8 karakter"
                     value={passwordInput}
                     onChange={(e) => setPasswordInput(e.target.value)}
-                    className="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition cursor-pointer"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition cursor-pointer hover:scale-110 active:scale-95"
                     title={showPassword ? 'Sembunyikan Kata Sandi' : 'Tampilkan Kata Sandi'}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -455,29 +455,29 @@ function LoginContent() {
 
                 {/* Password Strength Requirement Checklist saat Daftar Baru */}
                 {isRegister && (
-                  <div className="mt-2.5 p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] space-y-1.5">
-                    <div className="text-slate-400 font-semibold mb-1">Syarat Kombinasi Kata Sandi Baru:</div>
+                  <div className="mt-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 text-[11px] space-y-1.5">
+                    <div className="text-slate-600 dark:text-slate-400 font-semibold mb-1">Syarat Kombinasi Kata Sandi Baru:</div>
                     <div className="grid grid-cols-2 gap-1.5">
-                      <div className={`flex items-center gap-1.5 ${passMinLength ? 'text-emerald-400 font-medium' : 'text-slate-500'}`}>
-                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passMinLength ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-500'}`}>
+                      <div className={`flex items-center gap-1.5 ${passMinLength ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-slate-400 dark:text-slate-500'}`}>
+                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passMinLength ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}>
                           {passMinLength ? '✓' : '•'}
                         </span>
                         <span>Minimal 8 karakter</span>
                       </div>
-                      <div className={`flex items-center gap-1.5 ${passHasUpper && passHasLower ? 'text-emerald-400 font-medium' : 'text-slate-500'}`}>
-                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passHasUpper && passHasLower ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-500'}`}>
+                      <div className={`flex items-center gap-1.5 ${passHasUpper && passHasLower ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-slate-400 dark:text-slate-500'}`}>
+                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passHasUpper && passHasLower ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}>
                           {passHasUpper && passHasLower ? '✓' : '•'}
                         </span>
                         <span>Huruf besar & kecil</span>
                       </div>
-                      <div className={`flex items-center gap-1.5 ${passHasNumber ? 'text-emerald-400 font-medium' : 'text-slate-500'}`}>
-                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passHasNumber ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-500'}`}>
+                      <div className={`flex items-center gap-1.5 ${passHasNumber ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-slate-400 dark:text-slate-500'}`}>
+                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passHasNumber ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}>
                           {passHasNumber ? '✓' : '•'}
                         </span>
                         <span>Kombinasi angka (0-9)</span>
                       </div>
-                      <div className={`flex items-center gap-1.5 ${passHasSymbol ? 'text-emerald-400 font-medium' : 'text-slate-500'}`}>
-                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passHasSymbol ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-500'}`}>
+                      <div className={`flex items-center gap-1.5 ${passHasSymbol ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-slate-400 dark:text-slate-500'}`}>
+                        <span className={`w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px] font-bold ${passHasSymbol ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}>
                           {passHasSymbol ? '✓' : '•'}
                         </span>
                         <span>Simbol khusus (!@#$...)</span>
@@ -494,7 +494,7 @@ function LoginContent() {
                         type="checkbox"
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-950 text-orange-500 accent-orange-500 focus:ring-orange-500 cursor-pointer"
+                        className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-orange-500 accent-orange-500 focus:ring-orange-500 cursor-pointer"
                       />
                       <span className="text-xs text-slate-600 dark:text-slate-400 font-medium group-hover:text-slate-800 dark:group-hover:text-slate-200 transition">
                         Remember Me
@@ -507,7 +507,7 @@ function LoginContent() {
                         setError(null);
                         setSuccess(null);
                       }}
-                      className="text-xs font-semibold text-orange-500 hover:text-orange-400 dark:text-orange-400 dark:hover:text-orange-300 transition cursor-pointer"
+                      className="text-xs font-semibold text-orange-600 hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300 transition cursor-pointer hover:underline hover:-translate-y-0.5 active:scale-95"
                     >
                       Lupa Password?
                     </button>
@@ -518,7 +518,7 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full mt-4 py-3 px-4 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-bold rounded-xl shadow-lg shadow-orange-950/40 transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="w-full mt-4 py-3 px-4 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-bold rounded-xl shadow-lg shadow-orange-950/40 transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer hover:-translate-y-0.5 active:scale-95 hover:shadow-xl hover:shadow-orange-500/25"
               >
                 {isPending ? (
                   <>

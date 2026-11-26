@@ -200,8 +200,8 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           aria-label="Lihat rekapan klaim Petty Cash"
           className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
             selectedCategory === 'petty_cash'
-              ? 'bg-slate-900 border-2 border-orange-500 ring-2 ring-orange-500/40 shadow-xl shadow-orange-950/40 -translate-y-0.5'
-              : 'bg-slate-900 border border-slate-800 hover:border-orange-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-orange-950/20'
+              ? 'bg-white dark:bg-slate-900 border-2 border-orange-500 ring-2 ring-orange-500/40 shadow-xl shadow-orange-950/20 -translate-y-0.5'
+              : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-orange-500/50 hover:-translate-y-0.5 hover:shadow-md'
           }`}
         >
           <div className="w-full">
@@ -223,16 +223,16 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
                 <Wallet className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-base sm:text-lg font-bold text-white font-mono tracking-tight">
+            <div className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-mono tracking-tight">
               {formatRupiah(unpaidPettyCashNominal)}
             </div>
           </div>
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/80 w-full">
-            <span className="text-[11px] font-semibold text-orange-400/90">
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/60 w-full">
+            <span className="text-[11px] font-semibold text-orange-500 dark:text-orange-400/90">
               {unpaidPettyCashRequests.length} pengajuan belum cair
             </span>
             <ChevronRight
-              className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
+              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
                 selectedCategory === 'petty_cash' ? 'text-orange-400 translate-x-0.5' : 'group-hover:text-orange-400'
               }`}
             />
@@ -247,8 +247,8 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           aria-label="Lihat rekapan klaim Voucher Reimbursement"
           className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
             selectedCategory === 'voucher'
-              ? 'bg-slate-900 border-2 border-amber-500 ring-2 ring-amber-500/40 shadow-xl shadow-amber-950/40 -translate-y-0.5'
-              : 'bg-slate-900 border border-slate-800 hover:border-amber-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-950/20'
+              ? 'bg-white dark:bg-slate-900 border-2 border-amber-500 ring-2 ring-amber-500/40 shadow-xl shadow-amber-950/20 -translate-y-0.5'
+              : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-amber-500/50 hover:-translate-y-0.5 hover:shadow-md'
           }`}
         >
           <div className="w-full">
@@ -270,16 +270,16 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
                 RP
               </div>
             </div>
-            <div className="text-base sm:text-lg font-bold text-white font-mono tracking-tight">
+            <div className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-mono tracking-tight">
               {formatRupiah(unpaidVoucherNominal)}
             </div>
           </div>
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/80 w-full">
-            <span className="text-[11px] font-semibold text-amber-400/90">
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/60 w-full">
+            <span className="text-[11px] font-semibold text-amber-500 dark:text-amber-400/90">
               {unpaidVoucherRequests.length} pengajuan belum cair
             </span>
             <ChevronRight
-              className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
+              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
                 selectedCategory === 'voucher' ? 'text-amber-400 translate-x-0.5' : 'group-hover:text-amber-400'
               }`}
             />
@@ -294,8 +294,8 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           aria-label="Lihat rekapan klaim Lembur"
           className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
             selectedCategory === 'lembur'
-              ? 'bg-slate-900 border-2 border-orange-500 ring-2 ring-orange-500/40 shadow-xl shadow-orange-950/40 -translate-y-0.5'
-              : 'bg-slate-900 border border-slate-800 hover:border-orange-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-orange-950/20'
+              ? 'bg-white dark:bg-slate-900 border-2 border-orange-500 ring-2 ring-orange-500/40 shadow-xl shadow-orange-950/20 -translate-y-0.5'
+              : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-orange-500/50 hover:-translate-y-0.5 hover:shadow-md'
           }`}
         >
           <div className="w-full">
@@ -317,16 +317,16 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
                 <Clock className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-base sm:text-lg font-bold text-white font-mono tracking-tight">
+            <div className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-mono tracking-tight">
               {formatRupiah(unpaidOvertimeNominal)}
             </div>
           </div>
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/80 w-full">
-            <span className="text-[11px] font-semibold text-orange-400/90">
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/60 w-full">
+            <span className="text-[11px] font-semibold text-orange-500 dark:text-orange-400/90">
               {unpaidOvertimeRequests.length} pengajuan belum cair
             </span>
             <ChevronRight
-              className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
+              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
                 selectedCategory === 'lembur' ? 'text-orange-400 translate-x-0.5' : 'group-hover:text-orange-400'
               }`}
             />
@@ -341,8 +341,8 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           aria-label="Lihat rekapan klaim Telah Disetujui"
           className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
             selectedCategory === 'approved'
-              ? 'bg-slate-900 border-2 border-emerald-500 ring-2 ring-emerald-500/40 shadow-xl shadow-emerald-950/40 -translate-y-0.5'
-              : 'bg-slate-900 border border-slate-800 hover:border-emerald-500/60 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-950/20'
+              ? 'bg-white dark:bg-slate-900 border-2 border-emerald-500 ring-2 ring-emerald-500/40 shadow-xl shadow-emerald-950/20 -translate-y-0.5'
+              : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-emerald-500/50 hover:-translate-y-0.5 hover:shadow-md'
           }`}
         >
           <div className="w-full">
@@ -364,18 +364,18 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
                 <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-base sm:text-lg font-bold text-emerald-400 tracking-tight">
+            <div className="text-base sm:text-lg font-bold text-emerald-500 dark:text-emerald-400 tracking-tight">
               {approvedCount} transaksi
             </div>
           </div>
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/80 w-full">
-            <span className="text-[11px] font-semibold text-emerald-400/90">
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/60 w-full">
+            <span className="text-[11px] font-semibold text-emerald-500 dark:text-emerald-400/90">
               {approvedUnpaidRequests.length > 0
                 ? `${approvedUnpaidRequests.length} siap dicairkan finance`
                 : 'Semua telah dicairkan'}
             </span>
             <ChevronRight
-              className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
+              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
                 selectedCategory === 'approved' ? 'text-emerald-400 translate-x-0.5' : 'group-hover:text-emerald-400'
               }`}
             />
@@ -393,11 +393,11 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           onClick={() => setSelectedCategory(null)}
         >
           <div
-            className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl shadow-black overflow-hidden animate-in zoom-in-95 duration-200"
+            className="bg-white dark:bg-slate-900 border-0 shadow-2xl rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Bar Rekapan */}
-            <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900 sticky top-0 z-10">
+            <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800/60 flex items-center justify-between gap-3 bg-white dark:bg-slate-900 sticky top-0 z-10">
               <div className="flex items-center gap-2.5 flex-wrap">
                 <span id="rekapan-modal-title" className="text-sm sm:text-base font-bold text-white flex items-center gap-2 flex-wrap">
                   <span>Daftar Rekapan Klaim:</span>

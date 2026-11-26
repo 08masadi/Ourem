@@ -121,18 +121,18 @@ export default function EditOvertimeModal({
   return (
     <div className="fixed inset-0 z-[70] overflow-y-auto bg-black/85 backdrop-blur-sm">
       <div className="flex min-h-full items-start sm:items-center justify-center p-3 sm:p-4 pb-28 sm:pb-6">
-        <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-2xl my-auto sm:my-6 mb-24 sm:mb-6 flex flex-col max-h-[90vh]">
+        <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 border-0 rounded-3xl p-5 sm:p-7 shadow-2xl my-auto sm:my-6 mb-24 sm:mb-6 flex flex-col max-h-[90vh]">
           {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-5 shrink-0">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800/60 mb-5 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-orange-50 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/30 flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0 bg-clip-padding overflow-hidden shadow-none">
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-white">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                 Edit Pengajuan Form Lembur
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Perbarui rincian lembur, jam kerja, dan uraian pekerjaan
               </p>
             </div>
@@ -141,7 +141,7 @@ export default function EditOvertimeModal({
           <button
             onClick={onClose}
             type="button"
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer hover:scale-105 active:scale-95"
             title="Tutup"
           >
             <X className="w-5 h-5" />
@@ -399,12 +399,12 @@ export default function EditOvertimeModal({
           </div>
 
           {/* Action Buttons: 2 Kolom dalam 1 Baris, Icon Saja */}
-          <div className="pt-3 border-t border-slate-800 grid grid-cols-2 gap-2.5 sm:gap-4">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800/60 grid grid-cols-2 gap-2.5 sm:gap-4">
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="w-full py-2.5 sm:py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+              className="w-full py-2.5 sm:py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200/70 dark:border-slate-700 transition flex items-center justify-center cursor-pointer shadow-sm hover:-translate-y-0.5 active:scale-95"
               title="Batal"
               aria-label="Batal"
             >
@@ -414,7 +414,7 @@ export default function EditOvertimeModal({
             <button
               type="submit"
               disabled={isPending}
-              className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-md shadow-orange-950/30 transition flex items-center justify-center disabled:opacity-50 cursor-pointer active:scale-95"
+              className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-md shadow-orange-950/30 transition flex items-center justify-center disabled:opacity-50 cursor-pointer hover:-translate-y-0.5 active:scale-95 hover:shadow-lg hover:shadow-orange-500/25"
               title="Simpan Perubahan Lembur"
               aria-label="Simpan Perubahan Lembur"
             >

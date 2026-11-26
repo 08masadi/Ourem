@@ -1064,16 +1064,16 @@ export default function RequestList({
             placeholder="Cari pengajuan / customer..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm"
           />
         </div>
       </div>
 
       {/* Filter Bar: Jenis, Status, Pembayaran (Dropdown & Sejajar) & Sync Data */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 bg-slate-900/60 p-2.5 rounded-2xl border border-slate-800">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 bg-white/80 dark:bg-slate-900/60 p-2.5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm">
         <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
           {/* Dropdown Filter Jenis */}
-          <div className="flex-1 min-w-[130px] sm:flex-initial relative flex items-center bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-800 text-xs shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition">
+          <div className="flex-1 min-w-[130px] sm:flex-initial relative flex items-center bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-200/70 dark:border-slate-800 text-xs shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition">
             <Layers className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 shrink-0 pointer-events-none" />
             <select
               value={typeFilter}
@@ -1091,7 +1091,7 @@ export default function RequestList({
           </div>
 
           {/* Dropdown Filter Status */}
-          <div className="flex-1 min-w-[130px] sm:flex-initial relative flex items-center bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-800 text-xs shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition">
+          <div className="flex-1 min-w-[130px] sm:flex-initial relative flex items-center bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-200/70 dark:border-slate-800 text-xs shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition">
             <Filter className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 shrink-0 pointer-events-none" />
             <select
               value={statusFilter}
@@ -1112,7 +1112,7 @@ export default function RequestList({
 
           {/* Dropdown Filter Pembayaran (Khusus Akun Finance) */}
           {currentRole === 'finance' && (
-            <div className="flex-1 min-w-[145px] sm:flex-initial relative flex items-center bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-800 text-xs shadow-sm hover:border-slate-400 dark:hover:border-slate-700 transition">
+            <div className="flex-1 min-w-[145px] sm:flex-initial relative flex items-center bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-200/70 dark:border-slate-800 text-xs shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition">
               <CreditCard className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 pointer-events-none" />
               <select
                 value={paymentFilter}
@@ -1180,7 +1180,7 @@ export default function RequestList({
             type="button"
             onClick={toggleSelectAll}
             disabled={selectableRequests.length === 0}
-            className="flex items-center gap-2 px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-900/90 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
             title={
               selectableRequests.length === 0
                 ? 'Semua pengajuan telah dicairkan (Paid)'
@@ -1328,9 +1328,9 @@ export default function RequestList({
 
       {/* Requests List */}
       {filteredRequests.length === 0 ? (
-        <div className="text-center py-16 bg-slate-900/50 border border-slate-800/80 rounded-3xl">
-          <FileText className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-sm font-bold text-slate-300">Belum ada pengajuan</h3>
+        <div className="text-center py-16 bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 rounded-3xl shadow-sm">
+          <FileText className="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto mb-3" />
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Belum ada pengajuan</h3>
           <p className="text-xs text-slate-500 mt-1">
             Data pengajuan yang sesuai dengan filter pencarian tidak ditemukan.
           </p>
@@ -1382,10 +1382,10 @@ export default function RequestList({
                     setSelectedRequest(req);
                   }
                 }}
-                className={`bg-slate-900/90 border rounded-xl sm:rounded-2xl p-3 sm:p-4 transition shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 sm:gap-4 cursor-pointer hover:border-slate-700/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
+                className={`bg-white dark:bg-slate-900/90 border rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all duration-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 sm:gap-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 hover:-translate-y-0.5 hover:shadow-md ${
                   isSelected
-                    ? 'border-orange-500 bg-orange-950/10'
-                    : 'border-slate-800 hover:bg-slate-900'
+                    ? 'border-orange-500 bg-orange-50/50 dark:bg-orange-950/10'
+                    : 'border-slate-100 dark:border-slate-800/60 hover:border-orange-500/40'
                 }`}
               >
                 {/* Checkbox and Left Info */}
@@ -1584,14 +1584,14 @@ export default function RequestList({
           onClick={handleCloseDetail}
         >
           <div
-            className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto cursor-default"
+            className="bg-white dark:bg-slate-900 border-0 shadow-2xl rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto cursor-default"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="font-bold text-white text-base">Detail Pengajuan</h3>
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800/60 pb-3">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Detail Pengajuan</h3>
               <button
                 onClick={handleCloseDetail}
-                className="text-slate-400 hover:text-white text-xs font-bold px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg cursor-pointer transition"
+                className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white text-xs font-bold px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
               >
                 ✕ Tutup
               </button>
@@ -1810,7 +1810,8 @@ export default function RequestList({
               })()}
 
               {/* Action Buttons Section di Bawah Kolom Lampiran Bukti Nota (Ikon saja tanpa teks) */}
-              <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-end gap-2">
+              {/* Action Buttons Section di Bawah Kolom Lampiran Bukti Nota (Ikon saja tanpa teks) */}
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800/60 flex flex-wrap items-center justify-end gap-2">
                 {/* Export / Cetak PDF Button (Kecuali Director pada Petty Cash & Voucher) */}
                 {!(
                   currentRole === 'director' &&
@@ -1823,7 +1824,7 @@ export default function RequestList({
                   <button
                     type="button"
                     onClick={() => openPdfForSingle(selectedRequest)}
-                    className="p-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white transition flex items-center justify-center cursor-pointer shadow-md"
+                    className="p-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 flex items-center justify-center cursor-pointer shadow-md"
                     title={
                       selectedRequest.reimbursement_type === 'Lembur' ||
                       selectedRequest.account === 'Lembur' ||
@@ -1847,7 +1848,7 @@ export default function RequestList({
                       type="button"
                       onClick={() => handleOpenWordPreview(selectedRequest)}
                       disabled={wordLoadingId === selectedRequest.id}
-                      className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition flex items-center justify-center cursor-pointer shadow-md disabled:opacity-50"
+                      className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 flex items-center justify-center cursor-pointer shadow-md disabled:opacity-50"
                       title="Preview & Download Dokumen MS Word (.docx)"
                     >
                       {wordLoadingId === selectedRequest.id ? (
@@ -1871,7 +1872,7 @@ export default function RequestList({
                         handleCloseDetail();
                         setEditRequest(target);
                       }}
-                      className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 transition flex items-center justify-center cursor-pointer border border-slate-700"
+                      className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-amber-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-amber-400 dark:hover:text-amber-300 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-95 flex items-center justify-center cursor-pointer border border-slate-200/70 dark:border-slate-700"
                       title={
                         currentRole === 'director'
                           ? 'Hitung / Edit Lembur'
@@ -1896,7 +1897,7 @@ export default function RequestList({
                           setRejectReason('');
                         }}
                         disabled={isPending}
-                        className="p-2.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
+                        className="p-2.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
                         title="Tolak Form Lembur"
                       >
                         <XCircle className="w-4 h-4" />
@@ -1910,7 +1911,7 @@ export default function RequestList({
                           );
                         }}
                         disabled={isPending}
-                        className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
+                        className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
                         title="Setujui Form Lembur"
                       >
                         <CheckCircle2 className="w-4 h-4" />
@@ -1929,7 +1930,7 @@ export default function RequestList({
                           setRejectReason('');
                         }}
                         disabled={isPending}
-                        className="p-2.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
+                        className="p-2.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
                         title="Tolak Pengajuan"
                       >
                         <XCircle className="w-4 h-4" />
@@ -1943,7 +1944,7 @@ export default function RequestList({
                           );
                         }}
                         disabled={isPending}
-                        className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
+                        className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
                         title={
                           selectedRequest.reimbursement_type === 'Lembur' ||
                           selectedRequest.account === 'Lembur' ||
@@ -1965,7 +1966,7 @@ export default function RequestList({
                       type="button"
                       onClick={() => setPaymentModalReq(selectedRequest)}
                       disabled={isPending}
-                      className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
+                      className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 flex items-center justify-center shadow-sm disabled:opacity-50 cursor-pointer"
                       title="Cairkan Dana"
                     >
                       <CreditCard className="w-4 h-4" />
@@ -1983,7 +1984,7 @@ export default function RequestList({
                         setSelectedRequest(null);
                       }}
                       disabled={isPending}
-                      className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 text-rose-400 transition flex items-center justify-center cursor-pointer"
+                      className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 text-rose-400 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center cursor-pointer"
                       title="Hapus Pengajuan"
                     >
                       <Trash2 className="w-4 h-4" />

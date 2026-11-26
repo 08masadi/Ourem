@@ -66,8 +66,8 @@ body {
     --color-slate-950: #f1f5f9; /* Soft background, eliminates blinding white glare */
     --color-slate-900: #ffffff; /* Crisp white for floating cards & modals */
     --color-slate-850: #f8fafc; /* Gentle inner container */
-    --color-slate-800: #cbd5e1; /* Visible, clean, soft borders */
-    --color-slate-700: #94a3b8; /* Secondary borders */
+    --color-slate-800: #e2e8f0; /* Soft, seamless borders */
+    --color-slate-700: #cbd5e1; /* Secondary borders */
     --color-slate-600: #64748b;
     --color-slate-500: #64748b; /* Muted hints */
     --color-slate-400: #475569; /* Secondary text, rich & clear */
@@ -86,8 +86,8 @@ html.light {
   --color-slate-950: #f1f5f9;
   --color-slate-900: #ffffff;
   --color-slate-850: #f8fafc;
-  --color-slate-800: #cbd5e1;
-  --color-slate-700: #94a3b8;
+  --color-slate-800: #e2e8f0;
+  --color-slate-700: #cbd5e1;
   --color-slate-600: #64748b;
   --color-slate-500: #64748b;
   --color-slate-400: #475569;
@@ -165,37 +165,37 @@ html.dark .logo-dark {
    LIGHT MODE: FLAT, CLEAN, EYE-FRIENDLY COMPONENT STYLES
    ======================================================== */
 @media (prefers-color-scheme: light) {
-  /* Soft card elevation */
+  /* Soft card elevation - eliminate harsh dark borders */
   :root:not(.dark) .bg-slate-900 {
     background-color: #ffffff !important;
-    border-color: #cbd5e1 !important;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+    border-color: rgba(226, 232, 240, 0.6) !important;
+    box-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.05), 0 1px 3px -1px rgba(15, 23, 42, 0.02) !important;
   }
 
   /* Desktop Sidebar in Light Mode */
   :root:not(.dark) aside {
     background-color: #f8fafc !important;
-    border-right-color: #cbd5e1 !important;
+    border-right-color: #e2e8f0 !important;
   }
 
   /* Desktop Header in Light Mode */
   :root:not(.dark) header.bg-slate-950\/70 {
     background-color: rgba(248, 250, 252, 0.95) !important;
-    border-bottom-color: #cbd5e1 !important;
+    border-bottom-color: #e2e8f0 !important;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
   }
 
   /* Mobile Header in Light Mode */
   :root:not(.dark) header.bg-slate-900\/95 {
     background-color: rgba(255, 255, 255, 0.97) !important;
-    border-bottom-color: #cbd5e1 !important;
+    border-bottom-color: #e2e8f0 !important;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
   }
 
   /* Mobile Bottom Nav in Light Mode */
   :root:not(.dark) nav.bg-slate-900\/95 {
     background-color: rgba(255, 255, 255, 0.97) !important;
-    border-top-color: #cbd5e1 !important;
+    border-top-color: #e2e8f0 !important;
     box-shadow: 0 -1px 3px 0 rgba(0, 0, 0, 0.04) !important;
   }
 
@@ -290,7 +290,7 @@ html.dark .logo-dark {
   :root:not(.dark) select:not([class*="bg-transparent"]) {
     background-color: #ffffff !important;
     color: #0f172a !important;
-    border-color: #cbd5e1 !important;
+    border-color: #e2e8f0 !important;
   }
 
   :root:not(.dark) select[class*="bg-transparent"] {
@@ -319,7 +319,7 @@ html.dark .logo-dark {
   /* Monospace description block */
   :root:not(.dark) div[class*="font-mono"].bg-slate-950 {
     background-color: #f8fafc !important;
-    border-color: #cbd5e1 !important;
+    border-color: #e2e8f0 !important;
     color: #1e293b !important;
   }
 }
@@ -327,30 +327,30 @@ html.dark .logo-dark {
 /* Explicit fallback for html.light */
 html.light .bg-slate-900 {
   background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(226, 232, 240, 0.6) !important;
+  box-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.05), 0 1px 3px -1px rgba(15, 23, 42, 0.02) !important;
 }
 
 html.light aside {
   background-color: #f8fafc !important;
-  border-right-color: #cbd5e1 !important;
+  border-right-color: #e2e8f0 !important;
 }
 
 html.light header.bg-slate-950\/70 {
   background-color: rgba(248, 250, 252, 0.95) !important;
-  border-bottom-color: #cbd5e1 !important;
+  border-bottom-color: #e2e8f0 !important;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
 }
 
 html.light header.bg-slate-900\/95 {
   background-color: rgba(255, 255, 255, 0.97) !important;
-  border-bottom-color: #cbd5e1 !important;
+  border-bottom-color: #e2e8f0 !important;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
 }
 
 html.light nav.bg-slate-900\/95 {
   background-color: rgba(255, 255, 255, 0.97) !important;
-  border-top-color: #cbd5e1 !important;
+  border-top-color: #e2e8f0 !important;
   box-shadow: 0 -1px 3px 0 rgba(0, 0, 0, 0.04) !important;
 }
 
@@ -439,7 +439,7 @@ html.light textarea,
 html.light select:not([class*="bg-transparent"]) {
   background-color: #ffffff !important;
   color: #0f172a !important;
-  border-color: #cbd5e1 !important;
+  border-color: #e2e8f0 !important;
 }
 
 html.light select[class*="bg-transparent"] {
@@ -466,8 +466,73 @@ html.light .from-slate-950.via-slate-900.to-zinc-900 {
 
 html.light div[class*="font-mono"].bg-slate-950 {
   background-color: #f8fafc !important;
-  border-color: #cbd5e1 !important;
+  border-color: #e2e8f0 !important;
   color: #1e293b !important;
+}
+
+/* ========================================================
+   UNIVERSAL BUTTON INTERACTION & ANIMATION SYSTEM
+   Tactile response, bouncy micro-interactions across all menus
+   ======================================================== */
+button:not(:disabled),
+.btn-animate,
+[role="button"]:not([aria-disabled="true"]) {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.18s ease,
+              border-color 0.18s ease,
+              opacity 0.15s ease !important;
+  will-change: transform, box-shadow;
+}
+
+button:not(:disabled):hover,
+.btn-animate:hover,
+[role="button"]:not([aria-disabled="true"]):hover {
+  transform: translateY(-1.5px);
+}
+
+button:not(:disabled):active,
+.btn-animate:active,
+[role="button"]:not([aria-disabled="true"]):active {
+  transform: scale(0.96) translateY(0);
+}
+
+/* Primary Orange & Gradient Buttons - Vibrant Lift & Glow */
+button[class*="from-orange-"]:not(:disabled):hover,
+button[class*="bg-orange-"]:not([class*="/"]):not(:disabled):hover,
+.btn-primary-animate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -3px rgba(234, 88, 12, 0.35) !important;
+}
+
+button[class*="from-orange-"]:not(:disabled):active,
+button[class*="bg-orange-"]:not([class*="/"]):not(:disabled):active,
+.btn-primary-animate:active {
+  transform: scale(0.97) translateY(0);
+  box-shadow: 0 2px 8px -2px rgba(234, 88, 12, 0.25) !important;
+}
+
+/* Emerald / Success Buttons */
+button[class*="bg-emerald-"]:not([class*="/"]):not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -3px rgba(16, 185, 129, 0.35) !important;
+}
+
+button[class*="bg-emerald-"]:not([class*="/"]):not(:disabled):active {
+  transform: scale(0.97) translateY(0);
+}
+
+/* Danger / Delete Action Buttons */
+button[class*="bg-rose-"]:not(:disabled):hover,
+button[class*="text-rose-"]:not(:disabled):hover,
+button[class*="hover:bg-rose-"]:not(:disabled):hover {
+  transform: translateY(-1.5px);
+}
+
+button[class*="bg-rose-"]:not(:disabled):active,
+button[class*="text-rose-"]:not(:disabled):active,
+button[class*="hover:bg-rose-"]:not(:disabled):active {
+  transform: scale(0.95) translateY(0);
 }
 
 /* Dark mode select options explicitly dark */

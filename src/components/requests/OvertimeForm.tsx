@@ -143,10 +143,10 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
       )}
 
       {/* Main Form Container */}
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm dark:shadow-2xl space-y-4 sm:space-y-5">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 border-0 shadow-md shadow-slate-200/50 dark:shadow-2xl rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-5">
         {/* Section 1: Informasi Waktu & Karyawan */}
         <div>
-          <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3 border-b border-slate-200 dark:border-slate-800 pb-1.5">
+          <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3 border-b border-slate-100 dark:border-slate-800/60 pb-1.5">
             1. Informasi Umum & Waktu Lembur
           </h2>
 
@@ -167,7 +167,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                     e.currentTarget.showPicker?.();
                   } catch {}
                 }}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
               />
             </div>
 
@@ -180,10 +180,10 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 <button
                   type="button"
                   onClick={() => setTipeHari('hari kerja')}
-                  className={`py-2.5 sm:py-3 px-1.5 sm:px-2 rounded-xl text-xs sm:text-sm font-bold border transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`py-2.5 sm:py-3 px-1.5 sm:px-2 rounded-xl text-xs sm:text-sm font-bold border transition-all duration-200 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer ${
                     tipeHari === 'hari kerja'
                       ? 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/50 shadow-sm'
-                      : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
+                      : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200/70 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[9px] ${
@@ -197,10 +197,10 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 <button
                   type="button"
                   onClick={() => setTipeHari('hari libur')}
-                  className={`py-2.5 sm:py-3 px-1.5 sm:px-2 rounded-xl text-xs sm:text-sm font-bold border transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`py-2.5 sm:py-3 px-1.5 sm:px-2 rounded-xl text-xs sm:text-sm font-bold border transition-all duration-200 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer ${
                     tipeHari === 'hari libur'
                       ? 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/50 shadow-sm'
-                      : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
+                      : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200/70 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[9px] ${
@@ -225,7 +225,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 value={lokasiLembur}
                 onChange={(e) => setLokasiLembur(e.target.value)}
                 placeholder="Masukkan lokasi lembur..."
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400"
               />
             </div>
 
@@ -241,7 +241,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 value={jamLembur}
                 onChange={(e) => setJamLembur(e.target.value)}
                 placeholder="Masukkan jam lembur"
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400 font-mono"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400 font-mono"
               />
             </div>
 
@@ -255,7 +255,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 required
                 value={namaKaryawan}
                 onChange={(e) => setNamaKaryawan(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 uppercase font-semibold"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 uppercase font-semibold"
               />
             </div>
 
@@ -274,7 +274,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                   disabled
                   readOnly
                   value={department}
-                  className="w-full pl-8 pr-3 py-2.5 sm:pl-9 sm:pr-3.5 sm:py-3 bg-slate-100 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 rounded-xl text-sm text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90 truncate"
+                  className="w-full pl-8 pr-3 py-2.5 sm:pl-9 sm:pr-3.5 sm:py-3 bg-slate-100 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90 truncate"
                 />
                 <Briefcase className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input type="hidden" name="department" value={department} />
@@ -284,8 +284,8 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
         </div>
 
         {/* Section 2: Deskripsi Pekerjaan */}
-        <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
-          <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3 border-b border-slate-200 dark:border-slate-800 pb-1.5">
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/60">
+          <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3 border-b border-slate-100 dark:border-slate-800/60 pb-1.5">
             2. Rincian & Deskripsi Pekerjaan
           </h2>
 
@@ -302,7 +302,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 value={perusahaan}
                 onChange={(e) => setPerusahaan(e.target.value)}
                 placeholder="Masukkan nama perusahaan..."
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400"
               />
             </div>
 
@@ -318,7 +318,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 value={namaPekerjaan}
                 onChange={(e) => setNamaPekerjaan(e.target.value)}
                 placeholder="Nama pekerjaan..."
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400"
               />
             </div>
 
@@ -333,7 +333,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                 value={uraianPekerjaan}
                 onChange={(e) => setUraianPekerjaan(e.target.value)}
                 placeholder="Jelaskan rincian aktivitas pekerjaan lembur..."
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed font-mono placeholder:text-slate-400"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed font-mono placeholder:text-slate-400"
               />
             </div>
 
@@ -355,7 +355,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                   readOnly
                   disabled
                   value="Dihitung oleh Direktur"
-                  className="w-full bg-slate-100 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-xl pl-10 pr-8 py-2.5 sm:py-3 text-sm font-bold text-slate-500 dark:text-slate-400 font-mono cursor-not-allowed select-none shadow-inner"
+                  className="w-full bg-slate-100 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 rounded-xl pl-10 pr-8 py-2.5 sm:py-3 text-sm font-bold text-slate-500 dark:text-slate-400 font-mono cursor-not-allowed select-none shadow-inner"
                 />
                 <Lock className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
               </div>
@@ -367,11 +367,11 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
         </div>
 
         {/* Action Buttons: 2 Kolom dalam 1 baris, Icon Saja */}
-        <div className="pt-3 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-2.5 sm:gap-4">
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/60 grid grid-cols-2 gap-2.5 sm:gap-4">
           <button
             type="button"
             onClick={() => setShowPreviewPdf(true)}
-            className="w-full py-2.5 sm:py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+            className="w-full py-2.5 sm:py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200/70 dark:border-slate-700 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
             title="Lihat Preview Form Lembur"
             aria-label="Lihat Preview Form Lembur"
           >
@@ -381,7 +381,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-md shadow-orange-950/30 transition flex items-center justify-center disabled:opacity-50 cursor-pointer active:scale-95"
+            className="w-full py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-md shadow-orange-950/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 flex items-center justify-center disabled:opacity-50 cursor-pointer"
             title="Kirim Pengajuan Lembur"
             aria-label="Kirim Pengajuan Lembur"
           >
