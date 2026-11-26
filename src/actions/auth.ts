@@ -30,7 +30,12 @@ export async function signIn(prevState: any, formData: FormData) {
 
     if (res?.user) {
       const userRole = (res.user as any).role || 'employee';
-      const targetPath = userRole === 'director' ? '/director' : userRole === 'finance' ? '/finance' : '/employee';
+      const targetPath =
+        userRole === 'director' || userRole === 'admin' || userRole === 'super-admin'
+          ? '/director'
+          : userRole === 'finance'
+            ? '/finance'
+            : '/employee';
       redirect(targetPath);
     }
   } catch (betterAuthErr: any) {
@@ -80,7 +85,12 @@ export async function signIn(prevState: any, formData: FormData) {
           }
         }
 
-        const targetPath = role === 'director' ? '/director' : role === 'finance' ? '/finance' : '/employee';
+        const targetPath =
+          role === 'director' || (role as string) === 'admin' || (role as string) === 'super-admin'
+            ? '/director'
+            : role === 'finance'
+              ? '/finance'
+              : '/employee';
         redirect(targetPath);
       }
     } catch (supaErr: any) {
@@ -501,7 +511,7 @@ export async function updateProfileBank(formData: FormData) {
     .single();
   const effectiveRole = userRoleCheck?.role || user.user_metadata?.role || 'employee';
 
-  if (effectiveRole === 'director') {
+  if (effectiveRole === 'director' || (effectiveRole as string) === 'admin' || (effectiveRole as string) === 'super-admin') {
     department = 'Director';
   } else if (effectiveRole === 'finance') {
     department = 'Finance';
@@ -613,7 +623,10 @@ export async function updateProfileBank(formData: FormData) {
       user.user_metadata?.role === 'finance';
     const isDirector =
       profileCheck?.role === 'director' ||
-      user.user_metadata?.role === 'director';
+      (profileCheck?.role as string) === 'admin' ||
+      (profileCheck?.role as string) === 'super-admin' ||
+      user.user_metadata?.role === 'director' ||
+      user.user_metadata?.role === 'admin';
 
     if (isFinance && signature_url) {
       if (signature_file && signature_file.size > 0) {
@@ -688,7 +701,13 @@ export async function updateProfileBank(formData: FormData) {
     id: user.id,
     email: user.email,
     full_name: full_name || user.user_metadata?.full_name || 'User',
-    department: department || (effectiveRole === 'director' ? 'Director' : effectiveRole === 'finance' ? 'Finance' : 'Staff Operasional'),
+    department:
+      department ||
+      (effectiveRole === 'director' || (effectiveRole as string) === 'admin'
+        ? 'Director'
+        : effectiveRole === 'finance'
+          ? 'Finance'
+          : 'Staff Operasional'),
     bank_name: bank_name || null,
     bank_account_number: bank_account_number || null,
     bank_account_holder: bank_account_holder || null,
@@ -735,7 +754,13 @@ export async function updateProfileBank(formData: FormData) {
       id: user.id,
       email: user.email,
       full_name: full_name || user.user_metadata?.full_name || 'User',
-      department: department || (effectiveRole === 'director' ? 'Director' : effectiveRole === 'finance' ? 'Finance' : 'Staff Operasional'),
+      department:
+      department ||
+      (effectiveRole === 'director' || (effectiveRole as string) === 'admin'
+        ? 'Director'
+        : effectiveRole === 'finance'
+          ? 'Finance'
+          : 'Staff Operasional'),
       phone: phone || '',
       employee_id: employee_id || '',
       bank_name: bank_name || '',

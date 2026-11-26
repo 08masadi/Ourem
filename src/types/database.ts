@@ -1,4 +1,4 @@
-export type UserRole = 'employee' | 'director' | 'finance';
+export type UserRole = 'employee' | 'director' | 'finance' | 'admin' | 'super-admin';
 
 export type ReimbursementType = 'Petty Cash' | 'Voucher' | 'Lembur';
 

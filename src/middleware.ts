@@ -35,19 +35,26 @@ export async function middleware(request: NextRequest) {
 
   // 2. Jika sesi Better Auth aktif, tangani navigasi & proteksi rute
   if (betterAuthUser) {
+    const isAdmin = betterAuthRole === 'admin' || betterAuthRole === 'super-admin';
+
     if (isAuthRoute) {
       const targetDashboard =
-        betterAuthRole === 'director' ? '/director' : betterAuthRole === 'finance' ? '/finance' : '/employee';
+        isAdmin || betterAuthRole === 'director' ? '/director' : betterAuthRole === 'finance' ? '/finance' : '/employee';
       return NextResponse.redirect(new URL(targetDashboard, request.url));
     }
 
     if (pathname === '/') {
       const targetDashboard =
-        betterAuthRole === 'director' ? '/director' : betterAuthRole === 'finance' ? '/finance' : '/employee';
+        isAdmin || betterAuthRole === 'director' ? '/director' : betterAuthRole === 'finance' ? '/finance' : '/employee';
       return NextResponse.redirect(new URL(targetDashboard, request.url));
     }
 
     if (isDashboardRoute) {
+      // Super admin / admin diberikan akses penuh ke seluruh dashboard
+      if (isAdmin) {
+        return NextResponse.next();
+      }
+
       if (pathname.startsWith('/director') && betterAuthRole !== 'director') {
         const targetDashboard = betterAuthRole === 'finance' ? '/finance' : '/employee';
         return NextResponse.redirect(new URL(targetDashboard, request.url));

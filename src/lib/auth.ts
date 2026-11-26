@@ -1,7 +1,52 @@
 import { betterAuth } from 'better-auth';
 import { dash } from '@better-auth/infra';
+import { admin } from 'better-auth/plugins';
+import { createAccessControl } from 'better-auth/plugins/access';
 import { nextCookies } from 'better-auth/next-js';
 import { Pool } from 'pg';
+
+const statement = {
+  user: [
+    'create',
+    'list',
+    'set-role',
+    'ban',
+    'impersonate',
+    'impersonate-admins',
+    'delete',
+    'set-password',
+    'set-email',
+    'set-phone',
+    'get',
+    'update',
+  ],
+  session: ['list', 'revoke', 'delete'],
+} as const;
+
+const ac = createAccessControl(statement);
+
+const fullAdminRole = ac.newRole({
+  user: [
+    'create',
+    'list',
+    'set-role',
+    'ban',
+    'impersonate',
+    'impersonate-admins',
+    'delete',
+    'set-password',
+    'set-email',
+    'set-phone',
+    'get',
+    'update',
+  ],
+  session: ['list', 'revoke', 'delete'],
+});
+
+const standardRole = ac.newRole({
+  user: [],
+  session: [],
+});
 
 export const auth = betterAuth({
   appName: 'Ourem Gen 2',
@@ -14,6 +59,21 @@ export const auth = betterAuth({
   plugins: [
     dash({
       apiKey: process.env.BETTER_AUTH_API_KEY,
+    }),
+    admin({
+      ac,
+      roles: {
+        'super-admin': fullAdminRole,
+        admin: fullAdminRole,
+        director: fullAdminRole,
+        finance: standardRole,
+        employee: standardRole,
+        user: standardRole,
+      },
+      defaultRole: 'employee',
+      adminRoles: ['super-admin', 'admin', 'director'],
+      adminUserIds: ['adab5979-a3c8-40df-90b2-370a993ff47d'],
+      impersonationSessionDuration: 3600,
     }),
     nextCookies(),
   ],
