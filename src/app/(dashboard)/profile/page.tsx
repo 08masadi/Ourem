@@ -324,8 +324,8 @@ export default function ProfilePage() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl sm:text-2xl font-black text-white">Profil & Pengaturan Akun</h1>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Profil & Pengaturan Akun</h1>
+        <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
           Kelola foto profil, tanda tangan resmi, data diri, dan rekening bank
         </p>
       </div>
@@ -395,8 +395,8 @@ export default function ProfilePage() {
 
           {/* User Info & Upload Controls */}
           <div className="flex-1 text-center sm:text-left space-y-1.5">
-            <h2 className="text-lg font-bold text-white">{profile?.full_name || 'Pengguna'}</h2>
-            <p className="text-xs text-slate-400 flex items-center justify-center sm:justify-start gap-1.5">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">{profile?.full_name || 'Pengguna'}</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center justify-center sm:justify-start gap-1.5">
               <Mail className="w-3.5 h-3.5 text-slate-500" />
               <span>{profile?.email}</span>
             </p>
@@ -452,7 +452,7 @@ export default function ProfilePage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className={`grid grid-cols-2 gap-2.5 sm:gap-4`}>
             <div className={profile?.role === 'director' || profile?.role === 'finance' ? 'col-span-2 sm:max-w-md' : ''}>
-              <label className="block text-[11px] sm:text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
+              <label className="block text-[11px] sm:text-xs font-bold text-slate-900 dark:text-slate-200 mb-1 flex items-center gap-1">
                 <User className="w-3 h-3 text-orange-400 shrink-0" />
                 <span className="truncate">Nama Lengkap</span>
               </label>
@@ -462,13 +462,13 @@ export default function ProfilePage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
               />
             </div>
 
             {!(profile?.role === 'director' || profile?.role === 'finance') ? (
               <div>
-                <label className="block text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
+                <label className="block text-[11px] sm:text-xs font-bold text-slate-900 dark:text-slate-200 mb-1 flex items-center justify-between">
                   <span className="truncate">Department</span>
                   <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-normal flex items-center gap-0.5 shrink-0">
                     <Lock className="w-2.5 h-2.5" />
@@ -481,7 +481,7 @@ export default function ProfilePage() {
                     disabled
                     readOnly
                     value={department}
-                    className="w-full pl-7 pr-2.5 py-1.5 sm:pl-8 sm:pr-3 sm:py-2 bg-slate-100 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90 truncate"
+                    className="w-full pl-7 pr-2.5 py-1.5 sm:pl-8 sm:pr-3 sm:py-2 bg-slate-100 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-slate-200 font-bold cursor-not-allowed select-none opacity-90 truncate"
                   />
                   <Briefcase className="w-3 h-3 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input type="hidden" name="department" value={department} />
@@ -499,7 +499,7 @@ export default function ProfilePage() {
           {/* Kolom ID Karyawan dan Nomor Telepon (Phone) - 2 Kolom per baris di mobile */}
           <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
             <div>
-              <label className="block text-[11px] sm:text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
+              <label className="block text-[11px] sm:text-xs font-bold text-slate-900 dark:text-slate-200 mb-1 flex items-center gap-1">
                 <Hash className="w-3 h-3 text-orange-400 shrink-0" />
                 <span className="truncate">ID Karyawan</span>
               </label>
@@ -509,12 +509,12 @@ export default function ProfilePage() {
                 placeholder="Contoh: CSK-003"
                 value={employeeId}
                 onChange={(e) => setEmployeeId(e.target.value)}
-                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 font-mono font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] sm:text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
+              <label className="block text-[11px] sm:text-xs font-bold text-slate-900 dark:text-slate-200 mb-1 flex items-center gap-1">
                 <Phone className="w-3 h-3 text-orange-400 shrink-0" />
                 <span className="truncate">No. HP / WA</span>
               </label>
@@ -524,21 +524,21 @@ export default function ProfilePage() {
                 placeholder="Contoh: 0882 3991 9129"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 font-mono font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           </div>
 
           {/* INFORMASI REKENING BANK - 2 Kolom per baris di mobile */}
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-1.5">
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
               <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
               <span>Informasi Rekening Bank Pembayaran</span>
             </h3>
 
             <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
               <div>
-                <label className="block text-[11px] sm:text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
+                <label className="block text-[11px] sm:text-xs font-bold text-slate-900 dark:text-slate-200 mb-1 flex items-center gap-1">
                   <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
                   <span className="truncate">Nama Bank</span>
                 </label>
@@ -548,12 +548,12 @@ export default function ProfilePage() {
                   placeholder="Contoh: BCA"
                   value={bankName}
                   onChange={(e) => setBankName(e.target.value)}
-                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] sm:text-xs font-semibold text-slate-300 mb-1 truncate">
+                <label className="block text-[11px] sm:text-xs font-bold text-slate-900 dark:text-slate-200 mb-1 truncate">
                   Nomor Rekening
                 </label>
                 <input
@@ -562,12 +562,12 @@ export default function ProfilePage() {
                   placeholder="Contoh: 1234567890"
                   value={bankAccountNumber}
                   onChange={(e) => setBankAccountNumber(e.target.value)}
-                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white font-mono font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-[11px] sm:text-xs font-semibold text-slate-300 mb-1 truncate">
+                <label className="block text-[11px] sm:text-xs font-bold text-slate-900 dark:text-slate-200 mb-1 truncate">
                   Nama Pemilik Rekening (Sesuai Buku Tabungan)
                 </label>
                 <input
@@ -576,7 +576,7 @@ export default function ProfilePage() {
                   placeholder="Nama lengkap pemilik rekening"
                   value={bankAccountHolder}
                   onChange={(e) => setBankAccountHolder(e.target.value)}
-                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
             </div>
@@ -584,7 +584,7 @@ export default function ProfilePage() {
 
           {/* TANDA TANGAN KARYAWAN (FORMAT .PNG) */}
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <PenTool className="w-3.5 h-3.5 text-orange-400" />
               <span>Foto Tanda Tangan Karyawan (Format .PNG)</span>
             </h3>

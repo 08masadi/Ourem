@@ -644,7 +644,7 @@ export default function EditRequestModal({
 
                 {/* 1. MENU PILIH ACCOUNT DI ATAS KOLOM INI */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
                     <Layers className="w-3.5 h-3.5 text-orange-400" />
                     <span>
                       {reimbursementType === 'Petty Cash'
@@ -655,35 +655,35 @@ export default function EditRequestModal({
                   <select
                     value={block.account}
                     onChange={(e) => updateBlockField(blockIndex, 'account', e.target.value)}
-                    className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
+                    className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
                   >
                     {reimbursementType === 'Petty Cash' ? (
-                      <optgroup label="─── TRANSPORT (PETTY CASH) ───" className="bg-slate-900 text-orange-400 font-bold">
-                        <option value="Bensin" className="text-white">Bensin</option>
-                        <option value="Parkir" className="text-white">Parkir</option>
-                        <option value="Tol" className="text-white">Tol</option>
-                        <option value="Transport Lainnya" className="text-white">Transport Lainnya</option>
+                      <optgroup label="─── TRANSPORT (PETTY CASH) ───" className="bg-white dark:bg-slate-900 text-orange-500 font-bold">
+                        <option value="Bensin">Bensin</option>
+                        <option value="Parkir">Parkir</option>
+                        <option value="Tol">Tol</option>
+                        <option value="Transport Lainnya">Transport Lainnya</option>
                       </optgroup>
                     ) : (
                       <>
-                        <optgroup label="─── MATERIAL & PERLENGKAPAN ───" className="bg-slate-900 text-emerald-400 font-bold">
-                          <option value="Material" className="text-white">Material</option>
-                          <option value="Alat Tulis Kantor (ATK)" className="text-white">Alat Tulis Kantor (ATK)</option>
-                          <option value="Sparepart & Perlengkapan" className="text-white">Sparepart & Perlengkapan</option>
+                        <optgroup label="─── MATERIAL & PERLENGKAPAN ───" className="bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 font-bold">
+                          <option value="Material">Material</option>
+                          <option value="Alat Tulis Kantor (ATK)">Alat Tulis Kantor (ATK)</option>
+                          <option value="Sparepart & Perlengkapan">Sparepart & Perlengkapan</option>
                         </optgroup>
 
-                        <optgroup label="─── KONSUMSI ───" className="bg-slate-900 text-amber-400 font-bold">
-                          <option value="Makan" className="text-white">Makan</option>
-                          <option value="Kopi" className="text-white">Kopi</option>
-                          <option value="Rokok" className="text-white">Rokok</option>
-                          <option value="Konsumsi Lainnya" className="text-white">Konsumsi Lainnya</option>
+                        <optgroup label="─── KONSUMSI ───" className="bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 font-bold">
+                          <option value="Makan">Makan</option>
+                          <option value="Kopi">Kopi</option>
+                          <option value="Rokok">Rokok</option>
+                          <option value="Konsumsi Lainnya">Konsumsi Lainnya</option>
                         </optgroup>
 
-                        <optgroup label="─── OPERASIONAL LAINNYA ───" className="bg-slate-900 text-teal-400 font-bold">
-                          <option value="Entertain Partner" className="text-white">Entertain Partner</option>
-                          <option value="Hotel & Penginapan" className="text-white">Hotel & Penginapan</option>
-                          <option value="Medis & Kesehatan" className="text-white">Medis & Kesehatan</option>
-                          <option value="Operasional Kantor" className="text-white">Operasional Kantor</option>
+                        <optgroup label="─── OPERASIONAL LAINNYA ───" className="bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 font-bold">
+                          <option value="Entertain Partner">Entertain Partner</option>
+                          <option value="Hotel & Penginapan">Hotel & Penginapan</option>
+                          <option value="Medis & Kesehatan">Medis & Kesehatan</option>
+                          <option value="Operasional Kantor">Operasional Kantor</option>
                         </optgroup>
                       </>
                     )}
@@ -693,7 +693,7 @@ export default function EditRequestModal({
                 {/* 2. CUSTOMER & DESCRIPTION ROWS (2 BARIS KE BAWAH) */}
                 <div className="space-y-3 pt-1">
                   <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-slate-300">
+                    <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200">
                       Rincian Customer & Keterangan:
                     </label>
                   </div>
@@ -701,29 +701,29 @@ export default function EditRequestModal({
                   {block.entries.map((entry, entryIndex) => (
                     <div
                       key={entryIndex}
-                      className="bg-slate-900/70 border border-slate-800/80 rounded-xl p-3 space-y-2.5 relative"
+                      className="customer-dark-box rounded-2xl p-3.5 sm:p-4 space-y-3 relative shadow-md"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded bg-slate-800 text-orange-400">
+                        <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/40">
                           #{entryIndex + 1}
                         </span>
                         {block.entries.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeCustomerFromBlock(blockIndex, entryIndex)}
-                            className="p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
+                            className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 transition cursor-pointer active:scale-95"
                             title="Hapus baris customer ini"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3.5 h-3.5 text-rose-400" />
                           </button>
                         )}
                       </div>
 
                       {/* 2 Baris ke bawah: Baris 1 Customer, Baris 2 Keterangan */}
-                      <div className="space-y-2">
+                      <div className="space-y-2.5">
                         {/* Customer Input */}
                         <div>
-                          <label className="block text-xs sm:text-sm font-semibold text-slate-400 mb-1">
+                          <label className="block text-xs sm:text-sm font-bold text-white mb-1" style={{ color: '#ffffff' }}>
                             Customer / Project
                           </label>
                           <input
@@ -734,13 +734,13 @@ export default function EditRequestModal({
                               updateCustomerEntry(blockIndex, entryIndex, 'customer', e.target.value)
                             }
                             placeholder="Contoh: KPU RI"
-                            className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white text-slate-900 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
                           />
                         </div>
 
                         {/* Description Textarea */}
                         <div>
-                          <label className="block text-xs sm:text-sm font-semibold text-slate-400 mb-1 flex items-center gap-1">
+                          <label className="block text-xs sm:text-sm font-bold text-white mb-1 flex items-center gap-1" style={{ color: '#ffffff' }}>
                             <List className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                             <span>Description (Keterangan)</span>
                           </label>
@@ -752,7 +752,7 @@ export default function EditRequestModal({
                               updateCustomerEntry(blockIndex, entryIndex, 'description', e.target.value)
                             }
                             placeholder="Keterangan transaksi..."
-                            className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed"
+                            className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white text-slate-900 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed font-medium"
                           />
                         </div>
                       </div>

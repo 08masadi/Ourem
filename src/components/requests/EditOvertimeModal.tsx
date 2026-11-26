@@ -167,7 +167,7 @@ export default function EditOvertimeModal({
             <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
               {/* Tanggal Lembur */}
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                   <span className="truncate">Tanggal Lembur</span>
                 </label>
@@ -181,14 +181,13 @@ export default function EditOvertimeModal({
                       e.currentTarget.showPicker?.();
                     } catch {}
                   }}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white focus:outline-none focus:border-orange-500 cursor-pointer"
-                  style={{ colorScheme: 'dark' }}
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer font-medium"
                 />
               </div>
 
               {/* Tipe Hari */}
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5">
                   Kategori Hari
                 </label>
                 <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
@@ -197,8 +196,8 @@ export default function EditOvertimeModal({
                     onClick={() => setTipeHari('hari kerja')}
                     className={`py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1 cursor-pointer border ${
                       tipeHari === 'hari kerja'
-                        ? 'bg-orange-500 text-white border-orange-400 shadow-md'
-                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                        ? 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-500 dark:text-white dark:border-orange-400 shadow-sm'
+                        : 'bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-400 border-slate-200/70 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     <span><span className="hidden sm:inline">Hari </span>Kerja</span>
@@ -208,8 +207,8 @@ export default function EditOvertimeModal({
                     onClick={() => setTipeHari('hari libur')}
                     className={`py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1 cursor-pointer border ${
                       tipeHari === 'hari libur'
-                        ? 'bg-orange-500 text-white border-orange-400 shadow-md'
-                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                        ? 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-500 dark:text-white dark:border-orange-400 shadow-sm'
+                        : 'bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-400 border-slate-200/70 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     <span><span className="hidden sm:inline">Hari </span>Libur</span>
@@ -219,7 +218,7 @@ export default function EditOvertimeModal({
 
               {/* Lokasi Lembur */}
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                   <span className="truncate">Lokasi Lembur</span>
                 </label>
@@ -229,13 +228,13 @@ export default function EditOvertimeModal({
                   value={lokasiLembur}
                   onChange={(e) => setLokasiLembur(e.target.value)}
                   placeholder="Masukkan lokasi lembur..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white focus:outline-none focus:border-orange-500 placeholder:text-slate-600"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400 font-medium"
                 />
               </div>
 
               {/* Jam Lembur */}
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                   <span className="truncate">Jam Lembur</span>
                 </label>
@@ -245,13 +244,13 @@ export default function EditOvertimeModal({
                   value={jamLembur}
                   onChange={(e) => setJamLembur(e.target.value)}
                   placeholder="Masukkan jam lembur"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white font-mono focus:outline-none focus:border-orange-500"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
                 />
               </div>
 
               {/* Nama Karyawan */}
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5">
                   Nama Karyawan
                 </label>
                 <input
@@ -259,15 +258,15 @@ export default function EditOvertimeModal({
                   required
                   value={namaKaryawan}
                   onChange={(e) => setNamaKaryawan(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white focus:outline-none focus:border-orange-500 uppercase font-semibold"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 uppercase font-bold"
                 />
               </div>
 
               {/* Department (Terkunci) */}
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center justify-between">
                   <span className="truncate">Department</span>
-                  <span className="text-[10px] sm:text-xs text-slate-400 font-normal flex items-center gap-0.5 shrink-0">
+                  <span className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 font-normal flex items-center gap-0.5 shrink-0">
                     <Lock className="w-3 h-3" />
                     Terkunci
                   </span>
@@ -278,7 +277,7 @@ export default function EditOvertimeModal({
                     disabled
                     readOnly
                     value={department}
-                    className="w-full pl-8 pr-3 py-2.5 sm:pl-9 sm:pr-3.5 sm:py-3 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-slate-200 font-semibold cursor-not-allowed select-none opacity-90 truncate"
+                    className="w-full pl-8 pr-3 py-2.5 sm:pl-9 sm:pr-3.5 sm:py-3 bg-slate-100 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-200 font-bold cursor-not-allowed select-none opacity-90 truncate"
                   />
                   <Briefcase className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input type="hidden" name="department" value={department} />
@@ -288,16 +287,16 @@ export default function EditOvertimeModal({
           </div>
 
           {/* Section 2: Deskripsi Pekerjaan */}
-          <div className="space-y-3 pt-3 border-t border-slate-800">
-            <h3 className="text-xs font-bold text-orange-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Briefcase className="w-3.5 h-3.5" />
+          <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+            <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+              <Briefcase className="w-3.5 h-3.5 text-orange-400" />
               <span>2. Rincian Pekerjaan</span>
             </h3>
 
             <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
               {/* Perusahaan */}
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
                   <Building2 className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                   <span className="truncate">Perusahaan / Klien</span>
                 </label>
@@ -307,13 +306,13 @@ export default function EditOvertimeModal({
                   value={perusahaan}
                   onChange={(e) => setPerusahaan(e.target.value)}
                   placeholder="Masukkan nama perusahaan atau klien..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white focus:outline-none focus:border-orange-500 placeholder:text-slate-600"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400 font-medium"
                 />
               </div>
 
               {/* Nama Pekerjaan */}
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                   <span className="truncate">Nama Pekerjaan</span>
                 </label>
@@ -323,13 +322,13 @@ export default function EditOvertimeModal({
                   value={namaPekerjaan}
                   onChange={(e) => setNamaPekerjaan(e.target.value)}
                   placeholder="Nama pekerjaan..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-white focus:outline-none focus:border-orange-500"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
                 />
               </div>
 
               {/* Uraian Pekerjaan */}
               <div className="col-span-2">
-                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                   <span>Uraian Pekerjaan (Detail Aktivitas)</span>
                 </label>
@@ -339,13 +338,13 @@ export default function EditOvertimeModal({
                   value={uraianPekerjaan}
                   onChange={(e) => setUraianPekerjaan(e.target.value)}
                   placeholder="Jelaskan rincian aktivitas pekerjaan lembur..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 sm:p-3.5 text-sm text-white focus:outline-none focus:border-orange-500 leading-relaxed font-mono"
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed font-mono font-medium"
                 />
               </div>
 
               {/* Nominal Kompensasi */}
               <div className="col-span-2">
-                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <span className="text-[10px] font-black text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/40 px-1 py-0.2 rounded bg-orange-50 dark:bg-orange-500/10 font-mono bg-clip-padding">
                       RP
@@ -353,11 +352,11 @@ export default function EditOvertimeModal({
                     <span>Nominal Kompensasi / Uang Lembur (Rp)</span>
                   </span>
                   {canEditNominal ? (
-                    <span className="text-[10px] sm:text-xs text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                    <span className="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
                       Dapat Diisi (Mode {currentRole === 'director' ? 'Director' : 'Finance'})
                     </span>
                   ) : (
-                    <span className="text-[10px] sm:text-xs text-slate-500 font-medium flex items-center gap-1">
+                    <span className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1">
                       <Lock className="w-3 h-3" />
                       <span>Dihitung Direktur / Finance</span>
                     </span>
@@ -374,7 +373,7 @@ export default function EditOvertimeModal({
                       value={nominal}
                       onChange={handleNominalChange}
                       placeholder="0"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-3 py-2.5 sm:py-3 text-sm font-bold text-orange-400 font-mono focus:outline-none focus:border-orange-500"
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl pl-10 pr-3 py-2.5 sm:py-3 text-sm font-bold text-orange-600 dark:text-orange-400 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   ) : (
                     <>
@@ -383,13 +382,13 @@ export default function EditOvertimeModal({
                         readOnly
                         disabled
                         value={nominal === '0' || !nominal ? 'Dihitung oleh Direktur' : nominal}
-                        className="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-10 pr-8 py-2.5 sm:py-3 text-sm font-bold text-slate-400 font-mono cursor-not-allowed select-none shadow-inner"
+                        className="w-full bg-slate-100 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 rounded-xl pl-10 pr-8 py-2.5 sm:py-3 text-sm font-bold text-slate-500 dark:text-slate-400 font-mono cursor-not-allowed select-none shadow-inner"
                       />
-                      <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2" />
+                      <Lock className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
                     </>
                   )}
                 </div>
-                <p className="text-[11px] sm:text-xs text-slate-500 mt-1">
+                <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">
                   {canEditNominal
                     ? 'Masukkan nominal kompensasi / uang lembur yang disetujui untuk karyawan.'
                     : 'Hanya akun Direktur dan Finance yang dapat mengisi dan menentukan nominal kompensasi lembur.'}

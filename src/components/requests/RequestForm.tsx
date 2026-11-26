@@ -489,7 +489,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
 
       {/* Jenis Reimbursement Toggle (Petty Cash vs Voucher) */}
       <div className="mb-4 sm:mb-5">
-        <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+        <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5">
           Jenis Reimbursement
         </label>
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
@@ -506,7 +506,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
               <span className={`text-xs sm:text-sm font-bold ${
                 reimbursementType === 'Petty Cash'
                   ? 'text-orange-600 dark:text-orange-400'
-                  : 'text-slate-800 dark:text-slate-200'
+                  : 'text-slate-900 dark:text-slate-200'
               }`}>
                 PETTY CASH
               </span>
@@ -516,7 +516,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-tight">
+            <p className="text-[11px] text-slate-800 dark:text-slate-300 font-medium leading-tight">
               Kas kecil operasional harian (Transport: Bensin, Parkir, Tol)
             </p>
           </button>
@@ -534,7 +534,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
               <span className={`text-xs sm:text-sm font-bold ${
                 reimbursementType === 'Voucher'
                   ? 'text-amber-600 dark:text-amber-400'
-                  : 'text-slate-800 dark:text-slate-200'
+                  : 'text-slate-900 dark:text-slate-200'
               }`}>
                 VOUCHER
               </span>
@@ -544,7 +544,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-tight">
+            <p className="text-[11px] text-slate-800 dark:text-slate-300 font-medium leading-tight">
               Voucher klaim biaya non-transport (Material, Konsumsi, Kantor)
             </p>
           </button>
@@ -555,9 +555,9 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
         {/* Department (Terkunci) & Tanggal Pengajuan (1 Baris, 2 Kolom) */}
         <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+            <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center justify-between">
               <span className="truncate">Department</span>
-              <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-normal flex items-center gap-0.5 shrink-0">
+              <span className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 font-normal flex items-center gap-0.5 shrink-0">
                 <Lock className="w-3 h-3" />
                 Terkunci
               </span>
@@ -568,7 +568,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                 disabled
                 readOnly
                 value={department}
-                className="w-full pl-8 pr-3 py-2.5 sm:pl-9 sm:pr-3.5 sm:py-3 bg-slate-100 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-800 dark:text-slate-200 font-semibold cursor-not-allowed select-none opacity-90 truncate"
+                className="w-full pl-8 pr-3 py-2.5 sm:pl-9 sm:pr-3.5 sm:py-3 bg-slate-100 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-slate-200 font-bold cursor-not-allowed select-none opacity-90 truncate"
               />
               <Briefcase className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input type="hidden" name="department" value={department} />
@@ -576,7 +576,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
           </div>
 
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+            <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-orange-400 shrink-0" />
               <span className="truncate">Tanggal Pengajuan</span>
             </label>
@@ -590,7 +590,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                   e.currentTarget.showPicker?.();
                 } catch {}
               }}
-              className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+              className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer font-medium"
             />
           </div>
         </div>
@@ -599,10 +599,10 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/60 pb-1.5">
             <div>
-              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+              <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
                 Rincian Akun & Beban Transaksi
               </span>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-[11px] text-slate-800 dark:text-slate-300 font-medium mt-0.5">
                 Pilih menu account, lengkapi customer & deskripsi, serta nominal dan foto nota bukti pembayaran.
               </p>
             </div>
@@ -619,7 +619,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                   <span className="text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-lg bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30">
                     Account #{blockIndex + 1}
                   </span>
-                  <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                  <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200">
                     {block.account}
                   </span>
                 </div>
@@ -640,7 +640,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
 
               {/* 1. MENU PILIH ACCOUNT DI ATAS KOLOM INI */}
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5">
                   {reimbursementType === 'Petty Cash'
                     ? 'Kategori Transport (Beban):'
                     : 'Kategori Akun (Beban):'}
@@ -686,7 +686,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
               {/* 2. CUSTOMER & DESCRIPTION ROWS DALAM KOLOM INI (2 BARIS KE BAWAH) */}
               <div className="space-y-3 pt-1">
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200">
                     Rincian Customer & Keterangan:
                   </label>
                 </div>
@@ -694,29 +694,29 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                 {block.entries.map((entry, entryIndex) => (
                   <div
                     key={entryIndex}
-                    className="bg-slate-50/60 dark:bg-slate-900/70 border border-slate-200/60 dark:border-slate-800/60 rounded-xl p-3 space-y-2.5 relative"
+                    className="customer-dark-box rounded-2xl p-3.5 sm:p-4 space-y-3 relative shadow-md"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-orange-400">
+                      <span className="text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/40">
                         #{entryIndex + 1}
                       </span>
                       {block.entries.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeCustomerFromBlock(blockIndex, entryIndex)}
-                          className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer active:scale-95"
+                          className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 transition cursor-pointer active:scale-95"
                           title="Hapus baris customer ini"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-3.5 h-3.5 text-rose-400" />
                         </button>
                       )}
                     </div>
 
                     {/* 2 Baris ke bawah: Baris 1 Customer, Baris 2 Keterangan */}
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       {/* Customer Input */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                        <label className="block text-xs sm:text-sm font-bold text-white mb-1" style={{ color: '#ffffff' }}>
                           Customer / Project
                         </label>
                         <input
@@ -727,13 +727,13 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                             updateCustomerEntry(blockIndex, entryIndex, 'customer', e.target.value)
                           }
                           placeholder="Contoh: KPU RI"
-                          className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white text-slate-900 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
                         />
                       </div>
 
                       {/* Description Input */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                        <label className="block text-xs sm:text-sm font-bold text-white mb-1" style={{ color: '#ffffff' }}>
                           Keterangan
                         </label>
                         <input
@@ -744,7 +744,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                             updateCustomerEntry(blockIndex, entryIndex, 'description', e.target.value)
                           }
                           placeholder="Keterangan transaksi..."
-                          className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white text-slate-900 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
                         />
                       </div>
                     </div>
@@ -769,7 +769,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
               <div className="grid grid-cols-2 gap-2.5 sm:gap-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
                 {/* Kolom 1: Nominal Amount */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5">
                     Nominal (Rp)
                   </label>
                   <input
@@ -782,7 +782,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                     className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                   <div className="text-[11px] text-orange-600 dark:text-amber-400 mt-1 flex items-center justify-between font-mono font-semibold truncate">
-                    <span className="text-slate-500 dark:text-slate-400 font-normal">Subtotal:</span>
+                    <span className="text-slate-700 dark:text-slate-400 font-medium">Subtotal:</span>
                     <span>
                       {block.amount
                         ? new Intl.NumberFormat('id-ID', {
@@ -797,7 +797,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
 
                 {/* Kolom 2: Tanggal Nota */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5">
                     Tanggal Nota
                   </label>
                   <input
@@ -812,7 +812,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                     }}
                     className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer font-medium"
                   />
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
+                  <div className="text-[11px] text-slate-700 dark:text-slate-400 mt-1 truncate font-medium">
                     Tgl Transaksi Nota
                   </div>
                 </div>
@@ -820,7 +820,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                 {/* Kolom Foto Bukti Nota (Tanpa Tombol Galeri) */}
                 <div className="col-span-2 pt-1">
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    <label className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200">
                       Foto Nota
                     </label>
                   </div>

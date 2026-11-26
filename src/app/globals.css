@@ -60,41 +60,41 @@ body {
    ======================================================== */
 @media (prefers-color-scheme: light) {
   :root:not(.dark) {
-    --background: #f1f5f9; /* Soothing soft gray-blue canvas */
-    --foreground: #1e293b; /* Deep slate, much softer on eyes than harsh black */
+    --background: #f8fafc; /* Clean, modern light canvas */
+    --foreground: #0f172a; /* Crisp dark navy/black */
 
-    --color-slate-950: #f1f5f9; /* Soft background, eliminates blinding white glare */
+    --color-slate-950: #f8fafc; /* Soft background */
     --color-slate-900: #ffffff; /* Crisp white for floating cards & modals */
-    --color-slate-850: #f8fafc; /* Gentle inner container */
+    --color-slate-850: #f1f5f9; /* Gentle inner container */
     --color-slate-800: #e2e8f0; /* Soft, seamless borders */
     --color-slate-700: #cbd5e1; /* Secondary borders */
-    --color-slate-600: #64748b;
-    --color-slate-500: #64748b; /* Muted hints */
-    --color-slate-400: #475569; /* Secondary text, rich & clear */
-    --color-slate-300: #334155; /* Labels */
-    --color-slate-200: #1e293b; /* Subtitles & prominent values */
-    --color-slate-100: #0f172a; /* Headings */
-    --color-slate-50: #020617;
+    --color-slate-600: #0f172a; /* Labels/text turn crisp black */
+    --color-slate-500: #1e293b; /* Readable dark slate */
+    --color-slate-400: #0f172a; /* Rich black instead of faint gray */
+    --color-slate-300: #0f172a; /* Rich black instead of faint gray */
+    --color-slate-200: #e2e8f0; /* Gentle light border, NEVER dark/black */
+    --color-slate-100: #f1f5f9; /* Subtle light divider, NEVER black */
+    --color-slate-50: #f8fafc;  /* Clean light background, NEVER black */
     color-scheme: light;
   }
 }
 
 html.light {
-  --background: #f1f5f9;
-  --foreground: #1e293b;
+  --background: #f8fafc;
+  --foreground: #0f172a;
 
-  --color-slate-950: #f1f5f9;
+  --color-slate-950: #f8fafc;
   --color-slate-900: #ffffff;
-  --color-slate-850: #f8fafc;
+  --color-slate-850: #f1f5f9;
   --color-slate-800: #e2e8f0;
   --color-slate-700: #cbd5e1;
-  --color-slate-600: #64748b;
-  --color-slate-500: #64748b;
-  --color-slate-400: #475569;
-  --color-slate-300: #334155;
-  --color-slate-200: #1e293b;
-  --color-slate-100: #0f172a;
-  --color-slate-50: #020617;
+  --color-slate-600: #0f172a;
+  --color-slate-500: #1e293b;
+  --color-slate-400: #0f172a;
+  --color-slate-300: #0f172a;
+  --color-slate-200: #e2e8f0;
+  --color-slate-100: #f1f5f9;
+  --color-slate-50: #f8fafc;
   color-scheme: light;
 }
 
@@ -205,9 +205,51 @@ html.dark .logo-dark {
     background-color: rgba(15, 23, 42, 0.6) !important;
   }
 
-  /* General text-white turns dark on light cards */
-  :root:not(.dark) .text-white {
+  /* General text-white turns dark on light cards, EXCEPT inside customer-dark-box and preserve-white */
+  :root:not(.dark) .text-white:not(.customer-dark-box *):not(.preserve-white) {
     color: #0f172a;
+  }
+
+  /* Customer Dark Box: Dark card with pure white titles and clear white inputs */
+  .customer-dark-box,
+  :root:not(.dark) .customer-dark-box {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+  }
+  .customer-dark-box label,
+  .customer-dark-box .label-white,
+  .customer-dark-box span.text-white,
+  .customer-dark-box p.text-white,
+  :root:not(.dark) .customer-dark-box label,
+  :root:not(.dark) .customer-dark-box .label-white,
+  :root:not(.dark) .customer-dark-box span.text-white,
+  :root:not(.dark) .customer-dark-box p.text-white {
+    color: #ffffff !important;
+  }
+  .customer-dark-box input,
+  .customer-dark-box textarea,
+  :root:not(.dark) .customer-dark-box input,
+  :root:not(.dark) .customer-dark-box textarea {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  /* Titles and labels in Light Mode: Crisp Black */
+  :root:not(.dark) label:not(.customer-dark-box *),
+  :root:not(.dark) .menu-label,
+  :root:not(.dark) h1:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
+  :root:not(.dark) h2:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
+  :root:not(.dark) h3:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]) {
+    color: #0f172a !important;
+  }
+
+  /* Explicit light border enforcement */
+  :root:not(.dark) .border-slate-100 {
+    border-color: #f1f5f9 !important;
+  }
+  :root:not(.dark) .border-slate-200 {
+    border-color: #e2e8f0 !important;
   }
 
   /* High contrast, eye-friendly accent colors in light mode (no washed out neon) */
@@ -359,8 +401,40 @@ html.light .fixed.inset-0[class*="bg-slate-950"] {
   background-color: rgba(15, 23, 42, 0.6) !important;
 }
 
-html.light .text-white {
+html.light .text-white:not(.customer-dark-box *):not(.preserve-white) {
   color: #0f172a;
+}
+
+html.light .customer-dark-box {
+  background-color: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+html.light .customer-dark-box label,
+html.light .customer-dark-box .label-white,
+html.light .customer-dark-box span.text-white,
+html.light .customer-dark-box p.text-white {
+  color: #ffffff !important;
+}
+html.light .customer-dark-box input,
+html.light .customer-dark-box textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light label:not(.customer-dark-box *),
+html.light .menu-label,
+html.light h1:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
+html.light h2:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
+html.light h3:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]) {
+  color: #0f172a !important;
+}
+
+html.light .border-slate-100 {
+  border-color: #f1f5f9 !important;
+}
+html.light .border-slate-200 {
+  border-color: #e2e8f0 !important;
 }
 
 html.light .text-orange-400,

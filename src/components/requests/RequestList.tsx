@@ -1052,8 +1052,8 @@ export default function RequestList({
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white">{title}</h1>
-          <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{title}</h1>
+          <p className="text-xs text-slate-800 dark:text-slate-400 font-medium mt-0.5">{subtitle}</p>
         </div>
 
         {/* Search */}
@@ -1180,7 +1180,7 @@ export default function RequestList({
             type="button"
             onClick={toggleSelectAll}
             disabled={selectableRequests.length === 0}
-            className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-900/90 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-900/90 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
             title={
               selectableRequests.length === 0
                 ? 'Semua pengajuan telah dicairkan (Paid)'
@@ -1192,9 +1192,9 @@ export default function RequestList({
             {selectedIds.length > 0 &&
             selectableRequests.length > 0 &&
             selectableRequests.every((r) => selectedIds.includes(r.id)) ? (
-              <CheckSquare2 className="w-4 h-4 text-orange-400" />
+              <CheckSquare2 className="w-4 h-4 text-orange-500" />
             ) : (
-              <Square className="w-4 h-4 text-slate-500" />
+              <Square className="w-4 h-4 text-slate-700 dark:text-slate-400" />
             )}
             <span>Pilih Semua</span>
           </button>
@@ -1429,15 +1429,15 @@ export default function RequestList({
                   )}
 
                   <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-slate-400">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-slate-700 dark:text-slate-400 font-semibold">
                       {/* Reimbursement Type (Tanpa highlight kotak) */}
                       <span
                         className={`font-bold uppercase tracking-wider ${
                           reqType === 'Lembur'
-                            ? 'text-purple-400'
+                            ? 'text-purple-600 dark:text-purple-400'
                             : reqType === 'Voucher'
-                            ? 'text-amber-400'
-                            : 'text-orange-400'
+                            ? 'text-amber-600 dark:text-amber-400'
+                            : 'text-orange-600 dark:text-orange-400'
                         }`}
                       >
                         {reqType === 'Lembur' ? 'FORM LEMBUR' : reqType}
@@ -1453,7 +1453,7 @@ export default function RequestList({
                     </div>
 
                     {/* Judul Pengajuan (Customer di samping kategori pada Petty Cash & Voucher dihilangkan) */}
-                    <h3 className="text-sm sm:text-base font-bold text-white truncate">
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
                       {displayTitle}
                     </h3>
 
@@ -1461,19 +1461,19 @@ export default function RequestList({
                     <div className="flex items-center justify-between sm:justify-start gap-2 pt-0.5 w-full">
                       <div className="flex flex-wrap items-center gap-1.5">
                         {isPendingApproval && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                             <Clock className="w-3 h-3" />
                             <span>Menunggu Approval</span>
                           </span>
                         )}
                         {isApproved && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                             <CheckCircle2 className="w-3 h-3" />
                             <span>Disetujui</span>
                           </span>
                         )}
                         {isRejected && currentRole !== 'director' && currentRole !== 'finance' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
                             <XCircle className="w-3 h-3" />
                             <span>Ditolak</span>
                           </span>
@@ -1483,8 +1483,8 @@ export default function RequestList({
                           <span
                             className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
                               isPaid
-                                ? 'text-teal-300 bg-teal-500/10 border-teal-500/30'
-                                : 'text-slate-400 bg-slate-800 border-slate-700'
+                                ? 'text-teal-700 dark:text-teal-300 bg-teal-500/10 border-teal-500/30'
+                                : 'text-slate-700 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
                             }`}
                           >
                             <CreditCard className="w-3 h-3" />
@@ -1495,8 +1495,8 @@ export default function RequestList({
 
                       {/* Nominal Klaim di Tampilan Mobile (Sejajar di sebelah kanan) */}
                       <div className="text-right sm:hidden shrink-0 ml-auto flex flex-col items-end">
-                        <div className="text-[10px] text-slate-400 font-medium leading-tight">Nominal Klaim</div>
-                        <div className="text-xs sm:text-sm font-black text-orange-400 font-mono leading-tight">
+                        <div className="text-[10px] text-slate-700 dark:text-slate-400 font-bold leading-tight">Nominal Klaim</div>
+                        <div className="text-xs sm:text-sm font-black text-orange-600 dark:text-orange-400 font-mono leading-tight">
                           {reqType === 'Lembur' && Number(req.amount) <= 1
                             ? 'Dihitung Direktur'
                             : formatRupiah(req.amount)}
@@ -1521,8 +1521,8 @@ export default function RequestList({
 
                 {/* Right Amount (Desktop: Tampilan kolom kanan kartu) */}
                 <div className="hidden sm:flex sm:flex-col items-end justify-center shrink-0 text-right">
-                  <div className="text-xs text-slate-400 font-medium">Nominal Klaim</div>
-                  <div className="text-base sm:text-lg font-black text-orange-400 font-mono">
+                  <div className="text-xs text-slate-700 dark:text-slate-400 font-bold">Nominal Klaim</div>
+                  <div className="text-base sm:text-lg font-black text-orange-600 dark:text-orange-400 font-mono">
                     {reqType === 'Lembur' && Number(req.amount) <= 1
                       ? 'Dihitung Direktur'
                       : formatRupiah(req.amount)}

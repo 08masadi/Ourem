@@ -201,14 +201,14 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
             selectedCategory === 'petty_cash'
               ? 'bg-white dark:bg-slate-900 border-2 border-orange-500 ring-2 ring-orange-500/40 shadow-xl shadow-orange-950/20 -translate-y-0.5'
-              : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-orange-500/50 hover:-translate-y-0.5 hover:shadow-md'
+              : 'bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-orange-500/50 hover:-translate-y-0.5 hover:shadow-md'
           }`}
         >
           <div className="w-full">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
+            <div className="flex items-center justify-between text-slate-900 dark:text-slate-200 mb-2">
               <span
-                className={`text-xs font-semibold transition ${
-                  selectedCategory === 'petty_cash' ? 'text-orange-400 font-bold' : 'group-hover:text-slate-200'
+                className={`text-xs font-bold transition ${
+                  selectedCategory === 'petty_cash' ? 'text-orange-500 font-bold' : 'text-slate-900 dark:text-slate-200'
                 }`}
               >
                 Petty Cash
@@ -248,14 +248,14 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
             selectedCategory === 'voucher'
               ? 'bg-white dark:bg-slate-900 border-2 border-amber-500 ring-2 ring-amber-500/40 shadow-xl shadow-amber-950/20 -translate-y-0.5'
-              : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-amber-500/50 hover:-translate-y-0.5 hover:shadow-md'
+              : 'bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-amber-500/50 hover:-translate-y-0.5 hover:shadow-md'
           }`}
         >
           <div className="w-full">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
+            <div className="flex items-center justify-between text-slate-900 dark:text-slate-200 mb-2">
               <span
-                className={`text-xs font-semibold transition ${
-                  selectedCategory === 'voucher' ? 'text-amber-400 font-bold' : 'group-hover:text-slate-200'
+                className={`text-xs font-bold transition ${
+                  selectedCategory === 'voucher' ? 'text-amber-500 font-bold' : 'text-slate-900 dark:text-slate-200'
                 }`}
               >
                 Voucher Reimbursement
@@ -295,14 +295,14 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
             selectedCategory === 'lembur'
               ? 'bg-white dark:bg-slate-900 border-2 border-orange-500 ring-2 ring-orange-500/40 shadow-xl shadow-orange-950/20 -translate-y-0.5'
-              : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-orange-500/50 hover:-translate-y-0.5 hover:shadow-md'
+              : 'bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-orange-500/50 hover:-translate-y-0.5 hover:shadow-md'
           }`}
         >
           <div className="w-full">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
+            <div className="flex items-center justify-between text-slate-900 dark:text-slate-200 mb-2">
               <span
-                className={`text-xs font-semibold transition ${
-                  selectedCategory === 'lembur' ? 'text-orange-400 font-bold' : 'group-hover:text-slate-200'
+                className={`text-xs font-bold transition ${
+                  selectedCategory === 'lembur' ? 'text-orange-500 font-bold' : 'text-slate-900 dark:text-slate-200'
                 }`}
               >
                 Lembur
@@ -342,14 +342,14 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
           className={`group relative text-left w-full rounded-2xl p-4 transition-all duration-200 transform active:scale-[0.98] cursor-pointer touch-manipulation flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
             selectedCategory === 'approved'
               ? 'bg-white dark:bg-slate-900 border-2 border-emerald-500 ring-2 ring-emerald-500/40 shadow-xl shadow-emerald-950/20 -translate-y-0.5'
-              : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-emerald-500/50 hover:-translate-y-0.5 hover:shadow-md'
+              : 'bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/60 shadow-sm shadow-slate-200/50 dark:shadow-none hover:border-emerald-500/50 hover:-translate-y-0.5 hover:shadow-md'
           }`}
         >
           <div className="w-full">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
+            <div className="flex items-center justify-between text-slate-900 dark:text-slate-200 mb-2">
               <span
-                className={`text-xs font-semibold transition ${
-                  selectedCategory === 'approved' ? 'text-emerald-400 font-bold' : 'group-hover:text-slate-200'
+                className={`text-xs font-bold transition ${
+                  selectedCategory === 'approved' ? 'text-emerald-500 font-bold' : 'text-slate-900 dark:text-slate-200'
                 }`}
               >
                 Telah Disetujui
@@ -358,21 +358,19 @@ export default function EmployeeMetricsCards({ requests }: EmployeeMetricsCardsP
                 className={`w-7 h-7 rounded-xl border flex items-center justify-center transition ${
                   selectedCategory === 'approved'
                     ? 'bg-emerald-100 border-emerald-300 text-emerald-800 dark:bg-emerald-500/25 dark:border-emerald-500/50 dark:text-emerald-300'
-                    : 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/15 dark:border-emerald-500/30 dark:text-emerald-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/25'
+                    : 'bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-500/15 dark:border-emerald-500/30 dark:text-emerald-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/25'
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-base sm:text-lg font-bold text-emerald-500 dark:text-emerald-400 tracking-tight">
+            <div className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-mono tracking-tight">
               {approvedCount} transaksi
             </div>
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/60 w-full">
-            <span className="text-[11px] font-semibold text-emerald-500 dark:text-emerald-400/90">
-              {approvedUnpaidRequests.length > 0
-                ? `${approvedUnpaidRequests.length} siap dicairkan finance`
-                : 'Semua telah dicairkan'}
+            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400/90">
+              {approvedUnpaidRequests.length} siap dicairkan finance
             </span>
             <ChevronRight
               className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
