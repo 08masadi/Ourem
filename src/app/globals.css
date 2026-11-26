@@ -119,6 +119,13 @@ html.light {
     --color-slate-50: #f8fafc;
     color-scheme: dark;
   }
+
+  :root:not(.light) .customer-dark-box input,
+  :root:not(.light) .customer-dark-box textarea {
+    background-color: #020617 !important;
+    color: #ffffff !important;
+    border-color: #334155 !important;
+  }
 }
 
 html.dark {
@@ -218,7 +225,7 @@ html.dark .logo-dark {
     color: #334155 !important;
   }
 
-  /* Customer Dark Box: Dark card with pure white titles and clear white inputs */
+  /* Customer Dark Box: Dark card with pure white titles */
   .customer-dark-box,
   :root:not(.dark) .customer-dark-box {
     background-color: #1e293b !important;
@@ -234,13 +241,21 @@ html.dark .logo-dark {
   :root:not(.dark) .customer-dark-box p.text-white {
     color: #ffffff !important;
   }
-  .customer-dark-box input,
-  .customer-dark-box textarea,
+  /* In Light Mode: inputs inside dark customer box are crisp white */
   :root:not(.dark) .customer-dark-box input,
   :root:not(.dark) .customer-dark-box textarea {
     background-color: #ffffff !important;
     color: #0f172a !important;
     border-color: #cbd5e1 !important;
+  }
+  /* In Dark Mode: inputs inside dark customer box remain dark */
+  :root.dark .customer-dark-box input,
+  :root.dark .customer-dark-box textarea,
+  html.dark .customer-dark-box input,
+  html.dark .customer-dark-box textarea {
+    background-color: #020617 !important;
+    color: #ffffff !important;
+    border-color: #334155 !important;
   }
 
   /* Titles and labels in Light Mode: Crisp Black */

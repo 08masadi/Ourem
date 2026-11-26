@@ -734,7 +734,7 @@ export default function EditRequestModal({
                               updateCustomerEntry(blockIndex, entryIndex, 'customer', e.target.value)
                             }
                             placeholder="Contoh: KPU RI"
-                            className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white text-slate-900 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
+                            className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-xl text-sm placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
                           />
                         </div>
 
@@ -752,7 +752,7 @@ export default function EditRequestModal({
                               updateCustomerEntry(blockIndex, entryIndex, 'description', e.target.value)
                             }
                             placeholder="Keterangan transaksi..."
-                            className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white text-slate-900 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed font-medium"
+                            className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-white dark:bg-slate-950 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-xl text-sm placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 leading-relaxed font-medium"
                           />
                         </div>
                       </div>
