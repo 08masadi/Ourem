@@ -39,7 +39,7 @@ export default function BannerAvatar({
         className="shrink-0 rounded-full cursor-pointer focus:outline-none transition-transform duration-150 hover:scale-105 active:scale-95 select-none"
         title="Klik untuk melihat foto profil besar"
       >
-        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/95 shadow-xl overflow-hidden bg-white/20 flex items-center justify-center shrink-0 ring-2 ring-white/30">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full border-[3px] border-white/95 shadow-2xl overflow-hidden bg-white/20 flex items-center justify-center shrink-0 ring-4 ring-white/30">
           {avatarUrl ? (
             <img
               src={avatarUrl}
@@ -47,7 +47,7 @@ export default function BannerAvatar({
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-amber-400 via-orange-500 to-amber-600 flex items-center justify-center text-white text-lg sm:text-xl font-black">
+            <div className="w-full h-full bg-gradient-to-br from-amber-400 via-orange-500 to-amber-600 flex items-center justify-center text-white text-2xl sm:text-3xl lg:text-4xl font-black">
               {fullName ? fullName.charAt(0).toUpperCase() : 'U'}
             </div>
           )}
