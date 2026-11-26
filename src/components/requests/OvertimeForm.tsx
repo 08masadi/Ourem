@@ -44,7 +44,41 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
   );
   const [perusahaan, setPerusahaan] = useState('');
   const [namaPekerjaan, setNamaPekerjaan] = useState('');
-  const [jamLembur, setJamLembur] = useState('');
+  const [jamMulai, setJamMulai] = useState('');
+  const [jamBerakhir, setJamBerakhir] = useState('');
+
+  // Helper akumulasi durasi lembur
+  const calculateTotalOvertime = (mulai: string, berakhir: string): string => {
+    if (!mulai || !berakhir) return '';
+    const [startH, startM] = mulai.split(':').map(Number);
+    const [endH, endM] = berakhir.split(':').map(Number);
+    if (isNaN(startH) || isNaN(startM) || isNaN(endH) || isNaN(endM)) return '';
+
+    let startTotalMins = startH * 60 + startM;
+    let endTotalMins = endH * 60 + endM;
+
+    // Shift lembur melewati tengah malam (misal 21:00 ke 02:00)
+    if (endTotalMins < startTotalMins) {
+      endTotalMins += 24 * 60;
+    }
+
+    const diffMins = endTotalMins - startTotalMins;
+    const hours = Math.floor(diffMins / 60);
+    const minutes = diffMins % 60;
+
+    if (hours === 0 && minutes === 0) return '0 Jam';
+
+    const parts: string[] = [];
+    if (hours > 0) parts.push(`${hours} Jam`);
+    if (minutes > 0) parts.push(`${minutes} Menit`);
+    return parts.join(' ');
+  };
+
+  const totalJam = calculateTotalOvertime(jamMulai, jamBerakhir);
+  const formattedJamLembur = jamMulai && jamBerakhir
+    ? `${jamMulai} - ${jamBerakhir}${totalJam ? ` (Total: ${totalJam})` : ''}`
+    : '';
+
   const [uraianPekerjaan, setUraianPekerjaan] = useState('');
   const [nominal, setNominal] = useState('0');
   const [department, setDepartment] = useState(
@@ -63,7 +97,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
     namaKaryawan,
     perusahaan,
     namaPekerjaan: namaPekerjaan || '(Nama Pekerjaan)',
-    jamLembur,
+    jamLembur: formattedJamLembur || '(Jam Lembur)',
     uraianPekerjaan: uraianPekerjaan || '(Belum ada uraian pekerjaan)',
     nominal: Number(nominal.replace(/[^0-9]/g, '')) || 0,
     employeeSignature: userProfile?.signature_url || null,
@@ -87,6 +121,13 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
     e.preventDefault();
     setError(null);
 
+    if (!jamMulai || !jamBerakhir) {
+      setError('Silakan lengkapi jam mulai dan jam berakhir lembur.');
+      return;
+    }
+
+    const finalJamLembur = `${jamMulai} - ${jamBerakhir}${totalJam ? ` (Total: ${totalJam})` : ''}`;
+
     const formData = new FormData();
     formData.set('tanggal_lembur', tanggalLembur);
     formData.set('tipe_hari', tipeHari);
@@ -94,7 +135,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
     formData.set('nama_karyawan', namaKaryawan);
     formData.set('perusahaan', perusahaan);
     formData.set('nama_pekerjaan', namaPekerjaan);
-    formData.set('jam_lembur', jamLembur);
+    formData.set('jam_lembur', finalJamLembur);
     formData.set('uraian_pekerjaan', uraianPekerjaan);
     formData.set('nominal', nominal);
     formData.set('department', department);
@@ -126,10 +167,10 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
       {/* Top Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 p-6 sm:p-8 text-white shadow-xl">
         <div className="relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white" style={{ color: '#ffffff', textShadow: 'none', filter: 'none' }}>
             Pengajuan Form Lembur
           </h1>
-          <p className="text-xs sm:text-sm text-orange-100 mt-1 max-w-xl">
+          <p className="text-xs sm:text-sm text-orange-100 mt-1 max-w-xl" style={{ color: '#ffedd5', textShadow: 'none', filter: 'none' }}>
             Isi formulir lembur di bawah ini. Dokumen resmi PT. Citra Sari Kencana akan dibuat secara otomatis dan dapat langsung diekspor ke PDF.
           </p>
         </div>
@@ -214,7 +255,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
             </div>
 
             {/* Lokasi Lembur */}
-            <div>
+            <div className="col-span-2 sm:col-span-1">
               <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                 <span className="truncate">Lokasi Lembur</span>
@@ -229,20 +270,77 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
               />
             </div>
 
-            {/* Jam Lembur */}
-            <div>
-              <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                <span className="truncate">Jam Lembur</span>
+            {/* Jam Lembur: 3 Kolom (Mulai, Berakhir, Total) */}
+            <div className="col-span-2">
+              <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                  <span className="truncate">Jam Lembur</span>
+                </span>
+                {totalJam && (
+                  <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-800/50">
+                    Akumulasi: {totalJam}
+                  </span>
+                )}
               </label>
-              <input
-                type="text"
-                required
-                value={jamLembur}
-                onChange={(e) => setJamLembur(e.target.value)}
-                placeholder="Masukkan jam lembur"
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400 font-mono font-medium"
-              />
+
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                {/* Kolom 1: Mulai */}
+                <div>
+                  <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Mulai
+                  </span>
+                  <input
+                    type="time"
+                    required
+                    value={jamMulai}
+                    onChange={(e) => setJamMulai(e.target.value)}
+                    onClick={(e) => {
+                      try {
+                        e.currentTarget.showPicker?.();
+                      } catch {}
+                    }}
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer shadow-sm text-center"
+                    title="Klik untuk mensetting jam mulai lembur"
+                  />
+                </div>
+
+                {/* Kolom 2: Berakhir */}
+                <div>
+                  <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Berakhir
+                  </span>
+                  <input
+                    type="time"
+                    required
+                    value={jamBerakhir}
+                    onChange={(e) => setJamBerakhir(e.target.value)}
+                    onClick={(e) => {
+                      try {
+                        e.currentTarget.showPicker?.();
+                      } catch {}
+                    }}
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer shadow-sm text-center"
+                    title="Klik untuk mensetting jam berakhir lembur"
+                  />
+                </div>
+
+                {/* Kolom 3: Total (Akumulasi Otomatis) */}
+                <div>
+                  <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Total
+                  </span>
+                  <input
+                    type="text"
+                    readOnly
+                    tabIndex={-1}
+                    value={totalJam || '-'}
+                    placeholder="0 Jam"
+                    className="w-full bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800/60 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-orange-600 dark:text-orange-400 font-bold font-mono focus:outline-none shadow-sm text-center cursor-default select-none"
+                    title="Total jam lembur terakumulasi otomatis ketika kolom mulai dan berakhir diisi"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Nama Karyawan */}

@@ -344,6 +344,51 @@ html.dark .logo-dark {
     background-image: linear-gradient(135deg, #c2410c 0%, #d97706 100%) !important;
     box-shadow: 0 10px 25px -5px rgba(194, 65, 12, 0.2) !important;
   }
+
+  /* Banner Text: Pure white without glow in Light and Dark mode */
+  :root:not(.dark) [class*="from-orange-"],
+  :root:not(.dark) [class*="from-orange-"] *,
+  html.light [class*="from-orange-"],
+  html.light [class*="from-orange-"] * {
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  :root:not(.dark) [class*="from-orange-"] h1,
+  :root:not(.dark) [class*="from-orange-"] h2,
+  :root:not(.dark) [class*="from-orange-"] h3,
+  :root:not(.dark) [class*="from-orange-"] p,
+  :root:not(.dark) [class*="from-orange-"] div,
+  :root:not(.dark) [class*="from-orange-"] span,
+  :root:not(.dark) [class*="from-orange-"] .text-white,
+  html.light [class*="from-orange-"] h1,
+  html.light [class*="from-orange-"] h2,
+  html.light [class*="from-orange-"] h3,
+  html.light [class*="from-orange-"] p,
+  html.light [class*="from-orange-"] div,
+  html.light [class*="from-orange-"] span,
+  html.light [class*="from-orange-"] .text-white {
+    color: #ffffff !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  :root:not(.dark) [class*="from-orange-"] .text-orange-100,
+  html.light [class*="from-orange-"] .text-orange-100 {
+    color: #ffedd5 !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* Digital Time Picker clock icon styling */
+  html.dark input[type="time"]::-webkit-calendar-picker-indicator,
+  :root.dark input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+  }
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+  }
   :root:not(.dark) .from-emerald-700.to-teal-800 {
     background-image: linear-gradient(135deg, #065f46 0%, #0d9488 100%) !important;
     box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.2) !important;

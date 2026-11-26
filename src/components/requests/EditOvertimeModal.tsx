@@ -55,7 +55,56 @@ export default function EditOvertimeModal({
   const [namaPekerjaan, setNamaPekerjaan] = useState(
     ov?.nama_pekerjaan || request.title.replace(/^Form Lembur - /, '')
   );
-  const [jamLembur, setJamLembur] = useState(ov?.jam_lembur || '');
+
+  // Parsing jam lembur format (misal 08:00 - 17:00 (Total: 9 Jam))
+  const parseInitialHours = (val?: string | null) => {
+    if (!val) return { mulai: '', berakhir: '' };
+    const match = val.match(/(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})/);
+    if (match) {
+      return {
+        mulai: match[1].padStart(5, '0'),
+        berakhir: match[2].padStart(5, '0'),
+      };
+    }
+    return { mulai: '', berakhir: '' };
+  };
+
+  const initialHours = parseInitialHours(ov?.jam_lembur);
+  const [jamMulai, setJamMulai] = useState(initialHours.mulai);
+  const [jamBerakhir, setJamBerakhir] = useState(initialHours.berakhir);
+  const [rawJamLembur, setRawJamLembur] = useState(ov?.jam_lembur || '');
+
+  // Helper akumulasi durasi lembur
+  const calculateTotalOvertime = (mulai: string, berakhir: string): string => {
+    if (!mulai || !berakhir) return '';
+    const [startH, startM] = mulai.split(':').map(Number);
+    const [endH, endM] = berakhir.split(':').map(Number);
+    if (isNaN(startH) || isNaN(startM) || isNaN(endH) || isNaN(endM)) return '';
+
+    let startTotalMins = startH * 60 + startM;
+    let endTotalMins = endH * 60 + endM;
+
+    if (endTotalMins < startTotalMins) {
+      endTotalMins += 24 * 60;
+    }
+
+    const diffMins = endTotalMins - startTotalMins;
+    const hours = Math.floor(diffMins / 60);
+    const minutes = diffMins % 60;
+
+    if (hours === 0 && minutes === 0) return '0 Jam';
+
+    const parts: string[] = [];
+    if (hours > 0) parts.push(`${hours} Jam`);
+    if (minutes > 0) parts.push(`${minutes} Menit`);
+    return parts.join(' ');
+  };
+
+  const totalJam = calculateTotalOvertime(jamMulai, jamBerakhir);
+  const effectiveJamLembur = jamMulai && jamBerakhir
+    ? `${jamMulai} - ${jamBerakhir}${totalJam ? ` (Total: ${totalJam})` : ''}`
+    : rawJamLembur;
+
   const [uraianPekerjaan, setUraianPekerjaan] = useState(
     ov?.uraian_pekerjaan || getCleanDescription(request.description)
   );
@@ -87,7 +136,7 @@ export default function EditOvertimeModal({
     e.preventDefault();
     setError(null);
 
-    if (!namaPekerjaan.trim() || !jamLembur.trim() || !uraianPekerjaan.trim()) {
+    if (!namaPekerjaan.trim() || !effectiveJamLembur.trim() || !uraianPekerjaan.trim()) {
       setError('Nama pekerjaan, jam lembur, dan uraian pekerjaan wajib diisi.');
       return;
     }
@@ -101,7 +150,7 @@ export default function EditOvertimeModal({
     formData.set('department', department);
     formData.set('perusahaan', perusahaan);
     formData.set('nama_pekerjaan', namaPekerjaan);
-    formData.set('jam_lembur', jamLembur);
+    formData.set('jam_lembur', effectiveJamLembur);
     formData.set('uraian_pekerjaan', uraianPekerjaan);
     formData.set('nominal', nominal);
 
@@ -217,7 +266,7 @@ export default function EditOvertimeModal({
               </div>
 
               {/* Lokasi Lembur */}
-              <div>
+              <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                   <span className="truncate">Lokasi Lembur</span>
@@ -232,20 +281,77 @@ export default function EditOvertimeModal({
                 />
               </div>
 
-              {/* Jam Lembur */}
-              <div>
-                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                  <span className="truncate">Jam Lembur</span>
+              {/* Jam Lembur: 3 Kolom (Mulai, Berakhir, Total) */}
+              <div className="col-span-2">
+                <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                    <span className="truncate">Jam Lembur</span>
+                  </span>
+                  {totalJam && (
+                    <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-800/50">
+                      Akumulasi: {totalJam}
+                    </span>
+                  )}
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={jamLembur}
-                  onChange={(e) => setJamLembur(e.target.value)}
-                  placeholder="Masukkan jam lembur"
-                  className="w-full bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
-                />
+
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  {/* Kolom 1: Mulai */}
+                  <div>
+                    <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                      Mulai
+                    </span>
+                    <input
+                      type="time"
+                      required
+                      value={jamMulai}
+                      onChange={(e) => setJamMulai(e.target.value)}
+                      onClick={(e) => {
+                        try {
+                          e.currentTarget.showPicker?.();
+                        } catch {}
+                      }}
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer shadow-sm text-center"
+                      title="Klik untuk mensetting jam mulai lembur"
+                    />
+                  </div>
+
+                  {/* Kolom 2: Berakhir */}
+                  <div>
+                    <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                      Berakhir
+                    </span>
+                    <input
+                      type="time"
+                      required
+                      value={jamBerakhir}
+                      onChange={(e) => setJamBerakhir(e.target.value)}
+                      onClick={(e) => {
+                        try {
+                          e.currentTarget.showPicker?.();
+                        } catch {}
+                      }}
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer shadow-sm text-center"
+                      title="Klik untuk mensetting jam berakhir lembur"
+                    />
+                  </div>
+
+                  {/* Kolom 3: Total (Akumulasi Otomatis) */}
+                  <div>
+                    <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                      Total
+                    </span>
+                    <input
+                      type="text"
+                      readOnly
+                      tabIndex={-1}
+                      value={totalJam || '-'}
+                      placeholder="0 Jam"
+                      className="w-full bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800/60 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-orange-600 dark:text-orange-400 font-bold font-mono focus:outline-none shadow-sm text-center cursor-default select-none"
+                      title="Total jam lembur terakumulasi otomatis ketika kolom mulai dan berakhir diisi"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Nama Karyawan */}
