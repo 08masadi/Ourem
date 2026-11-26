@@ -212,16 +212,16 @@ html.dark .logo-dark {
     background-color: rgba(15, 23, 42, 0.6) !important;
   }
 
-  /* General text-white turns dark on light cards, EXCEPT inside customer-dark-box and preserve-white */
-  :root:not(.dark) .text-white:not(.customer-dark-box *):not(.preserve-white):not([class*="bg-orange-"]):not([class*="from-orange-"]):not([class*="bg-emerald-"]):not([class*="from-emerald-"]):not([class*="bg-rose-"]):not([class*="from-rose-"]):not([class*="bg-amber-"]):not([class*="from-amber-"]):not([class*="bg-gradient-"]),
-  :root:not(.dark) .text-slate-100:not(.customer-dark-box *):not(.preserve-white),
-  :root:not(.dark) .text-slate-200:not(.customer-dark-box *):not(.preserve-white) {
+  /* General text-white turns dark on light cards, EXCEPT inside customer-dark-box, banners, and preserve-white */
+  :root:not(.dark) .text-white:not(.customer-dark-box *):not(.preserve-white):not([class*="from-orange-"] *):not([class*="bg-orange-"] *):not([class*="bg-orange-"]):not([class*="from-orange-"]):not([class*="bg-emerald-"]):not([class*="from-emerald-"]):not([class*="bg-rose-"]):not([class*="from-rose-"]):not([class*="bg-amber-"]):not([class*="from-amber-"]):not([class*="bg-gradient-"]),
+  :root:not(.dark) .text-slate-100:not(.customer-dark-box *):not(.preserve-white):not([class*="from-orange-"] *),
+  :root:not(.dark) .text-slate-200:not(.customer-dark-box *):not(.preserve-white):not([class*="from-orange-"] *) {
     color: #0f172a !important;
   }
-  :root:not(.dark) .text-slate-300:not(.customer-dark-box *):not(.preserve-white) {
+  :root:not(.dark) .text-slate-300:not(.customer-dark-box *):not(.preserve-white):not([class*="from-orange-"] *) {
     color: #1e293b !important;
   }
-  :root:not(.dark) .text-slate-400:not(.customer-dark-box *):not(.preserve-white):not(input):not(textarea) {
+  :root:not(.dark) .text-slate-400:not(.customer-dark-box *):not(.preserve-white):not([class*="from-orange-"] *):not(input):not(textarea) {
     color: #334155 !important;
   }
 
@@ -258,12 +258,12 @@ html.dark .logo-dark {
     border-color: #334155 !important;
   }
 
-  /* Titles and labels in Light Mode: Crisp Black */
-  :root:not(.dark) label:not(.customer-dark-box *),
+  /* Titles and labels in Light Mode: Crisp Black (excluding banners and preserve-white) */
+  :root:not(.dark) label:not(.customer-dark-box *):not([class*="from-orange-"] *),
   :root:not(.dark) .menu-label,
-  :root:not(.dark) h1:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
-  :root:not(.dark) h2:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
-  :root:not(.dark) h3:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]) {
+  :root:not(.dark) h1:not(.preserve-white):not([class*="from-orange-"] *):not([class*="bg-orange-"] *):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
+  :root:not(.dark) h2:not(.preserve-white):not([class*="from-orange-"] *):not([class*="bg-orange-"] *):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
+  :root:not(.dark) h3:not(.preserve-white):not([class*="from-orange-"] *):not([class*="bg-orange-"] *):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]) {
     color: #0f172a !important;
   }
 
@@ -469,15 +469,15 @@ html.light .fixed.inset-0[class*="bg-slate-950"] {
   background-color: rgba(15, 23, 42, 0.6) !important;
 }
 
-html.light .text-white:not(.customer-dark-box *):not(.preserve-white):not([class*="bg-orange-"]):not([class*="from-orange-"]):not([class*="bg-emerald-"]):not([class*="from-emerald-"]):not([class*="bg-rose-"]):not([class*="from-rose-"]):not([class*="bg-amber-"]):not([class*="from-amber-"]):not([class*="bg-gradient-"]),
-html.light .text-slate-100:not(.customer-dark-box *):not(.preserve-white),
-html.light .text-slate-200:not(.customer-dark-box *):not(.preserve-white) {
+html.light .text-white:not(.customer-dark-box *):not(.preserve-white):not([class*="from-orange-"] *):not([class*="bg-orange-"] *):not([class*="bg-orange-"]):not([class*="from-orange-"]):not([class*="bg-emerald-"]):not([class*="from-emerald-"]):not([class*="bg-rose-"]):not([class*="from-rose-"]):not([class*="bg-amber-"]):not([class*="from-amber-"]):not([class*="bg-gradient-"]),
+html.light .text-slate-100:not(.customer-dark-box *):not(.preserve-white):not([class*="from-orange-"] *),
+html.light .text-slate-200:not(.customer-dark-box *):not(.preserve-white):not([class*="from-orange-"] *) {
   color: #0f172a !important;
 }
-html.light .text-slate-300:not(.customer-dark-box *):not(.preserve-white) {
+html.light .text-slate-300:not(.customer-dark-box *):not(.preserve-white):not([class*="from-orange-"] *) {
   color: #1e293b !important;
 }
-html.light .text-slate-400:not(.customer-dark-box *):not(.preserve-white):not(input):not(textarea) {
+html.light .text-slate-400:not(.customer-dark-box *):not(.preserve-white):not([class*="from-orange-"] *):not(input):not(textarea) {
   color: #334155 !important;
 }
 
@@ -498,11 +498,11 @@ html.light .customer-dark-box textarea {
   border-color: #cbd5e1 !important;
 }
 
-html.light label:not(.customer-dark-box *),
+html.light label:not(.customer-dark-box *):not([class*="from-orange-"] *),
 html.light .menu-label,
-html.light h1:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
-html.light h2:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
-html.light h3:not(.preserve-white):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]) {
+html.light h1:not(.preserve-white):not([class*="from-orange-"] *):not([class*="bg-orange-"] *):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
+html.light h2:not(.preserve-white):not([class*="from-orange-"] *):not([class*="bg-orange-"] *):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]),
+html.light h3:not(.preserve-white):not([class*="from-orange-"] *):not([class*="bg-orange-"] *):not([class*="text-orange-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]) {
   color: #0f172a !important;
 }
 
@@ -977,5 +977,45 @@ html.light .custom-scrollbar {
     transform: none !important;
   }
 }
+
+/* ========================================================
+   CRITICAL BANNER OVERRIDES: Pure White without Glow
+   ======================================================== */
+.banner-title-white,
+.banner-nominal-white,
+.preserve-white,
+html.light .banner-title-white,
+html.light .banner-nominal-white,
+html.light .preserve-white,
+:root:not(.dark) .banner-title-white,
+:root:not(.dark) .banner-nominal-white,
+:root:not(.dark) .preserve-white,
+[class*="from-orange-"] h1,
+[class*="from-orange-"] .preserve-white,
+[class*="from-orange-"] .banner-title-white,
+[class*="from-orange-"] .banner-nominal-white,
+html.light [class*="from-orange-"] h1,
+html.light [class*="from-orange-"] .preserve-white,
+html.light [class*="from-orange-"] .banner-title-white,
+html.light [class*="from-orange-"] .banner-nominal-white,
+:root:not(.dark) [class*="from-orange-"] h1,
+:root:not(.dark) [class*="from-orange-"] .preserve-white,
+:root:not(.dark) [class*="from-orange-"] .banner-title-white,
+:root:not(.dark) [class*="from-orange-"] .banner-nominal-white {
+  color: #ffffff !important;
+  text-shadow: none !important;
+  filter: none !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+[class*="from-orange-"] .banner-subtext-white,
+html.light [class*="from-orange-"] .banner-subtext-white,
+:root:not(.dark) [class*="from-orange-"] .banner-subtext-white {
+  color: #ffedd5 !important;
+  text-shadow: none !important;
+  filter: none !important;
+  -webkit-text-fill-color: #ffedd5 !important;
+}
+
 
 

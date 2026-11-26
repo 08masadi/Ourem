@@ -88,13 +88,13 @@ export default async function EmployeeDashboardPage() {
       <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 rounded-3xl p-5 sm:p-6 text-white shadow-xl flex flex-row justify-between items-center gap-4">
         {/* Left: Saldo Belum Dicairkan */}
         <div className="space-y-1">
-          <div className="text-xs sm:text-sm font-bold text-orange-100 uppercase tracking-wider" style={{ color: '#ffedd5', textShadow: 'none', filter: 'none' }}>
+          <div className="text-xs sm:text-sm font-bold text-orange-100 uppercase tracking-wider banner-subtext-white" style={{ color: '#ffedd5', textShadow: 'none', filter: 'none', WebkitTextFillColor: '#ffedd5' }}>
             Total Saldo Belum Dicairkan
           </div>
-          <div className="text-2xl sm:text-4xl lg:text-5xl font-black text-white font-mono tracking-tight" style={{ color: '#ffffff', textShadow: 'none', filter: 'none' }}>
+          <div className="text-2xl sm:text-4xl lg:text-5xl font-black text-white font-mono tracking-tight preserve-white banner-nominal-white" style={{ color: '#ffffff', textShadow: 'none', filter: 'none', WebkitTextFillColor: '#ffffff' }}>
             {formatRupiah(totalUnpaidNominal)}
           </div>
-          <div className="text-xs text-orange-100/90 font-medium" style={{ color: '#ffedd5', textShadow: 'none', filter: 'none' }}>
+          <div className="text-xs text-orange-100/90 font-medium banner-subtext-white" style={{ color: '#ffedd5', textShadow: 'none', filter: 'none', WebkitTextFillColor: '#ffedd5' }}>
             {unpaidRequests.length} pengajuan belum dicairkan
           </div>
         </div>

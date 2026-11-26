@@ -167,10 +167,10 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
       {/* Top Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 p-6 sm:p-8 text-white shadow-xl">
         <div className="relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white" style={{ color: '#ffffff', textShadow: 'none', filter: 'none' }}>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white preserve-white banner-title-white" style={{ color: '#ffffff', textShadow: 'none', filter: 'none', WebkitTextFillColor: '#ffffff' }}>
             Pengajuan Form Lembur
           </h1>
-          <p className="text-xs sm:text-sm text-orange-100 mt-1 max-w-xl" style={{ color: '#ffedd5', textShadow: 'none', filter: 'none' }}>
+          <p className="text-xs sm:text-sm text-orange-100 mt-1 max-w-xl banner-subtext-white" style={{ color: '#ffedd5', textShadow: 'none', filter: 'none', WebkitTextFillColor: '#ffedd5' }}>
             Isi formulir lembur di bawah ini. Dokumen resmi PT. Citra Sari Kencana akan dibuat secara otomatis dan dapat langsung diekspor ke PDF.
           </p>
         </div>
