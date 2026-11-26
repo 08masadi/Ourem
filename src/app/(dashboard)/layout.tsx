@@ -26,18 +26,18 @@ export default async function DashboardLayout({
   const avatarUrl = profile.avatar_url || null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col md:flex-row">
       {/* Desktop Sidebar */}
       <Sidebar role={role} userName={userName} userEmail={userEmail} avatarUrl={avatarUrl} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Desktop Top Header Bar with Notification Bell */}
-        <header className="hidden md:flex items-center justify-between px-6 lg:px-8 py-3.5 border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md sticky top-0 z-30">
+        <header className="hidden md:flex items-center justify-between px-6 lg:px-8 py-3.5 border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-950/70 backdrop-blur-md sticky top-0 z-30">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold text-slate-400">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
               Ouffice Reimbursement &bull;{' '}
-              <span className="text-white capitalize font-bold">
+              <span className="text-slate-900 dark:text-white capitalize font-bold">
                 {role === 'director' ? 'Director Workspace' : role === 'finance' ? 'Finance Workspace' : 'Employee Workspace'}
               </span>
             </span>
@@ -50,7 +50,7 @@ export default async function DashboardLayout({
             {/* Profile Pill */}
             <Link
               href="/profile"
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/60 transition group"
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800/60 transition group shadow-sm"
             >
               <div className="w-6 h-6 rounded-full overflow-hidden bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
                 {avatarUrl ? (
@@ -59,7 +59,7 @@ export default async function DashboardLayout({
                   userName.charAt(0).toUpperCase()
                 )}
               </div>
-              <span className="text-xs font-semibold text-slate-200 group-hover:text-white truncate max-w-[140px]">
+              <span className="text-xs font-bold text-slate-900 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-white truncate max-w-[140px]">
                 {userName}
               </span>
             </Link>
@@ -79,7 +79,7 @@ export default async function DashboardLayout({
         </header>
 
         {/* Mobile / Android Header with Transparent 2x Logo & Notification Bell */}
-        <header className="md:hidden bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-white px-4 py-2.5 shadow-md flex justify-between items-center sticky top-0 z-40">
+        <header className="md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white px-4 py-2.5 shadow-sm flex justify-between items-center sticky top-0 z-40">
           <div className="flex items-center gap-2.5">
             <img
               src="/ouffice-logo-white.png"

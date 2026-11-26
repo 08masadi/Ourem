@@ -45,10 +45,10 @@ export default function Sidebar({ role }: SidebarProps) {
     role === 'director' ? directorLinks : role === 'finance' ? financeLinks : employeeLinks;
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-slate-900 border-r border-slate-800 text-white h-screen sticky top-0 p-4 shrink-0 overflow-y-auto z-40">
+    <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white h-screen sticky top-0 p-4 shrink-0 overflow-y-auto z-40">
       <div>
         {/* Brand Logo - Official Ouffice.co.id Transparent (2x Size) */}
-        <div className="px-1 py-4 mb-6 border-b border-slate-800 flex items-center justify-center">
+        <div className="px-1 py-4 mb-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-center">
           <img
             src="/ouffice-logo-white.png"
             alt="Ouffice.co.id"
@@ -71,10 +71,10 @@ export default function Sidebar({ role }: SidebarProps) {
                 key={link.href}
                 href={link.href}
                 prefetch={false}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition ${
                   isActive
                     ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md shadow-orange-950/50'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />

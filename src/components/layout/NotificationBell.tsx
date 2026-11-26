@@ -198,8 +198,8 @@ export default function NotificationBell({ role }: NotificationBellProps) {
         aria-label="Lonceng Notifikasi"
         className={`relative p-2 rounded-xl transition duration-150 flex items-center justify-center cursor-pointer ${
           isOpen
-            ? 'bg-orange-500/20 text-orange-400 border border-orange-500/40 shadow-lg shadow-orange-950/30'
-            : 'bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800'
+            ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/40 shadow-lg shadow-orange-950/30'
+            : 'bg-white dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 shadow-sm'
         }`}
       >
         <Bell className="w-4 h-4 sm:w-5 sm:h-5" />

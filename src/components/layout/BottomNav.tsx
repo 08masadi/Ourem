@@ -35,7 +35,7 @@ export default function BottomNav({ role }: BottomNavProps) {
     role === 'director' ? directorLinks : role === 'finance' ? financeLinks : employeeLinks;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-40 px-4 py-2">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-40 px-4 py-2 shadow-lg">
       <div className="flex justify-around items-center max-w-md mx-auto">
         {links.map((link) => {
           const Icon = link.icon;
@@ -47,7 +47,7 @@ export default function BottomNav({ role }: BottomNavProps) {
               href={link.href}
               prefetch={false}
               className={`relative flex flex-col items-center justify-center gap-1 py-1.5 px-3.5 rounded-2xl select-none transition-all duration-150 ease-out active:scale-75 active:opacity-70 active:bg-orange-500/10 cursor-pointer ${
-                isActive ? 'text-orange-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+                isActive ? 'text-orange-600 dark:text-orange-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
               {isActive && (

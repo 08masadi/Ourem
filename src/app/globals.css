@@ -63,18 +63,18 @@ body {
     --background: #f8fafc; /* Clean, modern light canvas */
     --foreground: #0f172a; /* Crisp dark navy/black */
 
-    --color-slate-950: #f8fafc; /* Soft background */
-    --color-slate-900: #ffffff; /* Crisp white for floating cards & modals */
-    --color-slate-850: #f1f5f9; /* Gentle inner container */
-    --color-slate-800: #e2e8f0; /* Soft, seamless borders */
-    --color-slate-700: #cbd5e1; /* Secondary borders */
-    --color-slate-600: #0f172a; /* Labels/text turn crisp black */
-    --color-slate-500: #1e293b; /* Readable dark slate */
-    --color-slate-400: #0f172a; /* Rich black instead of faint gray */
-    --color-slate-300: #0f172a; /* Rich black instead of faint gray */
-    --color-slate-200: #e2e8f0; /* Gentle light border, NEVER dark/black */
-    --color-slate-100: #f1f5f9; /* Subtle light divider, NEVER black */
-    --color-slate-50: #f8fafc;  /* Clean light background, NEVER black */
+    --color-slate-950: #020617;
+    --color-slate-900: #0f172a; /* True Deep Slate/Black for high contrast */
+    --color-slate-850: #162032;
+    --color-slate-800: #1e293b; /* Dark slate text/icons */
+    --color-slate-700: #334155; /* Secondary text */
+    --color-slate-600: #475569; /* Muted text */
+    --color-slate-500: #64748b; /* Subtle text */
+    --color-slate-400: #94a3b8; /* Placeholder */
+    --color-slate-300: #cbd5e1;
+    --color-slate-200: #e2e8f0; /* Gentle light border */
+    --color-slate-100: #f1f5f9; /* Subtle light divider */
+    --color-slate-50: #f8fafc;  /* Clean light background */
     color-scheme: light;
   }
 }
@@ -83,15 +83,15 @@ html.light {
   --background: #f8fafc;
   --foreground: #0f172a;
 
-  --color-slate-950: #f8fafc;
-  --color-slate-900: #ffffff;
-  --color-slate-850: #f1f5f9;
-  --color-slate-800: #e2e8f0;
-  --color-slate-700: #cbd5e1;
-  --color-slate-600: #0f172a;
-  --color-slate-500: #1e293b;
-  --color-slate-400: #0f172a;
-  --color-slate-300: #0f172a;
+  --color-slate-950: #020617;
+  --color-slate-900: #0f172a; /* True Deep Slate/Black for high contrast */
+  --color-slate-850: #162032;
+  --color-slate-800: #1e293b;
+  --color-slate-700: #334155;
+  --color-slate-600: #475569;
+  --color-slate-500: #64748b;
+  --color-slate-400: #94a3b8;
+  --color-slate-300: #cbd5e1;
   --color-slate-200: #e2e8f0;
   --color-slate-100: #f1f5f9;
   --color-slate-50: #f8fafc;
@@ -206,8 +206,16 @@ html.dark .logo-dark {
   }
 
   /* General text-white turns dark on light cards, EXCEPT inside customer-dark-box and preserve-white */
-  :root:not(.dark) .text-white:not(.customer-dark-box *):not(.preserve-white) {
-    color: #0f172a;
+  :root:not(.dark) .text-white:not(.customer-dark-box *):not(.preserve-white):not([class*="bg-orange-"]):not([class*="from-orange-"]):not([class*="bg-emerald-"]):not([class*="from-emerald-"]):not([class*="bg-rose-"]):not([class*="from-rose-"]):not([class*="bg-amber-"]):not([class*="from-amber-"]):not([class*="bg-gradient-"]),
+  :root:not(.dark) .text-slate-100:not(.customer-dark-box *):not(.preserve-white),
+  :root:not(.dark) .text-slate-200:not(.customer-dark-box *):not(.preserve-white) {
+    color: #0f172a !important;
+  }
+  :root:not(.dark) .text-slate-300:not(.customer-dark-box *):not(.preserve-white) {
+    color: #1e293b !important;
+  }
+  :root:not(.dark) .text-slate-400:not(.customer-dark-box *):not(.preserve-white):not(input):not(textarea) {
+    color: #334155 !important;
   }
 
   /* Customer Dark Box: Dark card with pure white titles and clear white inputs */
@@ -401,8 +409,16 @@ html.light .fixed.inset-0[class*="bg-slate-950"] {
   background-color: rgba(15, 23, 42, 0.6) !important;
 }
 
-html.light .text-white:not(.customer-dark-box *):not(.preserve-white) {
-  color: #0f172a;
+html.light .text-white:not(.customer-dark-box *):not(.preserve-white):not([class*="bg-orange-"]):not([class*="from-orange-"]):not([class*="bg-emerald-"]):not([class*="from-emerald-"]):not([class*="bg-rose-"]):not([class*="from-rose-"]):not([class*="bg-amber-"]):not([class*="from-amber-"]):not([class*="bg-gradient-"]),
+html.light .text-slate-100:not(.customer-dark-box *):not(.preserve-white),
+html.light .text-slate-200:not(.customer-dark-box *):not(.preserve-white) {
+  color: #0f172a !important;
+}
+html.light .text-slate-300:not(.customer-dark-box *):not(.preserve-white) {
+  color: #1e293b !important;
+}
+html.light .text-slate-400:not(.customer-dark-box *):not(.preserve-white):not(input):not(textarea) {
+  color: #334155 !important;
 }
 
 html.light .customer-dark-box {
