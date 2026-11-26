@@ -704,7 +704,7 @@ export default function EditRequestModal({
                       className="customer-dark-box rounded-2xl p-3.5 sm:p-4 space-y-3 relative shadow-md"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/40">
+                        <span className="badge-entry-number text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-lg bg-white text-slate-900 border border-white shadow-sm dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/40 select-none">
                           #{entryIndex + 1}
                         </span>
                         {block.entries.length > 1 && (
@@ -792,18 +792,6 @@ export default function EditRequestModal({
                       placeholder="0"
                       className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
-                    <div className="text-[11px] font-bold text-amber-400 mt-1 flex items-center justify-between font-mono truncate">
-                      <span className="text-slate-400 font-normal">Subtotal:</span>
-                      <span>
-                        {block.amount
-                          ? new Intl.NumberFormat('id-ID', {
-                              style: 'currency',
-                              currency: 'IDR',
-                              maximumFractionDigits: 0,
-                            }).format(Number(block.amount))
-                          : 'Rp 0'}
-                      </span>
-                    </div>
                   </div>
 
                   {/* Kolom 2: Tanggal Nota */}
@@ -825,9 +813,6 @@ export default function EditRequestModal({
                       className="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer font-medium"
                       style={{ colorScheme: 'dark' }}
                     />
-                    <div className="text-[11px] text-slate-500 mt-1 truncate">
-                      Tgl Transaksi Nota
-                    </div>
                   </div>
 
                   {/* Kolom Foto Bukti Nota (Tanpa Tombol Galeri) */}

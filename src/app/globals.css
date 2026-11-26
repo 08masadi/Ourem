@@ -1017,5 +1017,15 @@ html.light [class*="from-orange-"] .banner-subtext-white,
   -webkit-text-fill-color: #ffedd5 !important;
 }
 
+/* Badge Entry #1 in Light Mode */
+:root:not(.dark) .customer-dark-box .badge-entry-number,
+html.light .customer-dark-box .badge-entry-number {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #ffffff !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+
 
 
