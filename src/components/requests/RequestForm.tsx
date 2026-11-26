@@ -697,7 +697,7 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
                     className="customer-dark-box rounded-2xl p-3.5 sm:p-4 space-y-3 relative shadow-md"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="badge-entry-number text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-lg bg-white text-slate-900 border border-white shadow-sm dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/40 select-none">
+                      <span className="customer-entry-index text-xs sm:text-sm font-black font-mono tracking-wider select-none text-white dark:text-orange-400">
                         #{entryIndex + 1}
                       </span>
                       {block.entries.length > 1 && (

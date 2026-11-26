@@ -1017,13 +1017,26 @@ html.light [class*="from-orange-"] .banner-subtext-white,
   -webkit-text-fill-color: #ffedd5 !important;
 }
 
-/* Badge Entry #1 in Light Mode */
-:root:not(.dark) .customer-dark-box .badge-entry-number,
-html.light .customer-dark-box .badge-entry-number {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #ffffff !important;
-  -webkit-text-fill-color: #0f172a !important;
+/* Customer Entry #1 without block: White in Light Mode, Bright Orange in Dark Mode */
+.customer-entry-index,
+:root:not(.dark) .customer-dark-box .customer-entry-index,
+html.light .customer-dark-box .customer-entry-index {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html.dark .customer-dark-box .customer-entry-index,
+:root.dark .customer-dark-box .customer-entry-index {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  color: #fb923c !important; /* Bright orange */
+  -webkit-text-fill-color: #fb923c !important;
 }
 
 
