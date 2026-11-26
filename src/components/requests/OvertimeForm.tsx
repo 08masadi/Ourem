@@ -255,39 +255,42 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
             </div>
 
             {/* Lokasi Lembur */}
-            <div className="col-span-2 sm:col-span-1">
-              <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
+            <div>
+              <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                 <span className="truncate">Lokasi Lembur</span>
               </label>
+              <span className="block text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 mb-1 truncate select-none">
+                Tempat / Lokasi
+              </span>
               <input
                 type="text"
                 required
                 value={lokasiLembur}
                 onChange={(e) => setLokasiLembur(e.target.value)}
                 placeholder="Masukkan lokasi lembur..."
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400 font-medium"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400 font-medium"
               />
             </div>
 
             {/* Jam Lembur: 3 Kolom (Mulai, Berakhir, Total) */}
-            <div className="col-span-2">
-              <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1.5 flex items-center justify-between">
+            <div>
+              <label className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                   <span className="truncate">Jam Lembur</span>
                 </span>
                 {totalJam && (
-                  <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-800/50">
-                    Akumulasi: {totalJam}
+                  <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 px-1.5 py-0.5 rounded-full border border-orange-200 dark:border-orange-800/50">
+                    {totalJam}
                   </span>
                 )}
               </label>
 
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 {/* Kolom 1: Mulai */}
                 <div>
-                  <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  <span className="block text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                     Mulai
                   </span>
                   <input
@@ -300,14 +303,14 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                         e.currentTarget.showPicker?.();
                       } catch {}
                     }}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer shadow-sm text-center"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-1 sm:px-2 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer shadow-sm text-center"
                     title="Klik untuk mensetting jam mulai lembur"
                   />
                 </div>
 
                 {/* Kolom 2: Berakhir */}
                 <div>
-                  <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  <span className="block text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                     Berakhir
                   </span>
                   <input
@@ -320,14 +323,14 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                         e.currentTarget.showPicker?.();
                       } catch {}
                     }}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer shadow-sm text-center"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 rounded-xl px-1 sm:px-2 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer shadow-sm text-center"
                     title="Klik untuk mensetting jam berakhir lembur"
                   />
                 </div>
 
                 {/* Kolom 3: Total (Akumulasi Otomatis) */}
                 <div>
-                  <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  <span className="block text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                     Total
                   </span>
                   <input
@@ -336,7 +339,7 @@ export default function OvertimeForm({ userProfile }: OvertimeFormProps) {
                     tabIndex={-1}
                     value={totalJam || '-'}
                     placeholder="0 Jam"
-                    className="w-full bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800/60 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm text-orange-600 dark:text-orange-400 font-bold font-mono focus:outline-none shadow-sm text-center cursor-default select-none"
+                    className="w-full bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800/60 rounded-xl px-1 sm:px-1.5 py-2 sm:py-2.5 text-xs sm:text-sm text-orange-600 dark:text-orange-400 font-bold font-mono focus:outline-none shadow-sm text-center cursor-default select-none truncate"
                     title="Total jam lembur terakumulasi otomatis ketika kolom mulai dan berakhir diisi"
                   />
                 </div>
