@@ -41,9 +41,9 @@ export async function updateSession(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    let role: string | null = (user?.user_metadata?.role as string) || null;
+    let role: string | null = null;
 
-    if (user && !role) {
+    if (user) {
       try {
         const { data: profile } = await supabase
           .from('profiles')
@@ -51,9 +51,9 @@ export async function updateSession(request: NextRequest) {
           .eq('id', user.id)
           .single();
 
-        role = profile?.role || 'employee';
+        role = profile?.role || (user.user_metadata?.role as string) || 'employee';
       } catch {
-        role = 'employee';
+        role = (user.user_metadata?.role as string) || 'employee';
       }
     }
 

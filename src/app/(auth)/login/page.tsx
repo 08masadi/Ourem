@@ -150,7 +150,11 @@ function LoginContent() {
             if (authData?.user) {
               const userRole = (authData.user as any).role || 'employee';
               const targetPath =
-                userRole === 'director' ? '/director' : userRole === 'finance' ? '/finance' : '/employee';
+                userRole === 'director' || userRole === 'admin' || userRole === 'super-admin'
+                  ? '/director'
+                  : userRole === 'finance'
+                    ? '/finance'
+                    : '/employee';
               window.location.href = targetPath;
               return;
             }
