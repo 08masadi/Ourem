@@ -738,15 +738,26 @@ export async function updateProfileBank(formData: FormData) {
     error = retryRes.error;
   }
 
-  // Try to update phone & employee_id to profiles table if columns exist, but never fail if they don't
-  if (phone || employee_id) {
-    try {
-      const extraCols: Record<string, any> = {};
-      if (phone) extraCols.phone = phone;
-      if (employee_id) extraCols.employee_id = employee_id;
-      await supabase.from('profiles').update(extraCols).eq('id', user.id);
-    } catch {}
-  }
+  // Update phone & employee_id to profiles table (supports clearing values)
+  try {
+    await supabase.from('profiles').update({
+      phone: phone || null,
+      employee_id: employee_id || null,
+    }).eq('id', user.id);
+  } catch {}
+
+  // Update phone & employee_id in Better Auth "user" table
+  try {
+    const { Pool } = await import('pg');
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/postgres',
+    });
+    await pool.query(
+      'UPDATE public."user" SET phone = $1, employee_id = $2, name = $3, department = $4 WHERE id = $5 OR email = $6;',
+      [phone || null, employee_id || null, full_name, department, user.id, user.email]
+    );
+    await pool.end();
+  } catch {}
 
   // Backup profile metadata to public storage so other accounts (Finance/Director) can always read phone and employee_id
   try {

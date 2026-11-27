@@ -164,11 +164,9 @@ export default function WordVoucherPreviewModal({
   if (typeof window !== 'undefined') {
     localPhone =
       (request.user_id ? localStorage.getItem(`ourem_phone_${request.user_id}`) : null) ||
-      localStorage.getItem('ourem_user_phone') ||
       '';
     localId =
       (request.user_id ? localStorage.getItem(`ourem_employee_id_${request.user_id}`) : null) ||
-      localStorage.getItem('ourem_user_employee_id') ||
       '';
   }
 

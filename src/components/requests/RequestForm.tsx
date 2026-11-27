@@ -379,14 +379,12 @@ export default function RequestForm({ initialProfile }: RequestFormProps = {}) {
 
         const userPhone =
           userProfile?.phone ||
-          (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_phone') : '') ||
-          (userProfile?.email?.includes('miskadi') || userProfile?.full_name?.toLowerCase().includes('miskadi') ? '085710002923' : '') ||
+          (typeof window !== 'undefined' && userProfile?.id ? localStorage.getItem(`ourem_phone_${userProfile.id}`) : '') ||
           undefined;
 
         const userEmpId =
           userProfile?.employee_id ||
-          (typeof window !== 'undefined' ? localStorage.getItem('ourem_user_employee_id') : '') ||
-          (userProfile?.email?.includes('miskadi') || userProfile?.full_name?.toLowerCase().includes('miskadi') ? 'CSK-007' : '') ||
+          (typeof window !== 'undefined' && userProfile?.id ? localStorage.getItem(`ourem_employee_id_${userProfile.id}`) : '') ||
           undefined;
 
         const combinedDescription = formatAccountBlocksToDescription(blocksData, {

@@ -65,10 +65,20 @@ export default function ProfilePage() {
       const data = await getCurrentUserProfile();
       setProfile(data);
       if (data) {
-        const storedPhone = typeof window !== 'undefined' ? localStorage.getItem('ourem_user_phone') : null;
-        const storedId = typeof window !== 'undefined' ? localStorage.getItem('ourem_user_employee_id') : null;
-        const defaultPhone = data.phone || storedPhone || (data.email?.includes('miskadi') ? '085710002923' : '');
-        const defaultId = data.employee_id || storedId || (data.email?.includes('miskadi') ? 'CSK-007' : '');
+        // Hapus key global lama agar tidak membocorkan nomor telepon ke akun lain
+        try {
+          localStorage.removeItem('ourem_user_phone');
+          localStorage.removeItem('ourem_user_employee_id');
+        } catch {}
+
+        const userPhoneKey = data.id ? `ourem_phone_${data.id}` : null;
+        const userIdKey = data.id ? `ourem_employee_id_${data.id}` : null;
+
+        const storedPhone = typeof window !== 'undefined' && userPhoneKey ? localStorage.getItem(userPhoneKey) : null;
+        const storedId = typeof window !== 'undefined' && userIdKey ? localStorage.getItem(userIdKey) : null;
+
+        const defaultPhone = data.phone !== undefined && data.phone !== null ? data.phone : (storedPhone || '');
+        const defaultId = data.employee_id !== undefined && data.employee_id !== null ? data.employee_id : (storedId || '');
 
         setFullName(data.full_name || '');
         const currentDept = data.department === 'Staff OPS' || !data.department ? 'Staff Operasional' : data.department;
@@ -80,8 +90,14 @@ export default function ProfilePage() {
         setBankAccountHolder(data.bank_account_holder || '');
 
         try {
-          if (defaultPhone) localStorage.setItem('ourem_user_phone', defaultPhone);
-          if (defaultId) localStorage.setItem('ourem_user_employee_id', defaultId);
+          if (userPhoneKey) {
+            if (defaultPhone) localStorage.setItem(userPhoneKey, defaultPhone);
+            else localStorage.removeItem(userPhoneKey);
+          }
+          if (userIdKey) {
+            if (defaultId) localStorage.setItem(userIdKey, defaultId);
+            else localStorage.removeItem(userIdKey);
+          }
         } catch {}
       }
       if (data?.avatar_url) {
@@ -228,13 +244,19 @@ export default function ProfilePage() {
       } catch {}
     }
     try {
-      if (phone) {
-        localStorage.setItem('ourem_user_phone', phone);
-        if (profile?.id) localStorage.setItem(`ourem_phone_${profile.id}`, phone);
-      }
-      if (employeeId) {
-        localStorage.setItem('ourem_user_employee_id', employeeId);
-        if (profile?.id) localStorage.setItem(`ourem_employee_id_${profile.id}`, employeeId);
+      localStorage.removeItem('ourem_user_phone');
+      localStorage.removeItem('ourem_user_employee_id');
+      if (profile?.id) {
+        if (phone) {
+          localStorage.setItem(`ourem_phone_${profile.id}`, phone);
+        } else {
+          localStorage.removeItem(`ourem_phone_${profile.id}`);
+        }
+        if (employeeId) {
+          localStorage.setItem(`ourem_employee_id_${profile.id}`, employeeId);
+        } else {
+          localStorage.removeItem(`ourem_employee_id_${profile.id}`);
+        }
       }
     } catch {}
 
