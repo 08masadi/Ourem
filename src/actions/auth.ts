@@ -264,11 +264,14 @@ export const getCurrentUserProfile = cache(async (): Promise<UserProfile | null>
       let signature_url = u.signature_url || null;
       let avatar_url = u.image || null;
 
+      let read_notifications: string[] = [];
+      let deleted_notifications: string[] = [];
+
       try {
         const supabase = await createClient();
         const { data: prof } = await supabase
           .from('profiles')
-          .select('phone, employee_id, bank_name, bank_account_number, bank_account_holder, avatar_url, signature_url, department')
+          .select('phone, employee_id, bank_name, bank_account_number, bank_account_holder, avatar_url, signature_url, department, read_notifications, deleted_notifications')
           .eq('id', u.id)
           .single();
 
@@ -281,6 +284,8 @@ export const getCurrentUserProfile = cache(async (): Promise<UserProfile | null>
           if (!signature_url && prof.signature_url) signature_url = prof.signature_url;
           if (!avatar_url && prof.avatar_url) avatar_url = prof.avatar_url;
           if (prof.department && prof.department !== 'Staff OPS') userDepartment = prof.department;
+          if (Array.isArray(prof.read_notifications)) read_notifications = prof.read_notifications;
+          if (Array.isArray(prof.deleted_notifications)) deleted_notifications = prof.deleted_notifications;
         }
       } catch {}
 
@@ -297,6 +302,8 @@ export const getCurrentUserProfile = cache(async (): Promise<UserProfile | null>
         bank_account_holder,
         avatar_url,
         signature_url,
+        read_notifications,
+        deleted_notifications,
       };
     }
   } catch {}
@@ -311,7 +318,7 @@ export const getCurrentUserProfile = cache(async (): Promise<UserProfile | null>
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, email, full_name, role, department, bank_name, bank_account_number, bank_account_holder, phone, employee_id, avatar_url, signature_url')
+    .select('id, email, full_name, role, department, bank_name, bank_account_number, bank_account_holder, phone, employee_id, avatar_url, signature_url, read_notifications, deleted_notifications')
     .eq('id', user.id)
     .single();
 
@@ -356,6 +363,8 @@ export const getCurrentUserProfile = cache(async (): Promise<UserProfile | null>
     bank_account_holder,
     avatar_url,
     signature_url,
+    read_notifications: Array.isArray(profile?.read_notifications) ? profile.read_notifications : [],
+    deleted_notifications: Array.isArray(profile?.deleted_notifications) ? profile.deleted_notifications : [],
   };
 });
 
@@ -376,6 +385,12 @@ export const getAuthUser = cache(async (): Promise<{
       user_metadata: {
         role: profile.role,
         full_name: profile.full_name,
+        signature_url: profile.signature_url,
+        avatar_url: profile.avatar_url,
+        phone: profile.phone,
+        employee_id: profile.employee_id,
+        read_notifications: profile.read_notifications || [],
+        deleted_notifications: profile.deleted_notifications || [],
       },
     };
   }

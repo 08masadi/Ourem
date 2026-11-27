@@ -43,6 +43,8 @@ export interface UserProfile {
   bank_account_holder?: string | null;
   avatar_url?: string | null;
   signature_url?: string | null;
+  read_notifications?: string[];
+  deleted_notifications?: string[];
   created_at?: string;
   updated_at?: string;
 }

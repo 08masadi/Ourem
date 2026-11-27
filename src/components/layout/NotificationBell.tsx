@@ -30,6 +30,7 @@ interface NotificationBellProps {
 export default function NotificationBell({ role }: NotificationBellProps) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [readIds, setReadIds] = useState<string[]>([]);
+  const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -41,6 +42,10 @@ export default function NotificationBell({ role }: NotificationBellProps) {
       if (storedRead) {
         setReadIds(JSON.parse(storedRead));
       }
+      const storedDel = localStorage.getItem('ourem_deleted_notifications');
+      if (storedDel) {
+        setDeletedIds(JSON.parse(storedDel));
+      }
     } catch {}
   }, []);
 
@@ -49,7 +54,7 @@ export default function NotificationBell({ role }: NotificationBellProps) {
     try {
       const data = await getUserNotifications(role);
       if (Array.isArray(data)) {
-        // Gabungkan status read dari server (user_metadata)
+        // Gabungkan status read dari server
         const serverReadIds = data.filter((n) => n.isRead).map((n) => n.id);
         setReadIds((prev) => {
           const merged = Array.from(new Set([...prev, ...serverReadIds]));
@@ -58,7 +63,20 @@ export default function NotificationBell({ role }: NotificationBellProps) {
           } catch {}
           return merged;
         });
-        setNotifications(data);
+
+        // Filter notifikasi yang sudah dihapus di lokal atau di server
+        let localDeleted: string[] = [];
+        try {
+          const storedDel = localStorage.getItem('ourem_deleted_notifications');
+          if (storedDel) {
+            localDeleted = JSON.parse(storedDel);
+          }
+        } catch {}
+
+        const activeNotifs = data.filter(
+          (n) => !localDeleted.includes(n.id) && !deletedIds.includes(n.id)
+        );
+        setNotifications(activeNotifs);
       }
     } catch {}
   };
@@ -107,24 +125,27 @@ export default function NotificationBell({ role }: NotificationBellProps) {
 
   // Tandai 1 notifikasi sebagai sudah dibaca (disimpan di LocalStorage & Server User Metadata)
   const markAsRead = (id: string) => {
-    if (!readIds.includes(id)) {
-      const updated = [...readIds, id];
-      setReadIds(updated);
+    setReadIds((prev) => {
+      if (prev.includes(id)) return prev;
+      const updated = [...prev, id];
       try {
         localStorage.setItem('ourem_read_notifications', JSON.stringify(updated));
       } catch {}
-      markNotificationAsRead(id).catch(() => {});
-    }
+      return updated;
+    });
+    markNotificationAsRead(id).catch(() => {});
   };
 
   // Tandai semua notifikasi sebagai sudah dibaca
   const markAllAsRead = () => {
     const allIds = notifications.map((n) => n.id);
-    const merged = Array.from(new Set([...readIds, ...allIds]));
-    setReadIds(merged);
-    try {
-      localStorage.setItem('ourem_read_notifications', JSON.stringify(merged));
-    } catch {}
+    setReadIds((prev) => {
+      const merged = Array.from(new Set([...prev, ...allIds]));
+      try {
+        localStorage.setItem('ourem_read_notifications', JSON.stringify(merged));
+      } catch {}
+      return merged;
+    });
     markAllNotificationsAsRead(allIds).catch(() => {});
   };
 
@@ -133,6 +154,13 @@ export default function NotificationBell({ role }: NotificationBellProps) {
     e.preventDefault();
     e.stopPropagation();
 
+    setDeletedIds((prev) => {
+      const updated = Array.from(new Set([...prev, id]));
+      try {
+        localStorage.setItem('ourem_deleted_notifications', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
     setNotifications((prev) => prev.filter((n) => n.id !== id));
     deleteNotificationAction(id).catch(() => {});
   };
@@ -143,6 +171,13 @@ export default function NotificationBell({ role }: NotificationBellProps) {
     e.stopPropagation();
 
     const allIds = notifications.map((n) => n.id);
+    setDeletedIds((prev) => {
+      const updated = Array.from(new Set([...prev, ...allIds]));
+      try {
+        localStorage.setItem('ourem_deleted_notifications', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
     setNotifications([]);
     clearAllNotificationsAction(allIds).catch(() => {});
   };

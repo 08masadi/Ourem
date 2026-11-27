@@ -20,11 +20,11 @@ export function LogoutButton({ variant = 'desktop', className }: LogoutButtonPro
     setIsLoggingOut(true);
 
     try {
-      // Bersihkan data lokal sesi
+      // Bersihkan data lokal sesi (kecuali cache notifikasi agar status read tidak hilang)
       if (typeof window !== 'undefined') {
         try {
           Object.keys(localStorage).forEach((key) => {
-            if (key.startsWith('ourem_')) {
+            if (key.startsWith('ourem_') && !key.includes('notifications')) {
               localStorage.removeItem(key);
             }
           });

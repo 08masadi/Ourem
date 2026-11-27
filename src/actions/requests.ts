@@ -1647,7 +1647,9 @@ export async function getUserNotifications(targetRole?: string): Promise<AppNoti
         }
       }
 
-      if (!user.user_metadata?.signature_url) {
+      // Cek apakah karyawan sudah memiliki tanda tangan di profiles atau metadata
+      const hasSignature = !!(user.user_metadata?.signature_url);
+      if (!hasSignature) {
         notifications.push({
           id: 'employee-no-sig',
           title: 'Upload Tanda Tangan Karyawan',
@@ -1755,7 +1757,8 @@ export async function getUserNotifications(targetRole?: string): Promise<AppNoti
         }
       }
 
-      if (!user.user_metadata?.signature_url) {
+      const hasFinSignature = !!(user.user_metadata?.signature_url);
+      if (!hasFinSignature) {
         notifications.push({
           id: 'finance-no-sig',
           title: 'Upload Tanda Tangan Finance',
@@ -1776,13 +1779,30 @@ export async function getUserNotifications(targetRole?: string): Promise<AppNoti
     console.error('Error fetching notifications:', err);
   }
 
-  // Filter out deleted notifications and mark read status from user_metadata
-  const readList: string[] = Array.isArray(user.user_metadata?.read_notifications)
+  // Ambil daftar status read & deleted dari profiles atau user_metadata
+  let readList: string[] = Array.isArray(user.user_metadata?.read_notifications)
     ? (user.user_metadata.read_notifications as string[])
     : [];
-  const deletedList: string[] = Array.isArray(user.user_metadata?.deleted_notifications)
+  let deletedList: string[] = Array.isArray(user.user_metadata?.deleted_notifications)
     ? (user.user_metadata.deleted_notifications as string[])
     : [];
+
+  try {
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('read_notifications, deleted_notifications')
+      .eq('id', user.id)
+      .single();
+
+    if (prof) {
+      if (Array.isArray(prof.read_notifications)) {
+        readList = Array.from(new Set([...readList, ...prof.read_notifications]));
+      }
+      if (Array.isArray(prof.deleted_notifications)) {
+        deletedList = Array.from(new Set([...deletedList, ...prof.deleted_notifications]));
+      }
+    }
+  } catch {}
 
   const filtered = notifications
     .filter((n) => !deletedList.includes(n.id))
@@ -1794,83 +1814,151 @@ export async function getUserNotifications(targetRole?: string): Promise<AppNoti
   return filtered.slice(0, 30);
 }
 
-// Server action: Tandai satu notifikasi sebagai sudah dibaca (disimpan permanen di cloud akun user)
+// Server action: Tandai satu notifikasi sebagai sudah dibaca (disimpan permanen di tabel profiles & auth)
 export async function markNotificationAsRead(id: string) {
   const user = await getAuthUser();
   if (!user) return { success: false };
   const supabase = await createClient();
 
-  const current: string[] = Array.isArray(user.user_metadata?.read_notifications)
-    ? user.user_metadata.read_notifications
-    : [];
+  try {
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('read_notifications')
+      .eq('id', user.id)
+      .single();
 
-  if (!current.includes(id)) {
-    const updated = [...current, id];
-    try {
-      await supabase.auth.updateUser({
-        data: { read_notifications: updated },
-      });
-    } catch {}
+    const current: string[] = Array.isArray(prof?.read_notifications)
+      ? prof.read_notifications
+      : Array.isArray(user.user_metadata?.read_notifications)
+      ? user.user_metadata.read_notifications
+      : [];
+
+    if (!current.includes(id)) {
+      const updated = [...current, id];
+      await supabase
+        .from('profiles')
+        .update({ read_notifications: updated })
+        .eq('id', user.id);
+
+      try {
+        await supabase.auth.updateUser({
+          data: { read_notifications: updated },
+        });
+      } catch {}
+    }
+  } catch (err) {
+    console.error('Error in markNotificationAsRead:', err);
   }
   return { success: true };
 }
 
-// Server action: Tandai semua notifikasi sebagai sudah dibaca (disimpan permanen di cloud akun user)
+// Server action: Tandai semua notifikasi sebagai sudah dibaca (disimpan permanen di tabel profiles & auth)
 export async function markAllNotificationsAsRead(ids: string[]) {
   const user = await getAuthUser();
   if (!user) return { success: false };
   const supabase = await createClient();
 
-  const current: string[] = Array.isArray(user.user_metadata?.read_notifications)
-    ? user.user_metadata.read_notifications
-    : [];
-
-  const merged = Array.from(new Set([...current, ...ids]));
   try {
-    await supabase.auth.updateUser({
-      data: { read_notifications: merged },
-    });
-  } catch {}
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('read_notifications')
+      .eq('id', user.id)
+      .single();
+
+    const current: string[] = Array.isArray(prof?.read_notifications)
+      ? prof.read_notifications
+      : Array.isArray(user.user_metadata?.read_notifications)
+      ? user.user_metadata.read_notifications
+      : [];
+
+    const merged = Array.from(new Set([...current, ...ids]));
+    await supabase
+      .from('profiles')
+      .update({ read_notifications: merged })
+      .eq('id', user.id);
+
+    try {
+      await supabase.auth.updateUser({
+        data: { read_notifications: merged },
+      });
+    } catch {}
+  } catch (err) {
+    console.error('Error in markAllNotificationsAsRead:', err);
+  }
   return { success: true };
 }
 
-// Server action: Hapus notifikasi (disimpan permanen di cloud akun user agar tidak muncul lagi)
+// Server action: Hapus notifikasi (disimpan permanen di tabel profiles & auth agar tidak muncul lagi)
 export async function deleteNotificationAction(id: string) {
   const user = await getAuthUser();
   if (!user) return { success: false };
   const supabase = await createClient();
 
-  const current: string[] = Array.isArray(user.user_metadata?.deleted_notifications)
-    ? user.user_metadata.deleted_notifications
-    : [];
+  try {
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('deleted_notifications')
+      .eq('id', user.id)
+      .single();
 
-  if (!current.includes(id)) {
-    const updated = [...current, id];
-    try {
-      await supabase.auth.updateUser({
-        data: { deleted_notifications: updated },
-      });
-    } catch {}
+    const current: string[] = Array.isArray(prof?.deleted_notifications)
+      ? prof.deleted_notifications
+      : Array.isArray(user.user_metadata?.deleted_notifications)
+      ? user.user_metadata.deleted_notifications
+      : [];
+
+    if (!current.includes(id)) {
+      const updated = [...current, id];
+      await supabase
+        .from('profiles')
+        .update({ deleted_notifications: updated })
+        .eq('id', user.id);
+
+      try {
+        await supabase.auth.updateUser({
+          data: { deleted_notifications: updated },
+        });
+      } catch {}
+    }
+  } catch (err) {
+    console.error('Error in deleteNotificationAction:', err);
   }
   return { success: true };
 }
 
-// Server action: Hapus semua notifikasi sekaligus (disimpan permanen di cloud akun user)
+// Server action: Hapus semua notifikasi sekaligus (disimpan permanen di tabel profiles & auth)
 export async function clearAllNotificationsAction(ids: string[]) {
   const user = await getAuthUser();
   if (!user) return { success: false };
   const supabase = await createClient();
 
-  const current: string[] = Array.isArray(user.user_metadata?.deleted_notifications)
-    ? user.user_metadata.deleted_notifications
-    : [];
-
-  const merged = Array.from(new Set([...current, ...ids]));
   try {
-    await supabase.auth.updateUser({
-      data: { deleted_notifications: merged },
-    });
-  } catch {}
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('deleted_notifications')
+      .eq('id', user.id)
+      .single();
+
+    const current: string[] = Array.isArray(prof?.deleted_notifications)
+      ? prof.deleted_notifications
+      : Array.isArray(user.user_metadata?.deleted_notifications)
+      ? user.user_metadata.deleted_notifications
+      : [];
+
+    const merged = Array.from(new Set([...current, ...ids]));
+    await supabase
+      .from('profiles')
+      .update({ deleted_notifications: merged })
+      .eq('id', user.id);
+
+    try {
+      await supabase.auth.updateUser({
+        data: { deleted_notifications: merged },
+      });
+    } catch {}
+  } catch (err) {
+    console.error('Error in clearAllNotificationsAction:', err);
+  }
   return { success: true };
 }
 
