@@ -6,7 +6,7 @@ import { UserRole, UserProfile } from '@/types/database';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
+import { headers, cookies } from 'next/headers';
 
 export async function signIn(prevState: any, formData: FormData) {
   const rawEmail = formData.get('email') as string;
@@ -215,15 +215,28 @@ export async function signUp(
 }
 
 export async function signOutAction() {
-  await Promise.allSettled([
-    auth.api
-      .signOut({
-        headers: await headers(),
-      })
-      .catch(() => null),
-    createClient()
-      .then((supabase) => supabase.auth.signOut())
-      .catch(() => null),
+  const cookieStore = await cookies();
+
+  // 1. Langsung bersihkan cookies autentikasi di server agar sesi terhapus instan
+  try {
+    cookieStore.delete('better-auth.session_token');
+    cookieStore.delete('__Secure-better-auth.session_token');
+  } catch {}
+
+  // 2. Beritahu server auth secara paralel dengan batas waktu timeout 500ms
+  // agar tidak pernah menggantung atau membuat respon aplikasi lambat
+  await Promise.race([
+    Promise.allSettled([
+      auth.api
+        .signOut({
+          headers: await headers(),
+        })
+        .catch(() => null),
+      createClient()
+        .then((supabase) => supabase.auth.signOut())
+        .catch(() => null),
+    ]),
+    new Promise((resolve) => setTimeout(resolve, 500)),
   ]);
 
   redirect('/login');
@@ -298,7 +311,7 @@ export const getCurrentUserProfile = cache(async (): Promise<UserProfile | null>
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, email, full_name, role, department, bank_name, bank_account_number, bank_account_holder, avatar_url, signature_url')
+    .select('id, email, full_name, role, department, bank_name, bank_account_number, bank_account_holder, phone, employee_id, avatar_url, signature_url')
     .eq('id', user.id)
     .single();
 
@@ -307,36 +320,10 @@ export const getCurrentUserProfile = cache(async (): Promise<UserProfile | null>
   const avatar_url: string | null =
     profile?.avatar_url || (user.user_metadata?.avatar_url as string) || null;
 
-  let phone: string | null =
+  const phone: string | null =
     (profile as any)?.phone || (user.user_metadata?.phone as string) || null;
-  let employee_id: string | null =
+  const employee_id: string | null =
     (profile as any)?.employee_id || (user.user_metadata?.employee_id as string) || null;
-
-  if (!phone || !employee_id) {
-    try {
-      const { data: fileData } = await supabase.storage
-        .from('receipts')
-        .download(`profiles-data/${user.id}.json`);
-      if (fileData) {
-        const text = await fileData.text();
-        const json = JSON.parse(text);
-        if (!phone && json.phone) phone = json.phone;
-        if (!employee_id && json.employee_id) employee_id = json.employee_id;
-      }
-    } catch {}
-  }
-
-  const nameLower = (profile?.full_name || user.user_metadata?.full_name || '').toLowerCase();
-  const emailLower = (user.email || '').toLowerCase();
-  if (!phone || !employee_id) {
-    if (nameLower.includes('miskadi') || emailLower.includes('miskadi')) {
-      phone = phone || '085710002923';
-      employee_id = employee_id || 'CSK-007';
-    } else if (nameLower.includes('bryan') || emailLower.includes('bryan')) {
-      phone = phone || '0882 3991 9129';
-      employee_id = employee_id || 'CSK-003';
-    }
-  }
 
   const bank_name: string | null =
     profile?.bank_name || (user.user_metadata?.bank_name as string) || null;
@@ -817,7 +804,7 @@ export const getGlobalFinanceSignature = cache(async (): Promise<{
 }> => {
   const supabase = await createClient();
   try {
-    // 1. Direct check in profiles table
+    // 1. Ambil langsung dari tabel profiles (sangat cepat & tidak memicu lag)
     const { data: finProfiles } = await supabase
       .from('profiles')
       .select('id, full_name, role, signature_url')
@@ -831,53 +818,10 @@ export const getGlobalFinanceSignature = cache(async (): Promise<{
           full_name: finWithSig.full_name || 'FINANCE DEPT',
         };
       }
-    }
-
-    // 2. Direct check: receipts/finance-signature.png
-    const { data: rootFiles } = await supabase.storage.from('receipts').list('receipts');
-    const hasFinSig = (rootFiles || []).some((f) => f.name.includes('finance-signature'));
-    if (hasFinSig) {
-      const { data: pubData } = supabase.storage
-        .from('receipts')
-        .getPublicUrl('receipts/finance-signature.png');
-
       return {
-        signature_url: pubData.publicUrl,
-        full_name: finProfiles?.[0]?.full_name || 'FINANCE DEPT',
+        signature_url: null,
+        full_name: finProfiles[0]?.full_name || 'FINANCE DEPT',
       };
-    }
-
-    // 3. Search storage files for finance user
-    if (finProfiles && finProfiles.length > 0) {
-      for (const finUser of finProfiles) {
-        // Search inside 'receipts' folder for sig-finUser.id
-        const finFile = (rootFiles || []).find(
-          (f) => f.name.includes(`sig-${finUser.id}`) || f.name.includes(finUser.id)
-        );
-        if (finFile) {
-          const { data: pubData } = supabase.storage
-            .from('receipts')
-            .getPublicUrl(`receipts/${finFile.name}`);
-          return {
-            signature_url: pubData.publicUrl,
-            full_name: finUser.full_name || 'FINANCE DEPT',
-          };
-        }
-
-        // Also check 'signatures' folder
-        const { data: sigFiles } = await supabase.storage.from('receipts').list('signatures');
-        const finSig = (sigFiles || []).find((f) => f.name.includes(finUser.id));
-        if (finSig) {
-          const { data: pubData } = supabase.storage
-            .from('receipts')
-            .getPublicUrl(`signatures/${finSig.name}`);
-          return {
-            signature_url: pubData.publicUrl,
-            full_name: finUser.full_name || 'FINANCE DEPT',
-          };
-        }
-      }
-      return { signature_url: null, full_name: finProfiles[0].full_name || 'FINANCE DEPT' };
     }
   } catch {
     // ignore
@@ -892,7 +836,7 @@ export const getGlobalDirectorSignature = cache(async (): Promise<{
 }> => {
   const supabase = await createClient();
   try {
-    // 1. Direct check in profiles table
+    // 1. Ambil langsung dari tabel profiles (sangat cepat & tidak memicu lag)
     const { data: dirProfiles } = await supabase
       .from('profiles')
       .select('id, full_name, role, signature_url')
@@ -906,51 +850,10 @@ export const getGlobalDirectorSignature = cache(async (): Promise<{
           full_name: dirWithSig.full_name || 'DIREKTUR UTAMA',
         };
       }
-    }
-
-    // 2. Direct check in storage: receipts/director-signature.png
-    const { data: rootFiles } = await supabase.storage.from('receipts').list('receipts');
-    const hasDirSig = (rootFiles || []).some((f) => f.name.includes('director-signature'));
-    if (hasDirSig) {
-      const { data: pubData } = supabase.storage
-        .from('receipts')
-        .getPublicUrl('receipts/director-signature.png');
-
       return {
-        signature_url: pubData.publicUrl,
-        full_name: dirProfiles?.[0]?.full_name || 'DIREKTUR UTAMA',
+        signature_url: null,
+        full_name: dirProfiles[0]?.full_name || 'DIREKTUR UTAMA',
       };
-    }
-
-    // 3. Search storage for director user id
-    if (dirProfiles && dirProfiles.length > 0) {
-      for (const dirUser of dirProfiles) {
-        const dirFile = (rootFiles || []).find(
-          (f) => f.name.includes(`sig-${dirUser.id}`) || f.name.includes(dirUser.id)
-        );
-        if (dirFile) {
-          const { data: pubData } = supabase.storage
-            .from('receipts')
-            .getPublicUrl(`receipts/${dirFile.name}`);
-          return {
-            signature_url: pubData.publicUrl,
-            full_name: dirUser.full_name || 'DIREKTUR UTAMA',
-          };
-        }
-
-        const { data: sigFiles } = await supabase.storage.from('receipts').list('signatures');
-        const dirSigFile = (sigFiles || []).find((f) => f.name.includes(dirUser.id));
-        if (dirSigFile) {
-          const { data: pubData } = supabase.storage
-            .from('receipts')
-            .getPublicUrl(`signatures/${dirSigFile.name}`);
-          return {
-            signature_url: pubData.publicUrl,
-            full_name: dirUser.full_name || 'DIREKTUR UTAMA',
-          };
-        }
-      }
-      return { signature_url: null, full_name: dirProfiles[0].full_name || 'DIREKTUR UTAMA' };
     }
   } catch {
     // ignore
@@ -1076,7 +979,7 @@ export async function getRequesterProfileInfo(userId: string): Promise<{
 
     const { data } = await supabase
       .from('profiles')
-      .select('*')
+      .select('full_name, email, department, phone, employee_id, bank_name, bank_account_number, bank_account_holder')
       .eq('id', userId)
       .single();
 
@@ -1091,36 +994,12 @@ export async function getRequesterProfileInfo(userId: string): Promise<{
       bank_account_holder = data.bank_account_holder || null;
     }
 
-    // 1. Check storage profiles-data/${userId}.json
-    if (!phone || !employee_id) {
-      try {
-        const { data: fileData } = await supabase.storage
-          .from('receipts')
-          .download(`profiles-data/${userId}.json`);
-        if (fileData) {
-          const text = await fileData.text();
-          const json = JSON.parse(text);
-          if (json) {
-            full_name = full_name || json.full_name || null;
-            email = email || json.email || null;
-            department = department || json.department || null;
-            phone = phone || json.phone || null;
-            employee_id = employee_id || json.employee_id || null;
-            bank_name = bank_name || json.bank_name || null;
-            bank_account_number = bank_account_number || json.bank_account_number || null;
-            bank_account_holder = bank_account_holder || json.bank_account_holder || null;
-          }
-        }
-      } catch {}
-    }
-
-    // 2. Directory fallback for seeded employees
-    const isGeneric = (n?: string | null) => !n || ['employee', 'karyawan', 'staff'].includes(n.trim().toLowerCase());
+    // Fallback spesifik hanya jika email/nama benar-benar cocok
     let nameLower = (full_name || '').toLowerCase();
     const emailLower = (email || '').toLowerCase();
 
-    if (nameLower.includes('miskadi') || emailLower.includes('miskadi') || isGeneric(full_name)) {
-      full_name = isGeneric(full_name) ? 'Miskadi' : full_name || 'Miskadi';
+    if (nameLower.includes('miskadi') || emailLower.includes('miskadi')) {
+      full_name = full_name || 'Miskadi';
       email = email || 'miskadi@ouffice.co.id';
       phone = phone || '085710002923';
       employee_id = employee_id || 'CSK-007';
@@ -1135,9 +1014,6 @@ export async function getRequesterProfileInfo(userId: string): Promise<{
       employee_id = employee_id || 'CSK-003';
       department = department || 'Sales Executive';
       bank_name = bank_name || 'BCA';
-    } else if (nameLower.includes('staff') || emailLower.includes('karyawan')) {
-      phone = phone || '0882 3991 9129';
-      employee_id = employee_id || 'CSK-002';
     }
 
     return {

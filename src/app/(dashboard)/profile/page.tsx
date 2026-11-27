@@ -6,6 +6,7 @@ import { compressImageFile } from '@/lib/imageCompressor';
 import { UserProfile, DEPARTMENT_OPTIONS } from '@/types/database';
 import AvatarCropperModal from '@/components/profile/AvatarCropperModal';
 import { triggerSuccessNotification } from '@/components/ui/DynamicIslandSuccess';
+import { LogoutButton } from '@/components/layout/LogoutButton';
 import ModernLoader from '@/components/ui/ModernLoader';
 import NeonVortexLoader from '@/components/ui/NeonVortexLoader';
 import {
@@ -671,26 +672,7 @@ export default function ProfilePage() {
 
         {/* Logout Button */}
         <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
-          <form
-            action={signOutAction}
-            onSubmit={() => {
-              try {
-                localStorage.removeItem('ourem_user_signature');
-                localStorage.removeItem('ourem_finance_signature');
-                localStorage.removeItem('ourem_director_signature');
-                localStorage.removeItem('ourem_finance_name');
-                localStorage.removeItem('ourem_director_name');
-              } catch {}
-            }}
-          >
-            <button
-              type="submit"
-              className="w-full py-2.5 px-4 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Keluar dari Akun</span>
-            </button>
-          </form>
+          <LogoutButton variant="profile" />
         </div>
       </div>
 

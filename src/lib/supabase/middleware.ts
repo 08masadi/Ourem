@@ -44,16 +44,20 @@ export async function updateSession(request: NextRequest) {
     let role: string | null = null;
 
     if (user) {
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
+      // Gunakan role dari user_metadata langsung tanpa query REST tambahan jika sudah ada
+      role = (user.user_metadata?.role as string) || null;
+      if (!role) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
 
-        role = profile?.role || (user.user_metadata?.role as string) || 'employee';
-      } catch {
-        role = (user.user_metadata?.role as string) || 'employee';
+          role = profile?.role || 'employee';
+        } catch {
+          role = 'employee';
+        }
       }
     }
 

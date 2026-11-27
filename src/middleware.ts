@@ -6,12 +6,22 @@ import { betterFetch } from '@better-fetch/fetch';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // 0. Lewatkan langsung semua rute API, polling notifikasi, dan proxy gambar agar tidak ada overhead middleware
+  if (pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
   const isAuthRoute = pathname.startsWith('/login');
   const isDashboardRoute =
     pathname.startsWith('/employee') ||
     pathname.startsWith('/director') ||
     pathname.startsWith('/finance') ||
     pathname.startsWith('/profile');
+
+  // Jika bukan halaman auth, bukan dashboard, dan bukan root, langsung lanjutkan tanpa beban auth
+  if (!isAuthRoute && !isDashboardRoute && pathname !== '/') {
+    return NextResponse.next();
+  }
 
   // 1. Cek sesi Better Auth melalui cookie token jika ada
   const hasBetterAuthCookie = !!getSessionCookie(request);

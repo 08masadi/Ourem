@@ -1,8 +1,9 @@
-import { getCurrentUserProfile, signOutAction } from '@/actions/auth';
+import { getCurrentUserProfile } from '@/actions/auth';
 import { redirect } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import BottomNav from '@/components/layout/BottomNav';
 import NotificationBell from '@/components/layout/NotificationBell';
+import { LogoutButton } from '@/components/layout/LogoutButton';
 import DynamicIslandSuccess from '@/components/ui/DynamicIslandSuccess';
 import SuccessUrlWatcher from '@/components/ui/SuccessUrlWatcher';
 import PushNotificationSubscriber from '@/components/notifications/PushNotificationSubscriber';
@@ -65,16 +66,7 @@ export default async function DashboardLayout({
             </Link>
 
             {/* Tombol Keluar Akun di Pojok Kanan Atas */}
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                title="Keluar Akun"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/25 text-rose-400 hover:text-rose-300 text-xs font-semibold transition cursor-pointer shadow-sm"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Keluar</span>
-              </button>
-            </form>
+            <LogoutButton variant="desktop" />
           </div>
         </header>
 
@@ -103,15 +95,7 @@ export default async function DashboardLayout({
             <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 capitalize">
               {role}
             </span>
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                title="Keluar"
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-rose-400 flex items-center justify-center transition border border-slate-700/60 cursor-pointer"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
-            </form>
+            <LogoutButton variant="mobile" />
           </div>
         </header>
 

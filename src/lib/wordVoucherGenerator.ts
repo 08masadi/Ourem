@@ -90,18 +90,55 @@ export async function fetchImageBuffer(url: string): Promise<LoadedImageData | n
   if (!url || typeof window === 'undefined') return null;
 
   try {
-    let res: Response;
-    try {
-      res = await fetch(url, { mode: 'cors' });
-      if (!res.ok) {
-        throw new Error('Direct fetch failed');
+    // 1. Tangani langsung data URL base64 tanpa melalui jaringan
+    if (url.startsWith('data:image/')) {
+      const parts = url.split(',');
+      if (parts.length === 2) {
+        const mimeMatch = parts[0].match(/:(.*?);/);
+        const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+        const type: 'png' | 'jpg' | 'gif' = mime.includes('png') ? 'png' : mime.includes('gif') ? 'gif' : 'jpg';
+        const binaryStr = atob(parts[1]);
+        const len = binaryStr.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryStr.charCodeAt(i);
+        }
+
+        const dims = await new Promise<{ width: number; height: number }>((resolve) => {
+          try {
+            const img = new Image();
+            img.onload = () => resolve({ width: img.naturalWidth || 400, height: img.naturalHeight || 500 });
+            img.onerror = () => resolve({ width: 400, height: 500 });
+            img.src = url;
+          } catch {
+            resolve({ width: 400, height: 500 });
+          }
+        });
+
+        return {
+          data: bytes,
+          type,
+          width: dims.width,
+          height: dims.height,
+        };
       }
-    } catch {
-      // Fallback via Next.js proxy
-      res = await fetch(`/api/image-proxy?url=${encodeURIComponent(url)}`);
     }
 
-    if (!res.ok) return null;
+    // 2. Fetch URL eksternal langsung via image-proxy dengan batas waktu 6 detik
+    const fetchTarget = url.startsWith('http')
+      ? `/api/image-proxy?url=${encodeURIComponent(url)}`
+      : url;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    let res = await fetch(fetchTarget, { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) return null;
+    }
 
     const contentType = res.headers.get('content-type') || '';
     let type: 'png' | 'jpg' | 'gif' = 'jpg';
